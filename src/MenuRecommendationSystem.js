@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
-  Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp
+  Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
+  MessageCircle, Image as ImageIcon
 } from 'lucide-react';
 import {
   Dialog,
@@ -11,6 +12,13 @@ import {
   DialogTitle,
 } from "./components/ui/dialog";
 import ReactMarkdown from 'react-markdown';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { EffectCoverflow, Pagination } from 'swiper/modules';
+
+// Swiper styles
+import 'swiper/css';
+import 'swiper/css/effect-coverflow';
+import 'swiper/css/pagination';
 
 const MenuRecommendationSystem = () => {
   const [query, setQuery] = useState('');
@@ -54,6 +62,7 @@ const MenuRecommendationSystem = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMenuItems, setFilteredMenuItems] = useState([]);
+  const [activeConversation, setActiveConversation] = useState(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleCart = () => setIsCartOpen(!isCartOpen);
@@ -65,27 +74,30 @@ const MenuRecommendationSystem = () => {
     setIsLoading(true);
     const newConversation = { query, response: '', items: [] };
     setConversations(prev => [...prev, newConversation]);
+    setActiveConversation(newConversation);
 
     try {
       const response = await fetch(`/api/chat/?query=${encodeURIComponent(query)}`);
       const data = await response.json();
       
       setConversations(prev => 
-        prev.map((conv, index) => 
-          index === prev.length - 1 
+        prev.map((conv) => 
+          conv === newConversation
             ? { ...conv, response: data.response_text, items: data.returned_items || [] }
             : conv
         )
       );
+      setActiveConversation({ ...newConversation, response: data.response_text, items: data.returned_items || [] });
     } catch (error) {
       console.error('Error fetching data:', error);
       setConversations(prev => 
-        prev.map((conv, index) => 
-          index === prev.length - 1 
+        prev.map((conv) => 
+          conv === newConversation
             ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
             : conv
         )
       );
+      setActiveConversation({ ...newConversation, response: 'An error occurred while fetching the data. Please try again.' });
     } finally {
       setIsLoading(false);
       setQuery('');
@@ -169,20 +181,34 @@ const MenuRecommendationSystem = () => {
     );
   }, [searchTerm, menuItems]);
 
-  const ConversationBubble = ({ isUser, content }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`max-w-3/4 p-4 rounded-lg shadow-md ${
-        isUser 
-          ? 'bg-blue-500 text-white self-end' 
-          : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
-      }`}
-    >
-      <p className="whitespace-pre-wrap">{content}</p>
-    </motion.div>
-  );
+  const ConversationBubble = ({ isUser, content }) => {
+    const controls = useAnimation();
+    
+    useEffect(() => {
+      controls.start({ opacity: 1, y: 0 });
+    }, []);
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={controls}
+        transition={{ duration: 0.5, type: 'spring' }}
+        className={`max-w-3/4 p-4 rounded-lg shadow-md ${
+          isUser 
+            ? 'bg-blue-500 text-white self-end' 
+            : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
+        }`}
+      >
+        {isUser ? (
+          <p className="whitespace-pre-wrap">{content}</p>
+        ) : (
+          <ReactMarkdown className="prose dark:prose-invert">
+            {content}
+          </ReactMarkdown>
+        )}
+      </motion.div>
+    );
+  };
 
   const ItemCard = ({ item }) => {
     const isFavorite = favorites.some(fav => fav.name_of_item === item.name_of_item);
@@ -303,6 +329,66 @@ const MenuRecommendationSystem = () => {
     </motion.button>
   );
 
+  const AIResponseCard = ({ response }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`rounded-lg shadow-lg p-6 mb-6 ${
+        theme === 'light' ? 'bg-white' : 'bg-gray-800'
+      }`}
+    >
+      <div className="flex items-center mb-4">
+        <MessageCircle size={24} className="text-blue-500 mr-2" />
+        <h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>AI Recommendation</h3>
+      </div>
+      <ReactMarkdown
+        className={`prose ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'} max-w-none`}
+        components={{
+          p: ({ node, ...props }) => <p className="mb-2" {...props} />,
+          ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2" {...props} />,
+          ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2" {...props} />,
+          li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+        }}
+      >
+        {response}
+      </ReactMarkdown>
+    </motion.div>
+  );
+
+  const RecommendedItemsCarousel = ({ items }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="mb-6"
+    >
+      <h3 className={`text-xl font-semibold mb-4 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Recommended for You</h3>
+      <Swiper
+        effect={'coverflow'}
+        grabCursor={true}
+        centeredSlides={true}
+        slidesPerView={'auto'}
+        coverflowEffect={{
+          rotate: 50,
+          stretch: 0,
+          depth: 100,
+          modifier: 1,
+          slideShadows: true,
+        }}
+        pagination={true}
+        modules={[EffectCoverflow, Pagination]}
+        className="mySwiper"
+      >
+        {items.map((item, index) => (
+          <SwiperSlide key={index}>
+            <ItemCard item={item} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </motion.div>
+  );
+  
   return (
     <div className={`min-h-screen flex flex-col ${
       theme === 'light' 
@@ -346,19 +432,10 @@ const MenuRecommendationSystem = () => {
               >
                 <ConversationBubble isUser={true} content={conv.query} />
                 {conv.response && (
-                  <ConversationBubble isUser={false} content={conv.response} />
+                  <AIResponseCard response={conv.response} />
                 )}
                 {conv.items.length > 0 && (
-                  <motion.div 
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
-                  >
-                    {conv.items.map((item, itemIndex) => (
-                      <ItemCard key={itemIndex} item={item} />
-                    ))}
-                  </motion.div>
+                  <RecommendedItemsCarousel items={conv.items} />
                 )}
               </motion.div>
             ))}
@@ -503,7 +580,7 @@ const MenuRecommendationSystem = () => {
                   <motion.button
                     onClick={toggleMenu}
                     className={`${theme === 'light' ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white'}`}
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <X size={24} />
@@ -579,7 +656,9 @@ const MenuRecommendationSystem = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    Your culinary journey awaits! Add some delectable items to begin.
+                    <ImageIcon size={64} className="mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-semibold mb-2">Your culinary journey awaits!</p>
+                    <p>Add some delectable items to begin your gastronomic adventure.</p>
                   </motion.div>
                 ) : (
                   <>
@@ -593,9 +672,12 @@ const MenuRecommendationSystem = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                       >
-                        <div>
-                          <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
-                          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost} x {item.quantity}</p>
+                        <div className="flex items-center">
+                          <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-lg mr-4" />
+                          <div>
+                            <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
+                            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost} x {item.quantity}</p>
+                          </div>
                         </div>
                         <div className="flex items-center">
                           <motion.button 
