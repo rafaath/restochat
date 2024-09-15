@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  MessageCircle, Image as ImageIcon
+  ArrowRight, ArrowLeft
 } from 'lucide-react';
 import {
   Dialog,
@@ -12,13 +12,8 @@ import {
   DialogTitle,
 } from "./components/ui/dialog";
 import ReactMarkdown from 'react-markdown';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { EffectCoverflow, Pagination } from 'swiper/modules';
-
-// Swiper styles
-import 'swiper/css';
-import 'swiper/css/effect-coverflow';
-import 'swiper/css/pagination';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const MenuRecommendationSystem = () => {
   const [query, setQuery] = useState('');
@@ -39,6 +34,11 @@ const MenuRecommendationSystem = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState('light');
   const [favorites, setFavorites] = useState([]);
+  const [activeStoryIndex, setActiveStoryIndex] = useState(0);
+  const [isStoryOpen, setIsStoryOpen] = useState(false);
+  const storyRef = useRef(null);
+  const storyContentRef = useRef(null);
+  const storyControls = useAnimation();
   const [menuItems, setMenuItems] = useState([
     {
       "name_of_item": "High Protein - Schezwan Chilli Paneer Exotic Veggies Low Gi Rice Bowl",
@@ -62,10 +62,143 @@ const MenuRecommendationSystem = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMenuItems, setFilteredMenuItems] = useState([]);
-  const [activeConversation, setActiveConversation] = useState(null);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleCart = () => setIsCartOpen(!isCartOpen);
+
+
+
+
+
+
+  const openStory = (index) => {
+    setActiveStoryIndex(index);
+    setIsStoryOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeStory = () => {
+    setIsStoryOpen(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const nextStory = () => {
+    if (activeStoryIndex < conversations.length - 1) {
+      setActiveStoryIndex(prevIndex => prevIndex + 1);
+      storyControls.start({ opacity: [0, 1], x: [50, 0] });
+    } else {
+      closeStory();
+    }
+  };
+
+  const prevStory = () => {
+    if (activeStoryIndex > 0) {
+      setActiveStoryIndex(prevIndex => prevIndex - 1);
+      storyControls.start({ opacity: [0, 1], x: [-50, 0] });
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (isStoryOpen) {
+        if (e.key === 'ArrowRight') nextStory();
+        else if (e.key === 'ArrowLeft') prevStory();
+        else if (e.key === 'Escape') closeStory();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isStoryOpen, activeStoryIndex]);
+
+  useEffect(() => {
+    if (isStoryOpen && storyContentRef.current) {
+      storyContentRef.current.scrollTop = 0;
+    }
+  }, [activeStoryIndex, isStoryOpen]);
+
+  const StoryContent = ({ conversation }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+      className="h-full overflow-y-auto px-4 py-8"
+      ref={storyContentRef}
+    >
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-bold mb-4 text-white">{conversation.query}</h2>
+        <ReactMarkdown
+          components={{
+            p: ({ node, ...props }) => <p className="mb-4 text-gray-200" {...props} />,
+            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mb-4 text-white" {...props} />,
+            h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mb-3 text-white" {...props} />,
+            h3: ({ node, ...props }) => <h3 className="text-xl font-bold mb-2 text-white" {...props} />,
+            ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-4 text-gray-200" {...props} />,
+            ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-4 text-gray-200" {...props} />,
+            li: ({ node, ...props }) => <li className="mb-2 text-gray-200" {...props} />,
+            code: ({ node, inline, className, children, ...props }) => {
+              const match = /language-(\w+)/.exec(className || '');
+              return !inline && match ? (
+                <SyntaxHighlighter
+                  style={tomorrow}
+                  language={match[1]}
+                  PreTag="div"
+                  className="rounded-md overflow-hidden my-4"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              ) : (
+                <code className="bg-gray-800 rounded px-1 py-0.5 text-gray-200" {...props}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+        >
+          {conversation.response}
+        </ReactMarkdown>
+        {conversation.items.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold mb-4 text-white">Recommended Items</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {conversation.items.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-gray-800 rounded-lg overflow-hidden shadow-lg"
+                >
+                  <img src={item.image_link} alt={item.name_of_item} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h4 className="text-lg font-semibold mb-2 text-white">{item.name_of_item}</h4>
+                    <p className="text-sm text-gray-300 mb-4">{item.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xl font-bold text-blue-400">₹{item.cost.toFixed(2)}</span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => addToCart(item)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
+                      >
+                        Add to Cart
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+
+
+
+
 
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
@@ -74,30 +207,27 @@ const MenuRecommendationSystem = () => {
     setIsLoading(true);
     const newConversation = { query, response: '', items: [] };
     setConversations(prev => [...prev, newConversation]);
-    setActiveConversation(newConversation);
 
     try {
       const response = await fetch(`/api/chat/?query=${encodeURIComponent(query)}`);
       const data = await response.json();
       
       setConversations(prev => 
-        prev.map((conv) => 
-          conv === newConversation
+        prev.map((conv, index) => 
+          index === prev.length - 1 
             ? { ...conv, response: data.response_text, items: data.returned_items || [] }
             : conv
         )
       );
-      setActiveConversation({ ...newConversation, response: data.response_text, items: data.returned_items || [] });
     } catch (error) {
       console.error('Error fetching data:', error);
       setConversations(prev => 
-        prev.map((conv) => 
-          conv === newConversation
+        prev.map((conv, index) => 
+          index === prev.length - 1 
             ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
             : conv
         )
       );
-      setActiveConversation({ ...newConversation, response: 'An error occurred while fetching the data. Please try again.' });
     } finally {
       setIsLoading(false);
       setQuery('');
@@ -181,34 +311,20 @@ const MenuRecommendationSystem = () => {
     );
   }, [searchTerm, menuItems]);
 
-  const ConversationBubble = ({ isUser, content }) => {
-    const controls = useAnimation();
-    
-    useEffect(() => {
-      controls.start({ opacity: 1, y: 0 });
-    }, []);
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={controls}
-        transition={{ duration: 0.5, type: 'spring' }}
-        className={`max-w-3/4 p-4 rounded-lg shadow-md ${
-          isUser 
-            ? 'bg-blue-500 text-white self-end' 
-            : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
-        }`}
-      >
-        {isUser ? (
-          <p className="whitespace-pre-wrap">{content}</p>
-        ) : (
-          <ReactMarkdown className="prose dark:prose-invert">
-            {content}
-          </ReactMarkdown>
-        )}
-      </motion.div>
-    );
-  };
+  const ConversationBubble = ({ isUser, content }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`max-w-3/4 p-4 rounded-lg shadow-md ${
+        isUser 
+          ? 'bg-blue-500 text-white self-end' 
+          : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
+      }`}
+    >
+      <p className="whitespace-pre-wrap">{content}</p>
+    </motion.div>
+  );
 
   const ItemCard = ({ item }) => {
     const isFavorite = favorites.some(fav => fav.name_of_item === item.name_of_item);
@@ -329,66 +445,6 @@ const MenuRecommendationSystem = () => {
     </motion.button>
   );
 
-  const AIResponseCard = ({ response }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`rounded-lg shadow-lg p-6 mb-6 ${
-        theme === 'light' ? 'bg-white' : 'bg-gray-800'
-      }`}
-    >
-      <div className="flex items-center mb-4">
-        <MessageCircle size={24} className="text-blue-500 mr-2" />
-        <h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>AI Recommendation</h3>
-      </div>
-      <ReactMarkdown
-        className={`prose ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'} max-w-none`}
-        components={{
-          p: ({ node, ...props }) => <p className="mb-2" {...props} />,
-          ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-2" {...props} />,
-          ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-2" {...props} />,
-          li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-        }}
-      >
-        {response}
-      </ReactMarkdown>
-    </motion.div>
-  );
-
-  const RecommendedItemsCarousel = ({ items }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-      className="mb-6"
-    >
-      <h3 className={`text-xl font-semibold mb-4 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Recommended for You</h3>
-      <Swiper
-        effect={'coverflow'}
-        grabCursor={true}
-        centeredSlides={true}
-        slidesPerView={'auto'}
-        coverflowEffect={{
-          rotate: 50,
-          stretch: 0,
-          depth: 100,
-          modifier: 1,
-          slideShadows: true,
-        }}
-        pagination={true}
-        modules={[EffectCoverflow, Pagination]}
-        className="mySwiper"
-      >
-        {items.map((item, index) => (
-          <SwiperSlide key={index}>
-            <ItemCard item={item} />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </motion.div>
-  );
-  
   return (
     <div className={`min-h-screen flex flex-col ${
       theme === 'light' 
@@ -430,13 +486,38 @@ const MenuRecommendationSystem = () => {
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <ConversationBubble isUser={true} content={conv.query} />
-                {conv.response && (
-                  <AIResponseCard response={conv.response} />
-                )}
-                {conv.items.length > 0 && (
-                  <RecommendedItemsCarousel items={conv.items} />
-                )}
+                <motion.div
+                  className={`p-6 rounded-lg shadow-lg cursor-pointer ${
+                    theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
+                  } transition-colors duration-200`}
+                  onClick={() => openStory(index)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                    {conv.query}
+                  </h3>
+                  <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                    {conv.response.substring(0, 100)}...
+                  </p>
+                  {conv.items.length > 0 && (
+                    <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
+                      {conv.items.slice(0, 3).map((item, itemIndex) => (
+                        <img
+                          key={itemIndex}
+                          src={item.image_link}
+                          alt={item.name_of_item}
+                          className="w-16 h-16 object-cover rounded-full border-2 border-blue-500"
+                        />
+                      ))}
+                      {conv.items.length > 3 && (
+                        <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                          +{conv.items.length - 3}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -556,6 +637,64 @@ const MenuRecommendationSystem = () => {
       </footer>
 
       <AnimatePresence>
+        {isStoryOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
+            onClick={closeStory}
+          >
+            <motion.div
+              className="w-full h-full max-w-4xl mx-auto relative"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              ref={storyRef}
+            >
+              <motion.div
+                className="absolute inset-0"
+                animate={storyControls}
+                initial={{ opacity: 1, x: 0 }}
+              >
+                <StoryContent conversation={conversations[activeStoryIndex]} />
+              </motion.div>
+              <button
+                className="absolute top-4 right-4 text-white"
+                onClick={closeStory}
+              >
+                <X size={24} />
+              </button>
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {conversations.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full ${
+                      index === activeStoryIndex ? 'bg-blue-500' : 'bg-gray-500'
+                    }`}
+                  />
+                ))}
+              </div>
+              <button
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white"
+                onClick={prevStory}
+              >
+                <ArrowLeft size={24} />
+              </button>
+              <button
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white"
+                onClick={nextStory}
+              >
+                <ArrowRight size={24} />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -580,7 +719,7 @@ const MenuRecommendationSystem = () => {
                   <motion.button
                     onClick={toggleMenu}
                     className={`${theme === 'light' ? 'text-gray-500 hover:text-gray-700' : 'text-gray-300 hover:text-white'}`}
-                    whileHover={{scale: 1.1 }}
+                    whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                   >
                     <X size={24} />
@@ -656,9 +795,7 @@ const MenuRecommendationSystem = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <ImageIcon size={64} className="mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-semibold mb-2">Your culinary journey awaits!</p>
-                    <p>Add some delectable items to begin your gastronomic adventure.</p>
+                    Your culinary journey awaits! Add some delectable items to begin.
                   </motion.div>
                 ) : (
                   <>
@@ -672,12 +809,9 @@ const MenuRecommendationSystem = () => {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                       >
-                        <div className="flex items-center">
-                          <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-lg mr-4" />
-                          <div>
-                            <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
-                            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost} x {item.quantity}</p>
-                          </div>
+                        <div>
+                          <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
+                          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost} x {item.quantity}</p>
                         </div>
                         <div className="flex items-center">
                           <motion.button 
