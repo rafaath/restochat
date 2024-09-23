@@ -203,36 +203,60 @@ const MenuRecommendationSystem = () => {
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
     if (!query.trim()) return;
-
+  
     setIsLoading(true);
-    const newConversation = { query, response: '', items: [] };
+    const newConversation = { query, response: 'Waiting for response...', items: [] };
     setConversations(prev => [...prev, newConversation]);
-
-    try {
-      const response = await fetch(`/api/chat/?query=${encodeURIComponent(query)}`);
-      const data = await response.json();
-      
-      setConversations(prev => 
-        prev.map((conv, index) => 
-          index === prev.length - 1 
-            ? { ...conv, response: data.response_text, items: data.returned_items || [] }
-            : conv
-        )
-      );
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setConversations(prev => 
-        prev.map((conv, index) => 
-          index === prev.length - 1 
-            ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
-            : conv
-        )
-      );
-    } finally {
-      setIsLoading(false);
-      setQuery('');
-      setIsPromptsExpanded(false);
-    }
+  
+    const pollInterval = 10000; // 10 seconds
+    const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
+    let attempts = 0;
+  
+    const pollForResponse = async () => {
+      try {
+        const response = await fetch(`https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(query)}`);
+        const data = await response.json();
+  
+        if (data.status === 'processing') {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            throw new Error('Max attempts reached');
+          }
+          setConversations(prev => 
+            prev.map((conv, index) => 
+              index === prev.length - 1 
+                ? { ...conv, response: `Still processing... (${attempts * 10} seconds)` }
+                : conv
+            )
+          );
+          setTimeout(pollForResponse, pollInterval);
+        } else {
+          setConversations(prev => 
+            prev.map((conv, index) => 
+              index === prev.length - 1 
+                ? { ...conv, response: data.response_text, items: data.returned_items || [] }
+                : conv
+            )
+          );
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setConversations(prev => 
+          prev.map((conv, index) => 
+            index === prev.length - 1 
+              ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
+              : conv
+          )
+        );
+        setIsLoading(false);
+      }
+    };
+  
+    pollForResponse();
+  
+    setQuery('');
+    setIsPromptsExpanded(false);
   }, [query]);
 
   const handleSuggestivePrompt = useCallback((promptText) => {
