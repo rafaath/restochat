@@ -91,14 +91,14 @@ const WelcomeScreen = ({ onGetStarted, theme }) => {
 
   return (
     <motion.div 
-      className={`fixed inset-0 flex flex-col items-center justify-center p-6 ${
+      className={`fixed inset-0 flex flex-col items-center justify-center p-6 min-h-screen ${
         theme === 'light' ? 'bg-gradient-to-br from-blue-50 to-indigo-100' : 'bg-gradient-to-br from-gray-900 to-indigo-900'
       }`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="relative w-full max-w-md mx-auto overflow-hidden">
+      <div className="relative w-full max-w-md mx-auto overflow-hidden min-h-[400px]">
         <AnimatePresence initial={false} custom={currentSlide}>
           <motion.div
             key={currentSlide}
