@@ -78,15 +78,15 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart }) => {
       <motion.div 
         className={`absolute bottom-0 left-0 right-0 ${
           theme === 'light' ? 'bg-white' : 'bg-gray-900'
-        } rounded-t-3xl max-h-[80vh] overflow-y-auto`}
+        } rounded-t-3xl max-h-[90vh] sm:max-h-[80vh] overflow-y-auto`}
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
       >
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Menu</h2>
+            <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Menu</h2>
             <button onClick={onClose} className={theme === 'light' ? 'text-gray-600' : 'text-gray-300'}>
               <X size={24} />
             </button>
@@ -109,17 +109,17 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart }) => {
             {filteredMenuItems.map((item, index) => (
               <motion.div 
                 key={index} 
-                className={`p-4 rounded-lg ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-800'} cursor-pointer flex flex-col h-[400px]`}
+                className={`p-4 rounded-lg ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-800'} cursor-pointer flex flex-col h-[300px] sm:h-[400px]`}
                 onClick={() => handleItemClick(item)}
                 whileHover={{ scale: 1.03 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
               >
-                <div className="h-48 overflow-hidden rounded-lg mb-4">
+                <div className="h-32 sm:h-48 overflow-hidden rounded-lg mb-2 sm:mb-4">
                   <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />
                 </div>
-                <h3 className={`font-semibold text-lg mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
-                <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-4 flex-grow overflow-hidden`}>
-                  {item.description.length > 100 ? `${item.description.substring(0, 100)}...` : item.description}
+                <h3 className={`font-semibold text-base sm:text-lg mb-1 sm:mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
+                <p className={`text-xs sm:text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-2 sm:mb-4 flex-grow overflow-hidden`}>
+                  {item.description.length > 60 ? `${item.description.substring(0, 60)}...` : item.description}
                 </p>
                 <div className="mt-auto">
                   <p className="text-blue-500 font-bold mb-2">₹{item.cost.toFixed(2)}</p>
@@ -165,7 +165,7 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart }) => {
                 <img
                   src={selectedItem.image_link}
                   alt={selectedItem.name_of_item}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-48 sm:h-64 object-cover"
                 />
                 <button 
                   onClick={closeModal}
@@ -174,21 +174,21 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart }) => {
                   <X size={20} />
                 </button>
               </div>
-              <div className="p-6">
-                <h3 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              <div className="p-4 sm:p-6">
+                <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
                   {selectedItem.name_of_item}
                 </h3>
-                <div className="flex items-center mb-4">
+                <div className="flex items-center mb-2 sm:mb-4">
                   <Star className="text-yellow-400 mr-1" size={16} />
                   <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
                     4.5 (120 reviews)
                   </span>
                 </div>
-                <p className={`mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                <p className={`mb-4 text-sm sm:text-base ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
                   {selectedItem.description}
                 </p>
-                <div className="flex justify-between items-center mb-6">
-                  <p className="text-2xl font-bold text-blue-600">
+                <div className="flex justify-between items-center mb-4 sm:mb-6">
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600">
                     ₹{selectedItem.cost.toFixed(2)}
                   </p>
                   <div className="flex items-center">
@@ -213,7 +213,7 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart }) => {
                 </div>
                 <motion.button
                   onClick={addToCartWithQuantity}
-                  className={`w-full bg-blue-500 text-white py-3 rounded-full text-lg font-semibold transition-colors ${
+                  className={`w-full bg-blue-500 text-white py-2 sm:py-3 rounded-full text-base sm:text-lg font-semibold transition-colors ${
                     isAddingToCart ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-600'
                   }`}
                   whileHover={{ scale: isAddingToCart ? 1 : 1.05 }}
@@ -230,7 +230,7 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart }) => {
       <AnimatePresence>
         {showNotification && (
           <motion.div
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-70"
+            className="fixed top-4 right-4 transform -translate-x-1/2 z-70"
             variants={notificationVariants}
             initial="hidden"
             animate="visible"

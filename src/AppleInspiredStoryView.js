@@ -1,9 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+
+
 
 const Notification = ({ message }) => (
   <motion.div
@@ -18,94 +21,166 @@ const Notification = ({ message }) => (
   </motion.div>
 );
 
-const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, theme }) => {
-  const handleAddToCart = (item, event) => {
-    event.preventDefault();
-    onAddToCart(item);
-  };
-
-  return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white leading-tight">
-        {conversation.query}
-      </h2>
-      <ReactMarkdown
-        components={{
-          p: ({ node, ...props }) => <p className="text-base sm:text-lg mb-4 sm:mb-6 text-gray-700 dark:text-gray-300 leading-relaxed" {...props} />,
-          h1: ({ node, ...props }) => <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 text-gray-900 dark:text-white mt-6 sm:mt-8" {...props} />,
-          h2: ({ node, ...props }) => <h2 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-3 text-gray-900 dark:text-white mt-5 sm:mt-6" {...props} />,
-          h3: ({ node, ...props }) => <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 dark:text-white mt-4" {...props} />,
-          ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-4 sm:mb-6 text-gray-700 dark:text-gray-300" {...props} />,
-          ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-4 sm:mb-6 text-gray-700 dark:text-gray-300" {...props} />,
-          li: ({ node, ...props }) => <li className="mb-2 text-gray-700 dark:text-gray-300" {...props} />,
-          code: ({ node, inline, className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || '');
-            return !inline && match ? (
-              <SyntaxHighlighter
-                style={tomorrow}
-                language={match[1]}
-                PreTag="div"
-                className="rounded-lg overflow-hidden my-4 sm:my-6 text-sm"
-                {...props}
+const highlightColors = [
+    'text-blue-500',
+    'text-green-500',
+    'text-purple-500',
+    'text-pink-500',
+    'text-yellow-500',
+    'text-indigo-500',
+    'text-red-500',
+    'text-teal-500'
+  ];
+  
+  const HighlightedText = ({ text, items, scrollToItem }) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    let colorIndex = 0;
+  
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const innerText = part.slice(2, -2);
+            const colorClass = highlightColors[colorIndex];
+            colorIndex = (colorIndex + 1) % highlightColors.length;
+            const matchingItem = items.find(item => item.name_of_item.toLowerCase().includes(innerText.toLowerCase()));
+            
+            return (
+              <span 
+                key={index} 
+                className={`${colorClass} font-bold cursor-pointer`}
+                onClick={() => matchingItem && scrollToItem(matchingItem.id)}
               >
-                {String(children).replace(/\n$/, '')}
-              </SyntaxHighlighter>
-            ) : (
-              <code className="bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5 text-sm font-mono text-gray-800 dark:text-gray-200" {...props}>
-                {children}
-              </code>
+                {innerText}
+              </span>
             );
-          },
-        }}
+          }
+          return part;
+        })}
+      </>
+    );
+  };
+  
+  const ItemCard = React.forwardRef(({ item, index, onAddToCart }, ref) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const toggleExpansion = () => setIsExpanded(!isExpanded);
+  
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col"
       >
-        {conversation.response}
-      </ReactMarkdown>
-      {conversation.items.length > 0 && (
-        <div className="mt-8 sm:mt-12">
-          <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">Recommended for You</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-            {conversation.items.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300"
+        <div className="relative h-48">
+          <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="absolute top-2 right-2 p-2 bg-white dark:bg-gray-900 rounded-full shadow-md"
+          >
+            <Heart size={20} className="text-red-500" />
+          </motion.button>
+        </div>
+        <div className="p-4 sm:p-6 flex flex-col flex-grow">
+          <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+            {item.name_of_item}
+          </h4>
+          <div className="relative flex-grow">
+            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isExpanded ? '' : 'line-clamp-3'}`}>
+              {item.description}
+            </p>
+            {item.description.length > 150 && (
+              <button
+                onClick={toggleExpansion}
+                className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center mt-2"
               >
-                <div className="relative">
-                  <img src={item.image_link} alt={item.name_of_item} className="w-full h-48 object-cover" />
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="absolute top-2 right-2 p-2 bg-white dark:bg-gray-900 rounded-full shadow-md"
-                  >
-                    <Heart size={20} className="text-red-500" />
-                  </motion.button>
-                </div>
-                <div className="p-4 sm:p-6">
-                  <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 dark:text-white">{item.name_of_item}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{item.description}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">₹{item.cost.toFixed(2)}</span>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(event) => handleAddToCart(item, event)}
-                      className="bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors flex items-center space-x-2"
-                    >
-                      <ShoppingBag size={16} />
-                      <span className="hidden sm:inline">Add to Cart</span>
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                {isExpanded ? (
+                  <>
+                    <ChevronUp size={16} className="mr-1" />
+                    Show Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown size={16} className="mr-1" />
+                    Show More
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
-      )}
-    </div>
-  );
-});
+        <div className="p-4 sm:p-6 mt-auto">
+          <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+            <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">₹{item.cost.toFixed(2)}</span>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={(event) => onAddToCart(item, event)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors flex items-center space-x-2"
+            >
+              <ShoppingBag size={16} />
+              <span>Add to Cart</span>
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  });
+  
+  const IsolatedScrollContent = React.memo(({ conversation, onAddToCart }) => {
+    const itemRefs = useRef({});
+    const [items, setItems] = useState([]);
+  
+    useEffect(() => {
+      if (conversation.items) {
+        setItems(conversation.items.map((item, index) => ({
+          ...item,
+          id: `item-${index}`
+        })));
+      }
+    }, [conversation.items]);
+  
+    const scrollToItem = (itemId) => {
+      const element = itemRefs.current[itemId];
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+  
+    const handleAddToCart = useCallback((item, event) => {
+      event.preventDefault();
+      onAddToCart(item);
+    }, [onAddToCart]);
+  
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white leading-tight">
+          {conversation.query}
+        </h2>
+        <div className="text-base sm:text-lg mb-8 text-gray-700 dark:text-gray-300 leading-relaxed">
+          <HighlightedText text={conversation.response} items={items} scrollToItem={scrollToItem} />
+        </div>
+        {items.length > 0 && (
+          <div className="mt-8 sm:mt-12">
+            <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">Recommended for You</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+              {items.map((item, index) => (
+                <ItemCard 
+                  key={item.id}
+                  ref={el => itemRefs.current[item.id] = el}
+                  item={item} 
+                  index={index} 
+                  onAddToCart={handleAddToCart} 
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  });
 
 const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme }) => {
   const [activeIndex, setActiveIndex] = useState(initialIndex);

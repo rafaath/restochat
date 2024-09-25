@@ -29,6 +29,7 @@ import WelcomeScreen from './WelcomeScreen';
 import EmptyState from './EmptyState';
 import IsolatedMenu from './IsolatedMenu';
 import IsolatedCart from './IsolatedCart';
+import ItemModal from './ItemModal';  // Make sure the path is correct
 
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -127,7 +128,7 @@ const MenuRecommendationSystem = () => {
 
   const [showWelcome, setShowWelcome] = useState(true);
   // ... (other state variables remain the same)
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [selectedItemFromConversation, setSelectedItemFromConversation] = useState(null);
 
@@ -569,55 +570,55 @@ const MenuRecommendationSystem = () => {
     </div>
   );
 
-  const ItemModal = ({ item, isOpen, onClose }) => (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-[90%] sm:max-w-[425px] mx-auto p-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
-        <div className="relative">
-          <img
-            src={item.image_link}
-            alt={item.name_of_item}
-            className="w-full h-64 object-cover"
-          />
-          <button 
-            onClick={onClose}
-            className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="p-6">
-          <h3 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-            {item.name_of_item}
-          </h3>
-          <div className="flex items-center mb-4">
-            <Star className="text-yellow-400 mr-1" size={16} />
-            <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-              4.5 (120 reviews)
-            </span>
-          </div>
-          <p className={`mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-            {item.description}
-          </p>
-          <div className="flex justify-between items-center mb-6">
-            <p className="text-2xl font-bold text-blue-600">
-              ₹{item.cost.toFixed(2)}
-            </p>
-          </div>
-          <motion.button
-            onClick={() => {
-              addToCart(item);
-              onClose();
-            }}
-            className="w-full bg-blue-500 text-white py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            Add to Cart
-          </motion.button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  // const ItemModal = ({ item, isOpen, onClose }) => (
+  //   <Dialog open={isOpen} onOpenChange={onClose}>
+  //     <DialogContent className={`max-w-[90%] sm:max-w-[425px] mx-auto p-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+  //       <div className="relative">
+  //         <img
+  //           src={item.image_link}
+  //           alt={item.name_of_item}
+  //           className="w-full h-64 object-cover"
+  //         />
+  //         <button 
+  //           onClick={onClose}
+  //           className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
+  //         >
+  //           <X size={20} />
+  //         </button>
+  //       </div>
+  //       <div className="p-6">
+  //         <h3 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+  //           {item.name_of_item}
+  //         </h3>
+  //         <div className="flex items-center mb-4">
+  //           <Star className="text-yellow-400 mr-1" size={16} />
+  //           <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+  //             4.5 (120 reviews)
+  //           </span>
+  //         </div>
+  //         <p className={`mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+  //           {item.description}
+  //         </p>
+  //         <div className="flex justify-between items-center mb-6">
+  //           <p className="text-2xl font-bold text-blue-600">
+  //             ₹{item.cost.toFixed(2)}
+  //           </p>
+  //         </div>
+  //         <motion.button
+  //           onClick={() => {
+  //             addToCart(item);
+  //             onClose();
+  //           }}
+  //           className="w-full bg-blue-500 text-white py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
+  //           whileHover={{ scale: 1.05 }}
+  //           whileTap={{ scale: 0.95 }}
+  //         >
+  //           Add to Cart
+  //         </motion.button>
+  //       </div>
+  //     </DialogContent>
+  //   </Dialog>
+  // );
 
   const MenuItemCard = ({ item }) => (
     <motion.div 
@@ -644,6 +645,11 @@ const MenuRecommendationSystem = () => {
       </div>
     </motion.div>
   );
+
+  const handleItemClick = (item) => {
+    setSelectedItemFromConversation(item);
+    setIsModalOpen(true);
+  };
 
   const PromptButton = ({ icon: Icon, text }) => (
     <motion.button
@@ -989,12 +995,14 @@ const MenuRecommendationSystem = () => {
         />
       )}
       {selectedItemFromConversation && (
-        <ItemModal
-          item={selectedItemFromConversation}
-          isOpen={!!selectedItemFromConversation}
-          onClose={() => setSelectedItemFromConversation(null)}
-        />
-      )}
+  <ItemModal
+    item={selectedItemFromConversation}
+    isOpen={!!selectedItemFromConversation}
+    onClose={() => setSelectedItemFromConversation(null)}
+    theme={theme}
+    addToCart={addToCart}
+  />
+)}
   
       {isLoading && (
         <motion.div 
