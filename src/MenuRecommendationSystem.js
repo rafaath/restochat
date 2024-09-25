@@ -128,6 +128,10 @@ const MenuRecommendationSystem = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   // ... (other state variables remain the same)
 
+
+  const [selectedItemFromConversation, setSelectedItemFromConversation] = useState(null);
+
+
   const mainContentRef = useRef(null);
 
   useEffect(() => {
@@ -549,33 +553,49 @@ const MenuRecommendationSystem = () => {
 
   const ItemModal = ({ item, isOpen, onClose }) => (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-[90%] sm:max-w-[425px] mx-auto px-4 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
-        <DialogHeader>
-          <DialogTitle className={theme === 'light' ? 'text-gray-800' : 'text-white'}>{item.name_of_item}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-4">
+      <DialogContent className={`max-w-[90%] sm:max-w-[425px] mx-auto p-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+        <div className="relative">
           <img
             src={item.image_link}
             alt={item.name_of_item}
-            className="w-full h-64 object-cover rounded-lg mb-4"
+            className="w-full h-64 object-cover"
           />
-          <p className={`mb-4 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>{item.description}</p>
-          <div className="flex items-center justify-between">
+          <button 
+            onClick={onClose}
+            className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-6">
+          <h3 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+            {item.name_of_item}
+          </h3>
+          <div className="flex items-center mb-4">
+            <Star className="text-yellow-400 mr-1" size={16} />
+            <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+              4.5 (120 reviews)
+            </span>
+          </div>
+          <p className={`mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+            {item.description}
+          </p>
+          <div className="flex justify-between items-center mb-6">
             <p className="text-2xl font-bold text-blue-600">
               ₹{item.cost.toFixed(2)}
             </p>
-            <motion.button
-              onClick={() => {
-                addToCart(item);
-                onClose();
-              }}
-              className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Add to Cart
-            </motion.button>
           </div>
+          <motion.button
+            onClick={() => {
+              addToCart(item);
+              onClose();
+            }}
+            className="w-full bg-blue-500 text-white py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Add to Cart
+          </motion.button>
         </div>
       </DialogContent>
     </Dialog>
@@ -748,64 +768,69 @@ const MenuRecommendationSystem = () => {
           </header>
   
           <main 
-            ref={mainContentRef}
-            className={`flex-grow overflow-y-auto ${conversations.length === 0 ? 'flex items-center justify-center' : 'p-4'}`}
-          >
-            <div className="w-full max-w-4xl mx-auto">
-              {conversations.length === 0 ? (
-                <EmptyState theme={theme} />
-              ) : (
-                <div className="space-y-4">
-                  <AnimatePresence>
-                    {conversations.map((conv, index) => (
-                      <motion.div 
-                        key={index} 
-                        className="mb-4"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <motion.div
-                          className={`p-6 rounded-lg shadow-lg cursor-pointer ${
-                            theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
-                          } transition-colors duration-200`}
-                          onClick={() => openStory(index)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-                            {conv.query}
-                          </h3>
-                          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                            {conv.response.substring(0, 100)}...
-                          </p>
-                        {conv.items.length > 0 && (
-                          <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
-                            {conv.items.slice(0, 3).map((item, itemIndex) => (
-                              <img
-                                key={itemIndex}
+        ref={mainContentRef}
+        className={`flex-grow overflow-y-auto ${conversations.length === 0 ? 'flex items-center justify-center' : 'p-4'}`}
+      >
+        <div className="w-full max-w-4xl mx-auto">
+          {conversations.length === 0 ? (
+            <EmptyState theme={theme} />
+          ) : (
+            <div className="space-y-4">
+              <AnimatePresence>
+                {conversations.map((conv, index) => (
+                  <motion.div 
+                    key={index} 
+                    className="mb-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <motion.div
+                      className={`p-6 rounded-lg shadow-lg cursor-pointer ${
+                        theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
+                      } transition-colors duration-200`}
+                      onClick={() => openStory(index)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                        {conv.query}
+                      </h3>
+                      <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                        {conv.response.substring(0, 100)}...
+                      </p>
+                      {conv.items.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-4">
+                          {conv.items.map((item, itemIndex) => (
+                            <div key={itemIndex} className="flex flex-col items-center">
+                              <motion.img
                                 src={item.image_link}
                                 alt={item.name_of_item}
-                                className="w-16 h-16 object-cover rounded-full border-2 border-blue-500"
+                                className="w-16 h-16 object-cover rounded-full border-2 border-blue-500 cursor-pointer"
+                                whileHover={{ scale: 1.1 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedItemFromConversation(item);
+                                }}
                               />
-                            ))}
-                            {conv.items.length > 3 && (
-                              <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                                +{conv.items.length - 3}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </motion.div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
-              <div ref={conversationEndRef} />
+                              <p className={`text-xs mt-1 text-center ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                                {item.name_of_item.length > 20 ? `${item.name_of_item.substring(0, 20)}...` : item.name_of_item}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
-          </main>
+          )}
+          <div ref={conversationEndRef} />
+        </div>
+      </main>
+
   
           <footer className={`flex-shrink-0 z-50 ${
             theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
@@ -934,6 +959,13 @@ const MenuRecommendationSystem = () => {
           onClose={() => setSelectedItem(null)}
           theme={theme}
           addToCart={addToCart}
+        />
+      )}
+      {selectedItemFromConversation && (
+        <ItemModal
+          item={selectedItemFromConversation}
+          isOpen={!!selectedItemFromConversation}
+          onClose={() => setSelectedItemFromConversation(null)}
         />
       )}
   
