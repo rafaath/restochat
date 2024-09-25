@@ -128,6 +128,14 @@ const MenuRecommendationSystem = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   // ... (other state variables remain the same)
 
+  const mainContentRef = useRef(null);
+
+  useEffect(() => {
+    if (conversations.length > 0 && mainContentRef.current) {
+      mainContentRef.current.scrollTop = mainContentRef.current.scrollHeight;
+    }
+  }, [conversations]);
+
   useEffect(() => {
     const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
     if (hasSeenWelcome) {
@@ -682,7 +690,7 @@ const MenuRecommendationSystem = () => {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <div className={`min-h-screen flex flex-col ${
+    <div className={`h-screen flex flex-col overflow-hidden ${
       theme === 'light' 
         ? 'bg-gradient-to-br from-gray-100 to-gray-200' 
         : 'bg-gradient-to-br from-gray-900 to-gray-800'
@@ -695,13 +703,10 @@ const MenuRecommendationSystem = () => {
   
       {!showWelcome && (
         <>
-          <motion.header 
-            className={`fixed top-0 left-0 right-0 z-50 p-4 shadow-md ${
+             <header 
+            className={`flex-shrink-0 z-50 p-4 shadow-md ${
               theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-900 text-white'
             }`}
-            initial={{ y: 0 }}
-            animate={{ y: isHeaderVisible ? 0 : '-100%' }}
-            transition={{ duration: 0.3 }}
           >
             <div className="max-w-4xl mx-auto flex justify-between items-center">
               <h1 className="text-2xl font-bold">RestoChat</h1>
@@ -717,37 +722,41 @@ const MenuRecommendationSystem = () => {
                 </motion.button>
               </div>
             </div>
-          </motion.header>
+          </header>
   
-          <main className="flex-grow p-4 overflow-auto pb-32 mt-16 flex items-center justify-center">
+          <main 
+            ref={mainContentRef}
+            className={`flex-grow overflow-y-auto ${conversations.length === 0 ? 'flex items-center justify-center' : 'p-4'}`}
+          >
             <div className="w-full max-w-4xl mx-auto">
-            
               {conversations.length === 0 ? (
                 <EmptyState theme={theme} />
               ) : (
-                  conversations.map((conv, index) => (
-                    <motion.div 
-                      key={index} 
-                      className="space-y-4"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <motion.div
-                        className={`p-6 rounded-lg shadow-lg cursor-pointer ${
-                          theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
-                        } transition-colors duration-200`}
-                        onClick={() => openStory(index)}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                <div className="space-y-4">
+                  <AnimatePresence>
+                    {conversations.map((conv, index) => (
+                      <motion.div 
+                        key={index} 
+                        className="mb-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
                       >
-                        <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-                          {conv.query}
-                        </h3>
-                        <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                          {conv.response.substring(0, 100)}...
-                        </p>
+                        <motion.div
+                          className={`p-6 rounded-lg shadow-lg cursor-pointer ${
+                            theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
+                          } transition-colors duration-200`}
+                          onClick={() => openStory(index)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                            {conv.query}
+                          </h3>
+                          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                            {conv.response.substring(0, 100)}...
+                          </p>
                         {conv.items.length > 0 && (
                           <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
                             {conv.items.slice(0, 3).map((item, itemIndex) => (
@@ -766,16 +775,17 @@ const MenuRecommendationSystem = () => {
                           </div>
                         )}
                       </motion.div>
-                    </motion.div>
-                  ))
-                )}
-              
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              )}
               <div ref={conversationEndRef} />
             </div>
           </main>
   
-          <footer className={`fixed bottom-0 left-0 right-0 transition-all duration-300 ease-in-out ${
-            theme === 'light' ? 'bg-white bg-opacity-80' : 'bg-gray-900 bg-opacity-80'
+          <footer className={`flex-shrink-0 z-50 ${
+            theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
           } backdrop-blur-md`}>
             <div className="max-w-4xl mx-auto p-4 space-y-4">
               <motion.div
