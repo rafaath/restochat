@@ -30,7 +30,7 @@ import EmptyState from './EmptyState';
 import IsolatedMenu from './IsolatedMenu';
 import IsolatedCart from './IsolatedCart';
 import ItemModal from './ItemModal';  // Make sure the path is correct
-
+import menuItemsData from './full_menu.json';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -175,27 +175,12 @@ const MenuRecommendationSystem = () => {
 
 
 
-  const [menuItems, setMenuItems] = useState([
-    ,
-    {
-        "name_of_item": "High Protein - Schezwan Chilli Paneer Exotic Veggies Low Gi Rice Bowl",
-        "cost": 319.0,
-        "description": "A deliciously aromatic and flavourful paneer rice bowl prepared with our special low gi rice,schezwan sauce along with exotic vegetables. A dish where taste meets health. High protein and low gi balanced meal. (gi value - 48) [Energy: 665.2 kcal, Protein: 25.6g, Carbohydrates: 58g, Fiber: 4g, Fat: 32.4g]",
-        "image_link": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/FOOD_CATALOG/IMAGES/CMS/2024/5/9/44ce79b1-9ec3-44cc-b336-87413920c421_97c2f817-0169-447a-8363-0b5503b04c36.jpg"
-    },
-    {
-        "name_of_item": "High Protein - Egg Curry Masala Low Gi Rice Bowl",
-        "cost": 299.0,
-        "description": "A simple but flavourful egg curry masala made along with our special low gi rice. A dish where taste meets health. High protein and low gi balanced meal. (gi value - 48) [Energy: 577.5 kcal, Protein: 18.6g, Carbohydrates: 59.4g, Fiber: 4.2g, Fat: 29g]",
-        "image_link": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/FOOD_CATALOG/IMAGES/CMS/2024/5/9/f5f18a40-5e48-45c6-8875-83ac71c4a254_d667d1b1-6434-4a16-a5f4-ff0edc8a673c.jpg"
-    },
-    {
-        "name_of_item": "High Protein - Paneer Makhani Low Gi Rice Bowl",
-        "cost": 319.0,
-        "description": "A delicious paneer makhani gravy celebrating the goodness of desi butter, served alongside our special low gi rice. A dish where taste meets health. High protein and low gi balanced meal. Taste bhi. . . Health bhi. . . (gi value - 48) [Energy: 758.6 kcal, Protein: 26.1g, Carbohydrates: 60.8g, Fiber: 4.2g, Fat: 42.6g]",
-        "image_link": "https://media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto,w_300,h_300,c_fit/FOOD_CATALOG/IMAGES/CMS/2024/5/9/9443d232-7828-4566-bff9-be3ea1004d8d_692f60af-eee7-4048-9301-1f86a7b24057.jpg"
-    },
-  ]);
+  const [menuItems, setMenuItems] = useState([]);
+
+  useEffect(() => {
+    // Load menu items from the JSON file
+    setMenuItems(menuItemsData);
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMenuItems, setFilteredMenuItems] = useState([]);

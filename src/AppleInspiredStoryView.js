@@ -48,7 +48,7 @@ const highlightColors = [
             return (
               <span 
                 key={index} 
-                className={`${colorClass} font-bold cursor-pointer`}
+                className={`${colorClass} font-semibold cursor-pointer transition-colors duration-200 ease-in-out hover:opacity-80`}
                 onClick={() => matchingItem && scrollToItem(matchingItem.id)}
               >
                 {innerText}
@@ -84,17 +84,17 @@ const highlightColors = [
           </motion.button>
         </div>
         <div className="p-4 sm:p-6 flex flex-col flex-grow">
-          <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+          <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 dark:text-white leading-tight">
             {item.name_of_item}
           </h4>
           <div className="relative flex-grow">
-            <p className={`text-sm text-gray-600 dark:text-gray-400 ${isExpanded ? '' : 'line-clamp-3'}`}>
+            <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
               {item.description}
             </p>
             {item.description.length > 150 && (
               <button
                 onClick={toggleExpansion}
-                className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center mt-2"
+                className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center mt-2 transition-colors duration-200 ease-in-out"
               >
                 {isExpanded ? (
                   <>
@@ -118,7 +118,7 @@ const highlightColors = [
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={(event) => onAddToCart(item, event)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors flex items-center space-x-2"
+              className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors duration-200 ease-in-out flex items-center space-x-2"
             >
               <ShoppingBag size={16} />
               <span>Add to Cart</span>
@@ -155,17 +155,19 @@ const highlightColors = [
     }, [onAddToCart]);
   
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white leading-tight">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-[3em] sm:pb-28"> {/* Added bottom padding */}
+        <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white leading-tight tracking-tight">
           {conversation.query}
-        </h2>
-        <div className="text-base sm:text-lg mb-8 text-gray-700 dark:text-gray-300 leading-relaxed">
+        </h1>
+        <div className="text-base sm:text-lg mb-10 text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
           <HighlightedText text={conversation.response} items={items} scrollToItem={scrollToItem} />
         </div>
         {items.length > 0 && (
-          <div className="mt-8 sm:mt-12">
-            <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900 dark:text-white">Recommended for You</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+          <div className="mt-12 sm:mt-16">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white leading-tight tracking-tight">
+              Recommended for You
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
               {items.map((item, index) => (
                 <ItemCard 
                   key={item.id}
@@ -181,6 +183,7 @@ const highlightColors = [
       </div>
     );
   });
+  
 
 const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme }) => {
   const [activeIndex, setActiveIndex] = useState(initialIndex);
