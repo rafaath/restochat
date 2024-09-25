@@ -550,6 +550,24 @@ const MenuRecommendationSystem = () => {
       </motion.div>
     );
   };
+  const ItemCircle = ({ item, onClick }) => (
+    <div className="flex flex-col items-center">
+      <motion.div
+        className="w-16 h-16 rounded-full overflow-hidden"
+        whileHover={{ scale: 1.1 }}
+      >
+        <img
+          src={item.image_link}
+          alt={item.name_of_item}
+          className="w-full h-full object-cover rounded-full border-2 border-blue-500 cursor-pointer"
+          onClick={onClick}
+        />
+      </motion.div>
+      <p className={`text-xs mt-1 text-center w-16 truncate ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+        {item.name_of_item}
+      </p>
+    </div>
+  );
 
   const ItemModal = ({ item, isOpen, onClose }) => (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -801,24 +819,34 @@ const MenuRecommendationSystem = () => {
                         {conv.response.substring(0, 100)}...
                       </p>
                       {conv.items.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-4">
-                          {conv.items.map((item, itemIndex) => (
-                            <div key={itemIndex} className="flex flex-col items-center">
-                              <motion.img
-                                src={item.image_link}
-                                alt={item.name_of_item}
-                                className="w-16 h-16 object-cover rounded-full border-2 border-blue-500 cursor-pointer"
+                        <div className="mt-4 flex space-x-2 md:space-x-4 md:p-2 overflow-x-auto md:overflow-x-visible">
+                          {conv.items.slice(0, 3).map((item, itemIndex) => (
+                            <ItemCircle
+                              key={itemIndex}
+                              item={item}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedItemFromConversation(item);
+                              }}
+                            />
+                          ))}
+                          {conv.items.length > 3 && (
+                            <div className="flex flex-col items-center">
+                              <motion.div
+                                className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold cursor-pointer"
                                 whileHover={{ scale: 1.1 }}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setSelectedItemFromConversation(item);
+                                  openStory(index);
                                 }}
-                              />
-                              <p className={`text-xs mt-1 text-center ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                                {item.name_of_item.length > 20 ? `${item.name_of_item.substring(0, 20)}...` : item.name_of_item}
+                              >
+                                +{conv.items.length - 3}
+                              </motion.div>
+                              <p className={`text-xs mt-1 text-center w-16 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                                More
                               </p>
                             </div>
-                          ))}
+                          )}
                         </div>
                       )}
                     </motion.div>
@@ -830,7 +858,6 @@ const MenuRecommendationSystem = () => {
           <div ref={conversationEndRef} />
         </div>
       </main>
-
   
           <footer className={`flex-shrink-0 z-50 ${
             theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
