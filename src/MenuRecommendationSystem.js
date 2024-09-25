@@ -648,7 +648,26 @@ const MenuRecommendationSystem = () => {
       ease: "easeInOut"
     }
   };
+  const inspireControls = useAnimation();
+  useEffect(() => {
+    const animateInspire = async () => {
+      while (true) {
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Wait for 3 seconds
+        if (!isPromptsExpanded) {
+          await inspireControls.start({
+            y: [0, -6, 0],
+            transition: {
+              duration: 0.6,
+              times: [0, 0.4, 1],
+              ease: [0.34, 1.56, 0.64, 1], // Custom spring-like easing
+            }
+          });
+        }
+      }
+    };
 
+    animateInspire();
+  }, [inspireControls, isPromptsExpanded]);
   const NavButton = React.useMemo(() => {
     return ({ icon: Icon, text, onClick, isActive, badge = null }) => (
       <motion.button
@@ -670,7 +689,7 @@ const MenuRecommendationSystem = () => {
           animate={text === "Inspire" 
             ? isPromptsExpanded 
               ? { rotate: 180 } 
-              : bounceAnimation
+              : inspireControls
             : {}
           }
           transition={{ duration: 0.3 }}
@@ -689,7 +708,7 @@ const MenuRecommendationSystem = () => {
         <span className="text-xs font-medium">{text}</span>
       </motion.button>
     );
-  }, [theme, isPromptsExpanded]);
+  }, [theme, isPromptsExpanded, inspireControls]);
 
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
