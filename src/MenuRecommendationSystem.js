@@ -639,54 +639,58 @@ const MenuRecommendationSystem = () => {
     animateInspireButton();
   }, [isPromptsExpanded, inspireButtonControls]);
 
-  const NavButton = ({ icon: Icon, text, onClick, isActive, isAnimated = false, badge = null }) => (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={onClick}
-      className={`flex flex-col items-center justify-center space-y-1 transition-colors duration-300 w-20 relative ${
-        isActive
-          ? theme === 'light'
-            ? 'text-blue-600'
-            : 'text-blue-400'
-          : theme === 'light'
-          ? 'text-gray-600 hover:text-gray-800'
-          : 'text-gray-400 hover:text-white'
-      }`}
-      animate={text === "Inspire" ? inspireButtonControls : undefined}
-    >
-      <div className="relative">
-        <Icon size={24} />
-        {badge !== null && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
-          >
-            {badge}
-          </motion.div>
-        )}
-      </div>
-      <div className="h-4 flex items-center justify-center">
-        {isAnimated ? (
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={text}
-              className="text-xs font-medium"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2 }}
+  const bounceAnimation = {
+    y: [0, -4, 0],
+    transition: {
+      duration: 1.0,
+      repeat: Infinity,
+      repeatType: "reverse",
+      ease: "easeInOut"
+    }
+  };
+
+  const NavButton = React.useMemo(() => {
+    return ({ icon: Icon, text, onClick, isActive, badge = null }) => (
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onClick}
+        className={`flex flex-col items-center justify-center space-y-1 transition-colors duration-300 w-20 relative ${
+          isActive
+            ? theme === 'light'
+              ? 'text-blue-600'
+              : 'text-blue-400'
+            : theme === 'light'
+            ? 'text-gray-600 hover:text-gray-800'
+            : 'text-gray-400 hover:text-white'
+        }`}
+      >
+        <motion.div 
+          className="relative"
+          animate={text === "Inspire" 
+            ? isPromptsExpanded 
+              ? { rotate: 180 } 
+              : bounceAnimation
+            : {}
+          }
+          transition={{ duration: 0.3 }}
+        >
+          <Icon size={24} />
+          {badge !== null && (
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
             >
-              {text}
-            </motion.span>
-          </AnimatePresence>
-        ) : (
-          <span className="text-xs font-medium">{text}</span>
-        )}
-      </div>
-    </motion.button>
-  );
+              {badge}
+            </motion.div>
+          )}
+        </motion.div>
+        <span className="text-xs font-medium">{text}</span>
+      </motion.button>
+    );
+  }, [theme, isPromptsExpanded]);
+
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (

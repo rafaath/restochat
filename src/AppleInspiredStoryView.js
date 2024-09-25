@@ -210,7 +210,7 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
               </motion.div>
             </div>
             <motion.div 
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-white dark:bg-gray-800 rounded-full shadow-lg px-4 py-2"
+              className="absolute bottom-3 right-3 flex items-center space-x-4 bg-white dark:bg-gray-800 rounded-full shadow-lg px-4 py-2"
               initial={{ y: 100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, type: "spring", damping: 20, stiffness: 300 }}
