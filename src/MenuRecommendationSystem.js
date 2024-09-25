@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./components/ui/alert-dialog";
-
+import AppleInspiredStoryView from './AppleInspiredStoryView';
 import WelcomeScreen from './WelcomeScreen';
 import EmptyState from './EmptyState';
 import IsolatedMenu from './IsolatedMenu';
@@ -618,7 +618,7 @@ const MenuRecommendationSystem = () => {
   useEffect(() => {
     const animateInspireButton = async () => {
       while (true) {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for 10 seconds
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 10 seconds
         if (!isPromptsExpanded) {
           await inspireButtonControls.start({
             y: [0, -10, 0],
@@ -859,19 +859,15 @@ const MenuRecommendationSystem = () => {
         </>
       )}
   
-      <AnimatePresence>
-        {isStoryOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
-            onClick={closeStory}
-          >
-            {/* Story content */}
-          </motion.div>
-        )}
-      </AnimatePresence>
+  <AppleInspiredStoryView
+  isOpen={isStoryOpen}
+  onClose={closeStory}
+  conversations={conversations}
+  initialIndex={activeStoryIndex}
+  addToCart={addToCart}
+  theme={theme}
+  // userName={"John"}
+/>
   
       <AnimatePresence>
         {isMenuOpen && (
