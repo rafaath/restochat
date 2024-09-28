@@ -102,9 +102,34 @@ const MenuRecommendationSystem = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [suggestivePrompts, setSuggestivePrompts] = useState([
-    { icon: Coffee, text: "Craft a perfect breakfast" },
-    { icon: Pizza, text: "Discover our spiciest dish" },
-    { icon: Cake, text: "Surprise me with a culinary delight" },
+    { emoji: "☕", text: "Craft a perfect breakfast" },
+    { emoji: "🍕", text: "Discover our spiciest dish" },
+    { emoji: "🍰", text: "Surprise me with a culinary delight" },
+    { "emoji": "☕", "text": "Start your day with a delightful breakfast" },
+    { "emoji": "🍽", "text": "Discover a dish that will surprise you" },
+    { "emoji": "🍷", "text": "Elevate your dining experience" },
+    { "emoji": "🍽", "text": "Find your next favorite meal" },
+    { "emoji": "🥘", "text": "Savor the chef’s best creation" },
+    { "emoji": "🍴", "text": "Enjoy a top-rated culinary delight" },
+    { "emoji": "🥂", "text": "Indulge in something special" },
+    { "emoji": "🍲", "text": "Discover what everyone’s talking about" },
+    { "emoji": "🍽", "text": "Treat yourself to a must-try dish" },
+    { "emoji": "🍴", "text": "Explore the most loved menu items" },
+    { "emoji": "🍷", "text": "Experience fine dining in every bite" },
+    { "emoji": "🍽", "text": "Discover a dish crafted just for you" },
+    { "emoji": "🥂", "text": "Celebrate with a signature dish" },
+    { "emoji": "🥘", "text": "Find the dish that defines us" },
+    { "emoji": "🍽", "text": "Taste a meal that’s made to impress" },
+    { "emoji": "🍷", "text": "Uncover the hidden gems on our menu" },
+    { "emoji": "🥘", "text": "Dine like a local favorite" },
+    { "emoji": "🍽", "text": "Discover the art of culinary perfection" },
+    { "emoji": "🍴", "text": "Let us recommend something you’ll love" },
+    { "emoji": "🍲", "text": "Explore our top-rated selections" },
+    { "emoji": "🍽", "text": "Taste the essence of our kitchen" },
+    { "emoji": "🍷", "text": "Satisfy your cravings with something special" },
+    { "emoji": "🥘", "text": "Find a dish you’ll come back for" },
+    { "emoji": "🍽", "text": "Indulge in an unforgettable dining experience" },
+    { "emoji": "🥂", "text": "Discover a crowd-pleaser loved by all" }
   ]);
   const [isPromptsExpanded, setIsPromptsExpanded] = useState(false);
   const searchInputRef = useRef(null);
@@ -135,9 +160,61 @@ const MenuRecommendationSystem = () => {
 
   const mainContentRef = useRef(null);
 
+
+  const [displayedPrompts, setDisplayedPrompts] = useState([]);
+
+  // Assume this is your full list of prompts
+  const allPrompts = [
+    { emoji: "☕", text: "Craft a perfect breakfast" },
+    { emoji: "🍕", text: "Discover our spiciest dish" },
+    { emoji: "🍰", text: "Surprise me with a culinary delight" },
+    { emoji: "🍣", text: "Find the best sushi combo" },
+    { emoji: "🥗", text: "Suggest a healthy lunch" },
+    { emoji: "🍝", text: "Recommend an Italian classic" },
+    { emoji: "🌮", text: "Spice up my day with Mexican" },
+    { emoji: "🍜", text: "What's your best noodle dish?" },
+    { emoji: "🥩", text: "I'm in the mood for steak" },
+    { emoji: "🍷", text: "Pair a wine with my meal" },
+    { emoji: "🍦", text: "What's the dessert of the day?" },
+    { emoji: "🍳", text: "Best brunch options" },
+    { emoji: "🍔", text: "Gourmet burger recommendations" },
+    { emoji: "🥪", text: "Quick sandwich ideas" },
+    { emoji: "🍱", text: "Bento box suggestions" }
+  ];
+
+  const shuffleArray = (array) => {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+  };
+
+  useEffect(() => {
+    const selectRandomPrompts = () => {
+      const shuffled = shuffleArray([...allPrompts]);
+      setDisplayedPrompts(shuffled.slice(0, 10));
+    };
+
+    selectRandomPrompts();
+  }, []);
+
   // const [selectedItem, setSelectedItem] = useState(null);
 
   const [menuItems, setMenuItems] = useState([]);
+
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const promptsContainerRef = useRef(null);
+
+  const handleScroll = (direction) => {
+    const container = promptsContainerRef.current;
+    if (container) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     // Load menu items from the JSON file
@@ -649,19 +726,22 @@ const MenuRecommendationSystem = () => {
     setIsModalOpen(true);
   };
 
-  const PromptButton = ({ icon: Icon, text }) => (
+  // const promptsContainerRef = useRef(null);
+
+  const PromptButton = ({ emoji, text }) => (
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => handleSuggestivePrompt(text)}
-      className={`px-4 py-2 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-2 group text-sm ${
+      className={`px-2 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-1 group text-xs flex-shrink-0 ${
         theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
       }`}
     >
-      <Icon size={16} className="group-hover:animate-bounce text-blue-500" />
+      <span className="text-sm group-hover:animate-bounce">{emoji}</span>
       <span className="truncate">{text}</span>
     </motion.button>
   );
+  
 
   const inspireButtonControls = useAnimation();
 
@@ -867,77 +947,88 @@ const MenuRecommendationSystem = () => {
         </div>
       </main>
   
-          <footer className={`flex-shrink-0 z-50 ${
-            theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
-          } backdrop-blur-md`}>
-            <div className="max-w-4xl mx-auto p-4 space-y-4">
-              <motion.div
-                initial={false}
-                animate={{ height: isPromptsExpanded ? 'auto' : '0' }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                className="overflow-hidden"
+      <footer className={`flex-shrink-0 z-50 ${
+        theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
+      } backdrop-blur-md`}>
+        <div className="max-w-4xl mx-auto p-4 space-y-2">
+          <motion.div
+            initial={false}
+            animate={{ height: isPromptsExpanded ? 'auto' : '0' }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <motion.div 
+              ref={promptsContainerRef}
+              className="flex items-center gap-2 mb-2 overflow-x-auto scrollbar-hide"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              {displayedPrompts.map((prompt, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+
+                  <PromptButton emoji={prompt.emoji} text={prompt.text} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          <form onSubmit={handleSearch} className="relative">
+            <input
+              type="text"
+              ref={searchInputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="What are you craving today?"
+              className={`w-full p-3 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-sm ${
+                theme === 'light' 
+                  ? 'bg-gray-100 text-gray-800 placeholder-gray-500' 
+                  : 'bg-gray-800 text-white placeholder-gray-400'
+              }`}
+            />
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                type="button"
+                onClick={handleVoiceInput}
+                className={`p-1.5 rounded-full ${
+                  isListening 
+                    ? 'bg-red-500 text-white' 
+                    : theme === 'light' ? 'bg-gray-200 text-gray-600' : 'bg-gray-700 text-gray-300'
+                } hover:bg-opacity-80 transition-colors`}
               >
-                <div className="flex flex-wrap justify-center gap-2 mb-4">
-                  <AnimatePresence>
-                    {suggestivePrompts.map((prompt, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <PromptButton icon={prompt.icon} text={prompt.text} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  ref={searchInputRef}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="What are you craving today?"
-                  className={`w-full p-4 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-base ${
-                    theme === 'light' 
-                      ? 'bg-gray-100 text-gray-800 placeholder-gray-500' 
-                      : 'bg-gray-800 text-white placeholder-gray-400'
-                  }`}
-                />
-                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    type="button"
-                    onClick={handleVoiceInput}
-                    className={`p-2 rounded-full ${
-                      isListening 
-                        ? 'bg-red-500 text-white' 
-                        : theme === 'light' ? 'bg-gray-200 text-gray-600' : 'bg-gray-700 text-gray-300'
-                    } hover:bg-opacity-80 transition-colors`}
-                  >
-                    <Mic size={20} />
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    type="submit"
-                    className="p-2 bg-blue-500 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-300"
-                  >
-                    <Send size={20} />
-                  </motion.button>
-                </div>
-              </form>
-              <nav className="flex justify-around items-center py-2 border-gray-200 dark:border-gray-700">
+                <Mic size={16} />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                type="submit"
+                className="p-1.5 bg-blue-500 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+              >
+                <Send size={16} />
+              </motion.button>
+            </div>
+          </form>
+
+          <nav className="flex justify-around items-center py-1 border-gray-200 dark:border-gray-700">
             <NavButton icon={Menu} text="Menu" onClick={toggleMenu} isActive={isMenuOpen} />
             <NavButton
               icon={isPromptsExpanded ? ChevronDown : ChevronUp}
               text={isPromptsExpanded ? "Hide" : "Inspire"}
               onClick={() => setIsPromptsExpanded(!isPromptsExpanded)}
               isActive={isPromptsExpanded}
-              isAnimated={true}
             />
             <NavButton 
               icon={ShoppingCart} 
@@ -947,8 +1038,8 @@ const MenuRecommendationSystem = () => {
               badge={cartItemCount > 0 ? cartItemCount : null}
             />
           </nav>
-            </div>
-          </footer>
+        </div>
+      </footer>
         </>
       )}
   
