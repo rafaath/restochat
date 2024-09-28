@@ -795,7 +795,11 @@ const MenuRecommendationSystem = () => {
       >
         <div className="w-full max-w-4xl mx-auto">
           {conversations.length === 0 ? (
-            <EmptyState theme={theme} onItemClick={handleItemClick} />
+            <EmptyState 
+              theme={theme} 
+              onItemClick={handleItemClick} 
+              addToCart={addToCart}
+            />
           ) : (
             <div className="space-y-4">
               <AnimatePresence>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ShoppingBag } from 'lucide-react';
+import { Star, ShoppingBag, Check } from 'lucide-react';
 import Lottie from 'lottie-react';
 import animationData from './animation.json';
 
@@ -49,7 +49,56 @@ const LottieAnimation = ({
   );
 };
 
-const EmptyState = ({ theme, onItemClick }) => {
+const AnimatedAddToCartButton = ({ onClick, theme }) => {
+  const [isAdded, setIsAdded] = useState(false);
+
+  const handleClick = useCallback(() => {
+    setIsAdded(true);
+    onClick();
+    setTimeout(() => setIsAdded(false), 1500);
+  }, [onClick]);
+
+  return (
+    <motion.button
+      onClick={handleClick}
+      className={`px-2 py-1 rounded-full text-xs font-medium flex items-center justify-center w-28 h-8 ${
+        isAdded
+          ? 'bg-green-500 text-white'
+          : `bg-blue-600 text-white hover:bg-blue-700`
+      } transition-colors duration-300`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <AnimatePresence mode="wait">
+        {isAdded ? (
+          <motion.div
+            key="check"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="flex items-center"
+          >
+            <Check size={14} className="mr-1" />
+            <span className="whitespace-nowrap">Added</span>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="add"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            className="flex items-center"
+          >
+            <ShoppingBag size={14} className="mr-1" />
+            <span className="whitespace-nowrap">Add to Cart</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+};
+
+const EmptyState = ({ theme, onItemClick, addToCart }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const carouselRef = useRef(null);
@@ -63,16 +112,27 @@ const EmptyState = ({ theme, onItemClick }) => {
     });
   }, []);
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (carouselRef.current) {
       const position = carouselRef.current.scrollLeft / (carouselRef.current.scrollWidth - carouselRef.current.clientWidth);
       setScrollPosition(position);
     }
-  };
+  }, []);
 
   const headingGradient = theme === 'light'
     ? 'from-blue-600 to-indigo-500'
     : 'from-blue-400 to-indigo-300';
+
+    // const headingGradient = theme === 'light'
+    // ? 'from-blue-600 to-indigo-500'
+    // : 'from-blue-400 to-indigo-300';
+
+  const handleCardClick = useCallback((item, event) => {
+    // Prevent opening the modal if the click was on the "Add to Cart" button
+    if (!event.target.closest('.add-to-cart-button')) {
+      onItemClick(item);
+    }
+  }, [onItemClick]);
 
   return (
     <div className={`h-full flex flex-col p-2 space-y-1`}>
@@ -109,7 +169,7 @@ const EmptyState = ({ theme, onItemClick }) => {
             {topRatedItems.map((item, index) => (
               <motion.div
                 key={item.name_of_item}
-                className={`flex-shrink-0 w-48 h-60 rounded-xl overflow-hidden shadow-md ${
+                className={`flex-shrink-0 w-48 h-60 rounded-xl overflow-hidden shadow-md cursor-pointer ${
                   theme === 'light' ? 'bg-white' : 'bg-gray-800'
                 }`}
                 initial={{ opacity: 0, scale: 0.9, x: 20 }}
@@ -117,7 +177,7 @@ const EmptyState = ({ theme, onItemClick }) => {
                 exit={{ opacity: 0, scale: 0.9, x: -20 }}
                 transition={{ delay: 0.05 * index, duration: 0.3 }}
                 whileHover={{ y: -3, boxShadow: '0px 3px 10px rgba(0,0,0,0.1)' }}
-                onClick={() => onItemClick(item)}
+                onClick={(event) => handleCardClick(item, event)}
               >
                 <div className="relative h-28">
                   <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />
@@ -140,14 +200,12 @@ const EmptyState = ({ theme, onItemClick }) => {
                     <span className={`text-sm font-bold ${theme === 'light' ? 'text-blue-600' : 'text-blue-400'}`}>
                       ₹{item.cost.toFixed(0)}
                     </span>
-                    <motion.button 
-                      className="px-2 py-1 bg-blue-600 text-white rounded-full text-xs font-medium flex items-center"
-                      whileHover={{ scale: 1.05, backgroundColor: '#4F46E5' }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <ShoppingBag size={12} className="mr-1" />
-                      Add to Cart
-                    </motion.button>
+                    <div className="add-to-cart-button" onClick={(e) => e.stopPropagation()}>
+                      <AnimatedAddToCartButton
+                        onClick={() => addToCart(item)}
+                        theme={theme} 
+                      />
+                    </div>
                   </div>
                 </div>
               </motion.div>
