@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation, LayoutGroup } from 'framer-motion';
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Trash2, AlertCircle
+  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import {
   Dialog,
@@ -31,6 +31,7 @@ import IsolatedMenu from './IsolatedMenu';
 import IsolatedCart from './IsolatedCart';
 import ItemModal from './ItemModal';  // Make sure the path is correct
 import fullMenuData from './full_menu.json';
+import prompts from './prompts.json';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -164,24 +165,7 @@ const MenuRecommendationSystem = () => {
   const [displayedPrompts, setDisplayedPrompts] = useState([]);
 
   // Assume this is your full list of prompts
-  const allPrompts = [
-    { emoji: "☕", text: "Craft a perfect breakfast" },
-    { emoji: "🍕", text: "Discover our spiciest dish" },
-    { emoji: "🍰", text: "Surprise me with a culinary delight" },
-    { emoji: "🍣", text: "Find the best sushi combo" },
-    { emoji: "🥗", text: "Suggest a healthy lunch" },
-    { emoji: "🍝", text: "Recommend an Italian classic" },
-    { emoji: "🌮", text: "Spice up my day with Mexican" },
-    { emoji: "🍜", text: "What's your best noodle dish?" },
-    { emoji: "🥩", text: "I'm in the mood for steak" },
-    { emoji: "🍷", text: "Pair a wine with my meal" },
-    { emoji: "🍦", text: "What's the dessert of the day?" },
-    { emoji: "🍳", text: "Best brunch options" },
-    { emoji: "🍔", text: "Gourmet burger recommendations" },
-    { emoji: "🥪", text: "Quick sandwich ideas" },
-    { emoji: "🍱", text: "Bento box suggestions" }
-  ];
-
+  const allPrompts = prompts;
   const shuffleArray = (array) => {
     let currentIndex = array.length, randomIndex;
     while (currentIndex !== 0) {
@@ -726,10 +710,44 @@ const MenuRecommendationSystem = () => {
     setIsModalOpen(true);
   };
 
+  // const [displayedPrompts, setDisplayedPrompts] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // const promptsContainerRef = useRef(null);
+
+  const selectRandomPrompts = useCallback(() => {
+    const shuffled = shuffleArray([...allPrompts]);
+    return shuffled.slice(0, 10);
+  }, []);
+
+  useEffect(() => {
+    setDisplayedPrompts(selectRandomPrompts());
+  }, [selectRandomPrompts]);
+
+  const handleRefreshPrompts = async () => {
+    setIsRefreshing(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const newPrompts = selectRandomPrompts();
+    setDisplayedPrompts(newPrompts);
+    
+    setIsRefreshing(false);
+    
+    // Scroll to the beginning after a short delay to allow for render
+    setTimeout(() => {
+      if (promptsContainerRef.current) {
+        promptsContainerRef.current.scrollTo({
+          left: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  };
 
   const PromptButton = ({ emoji, text }) => (
     <motion.button
+      layout
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => handleSuggestivePrompt(text)}
@@ -741,7 +759,26 @@ const MenuRecommendationSystem = () => {
       <span className="truncate">{text}</span>
     </motion.button>
   );
-  
+
+  const RefreshButton = () => (
+    <motion.button
+      layout
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={handleRefreshPrompts}
+      disabled={isRefreshing}
+      className={`p-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 ${
+        theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
+      } ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      <motion.div
+        animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
+        transition={{ duration: 0.5, repeat: isRefreshing ? Infinity : 0, ease: "linear" }}
+      >
+        {isRefreshing ? <Loader size={16} /> : <RefreshCw size={16} />}
+      </motion.div>
+    </motion.button>
+  );
 
   const inspireButtonControls = useAnimation();
 
@@ -957,31 +994,46 @@ const MenuRecommendationSystem = () => {
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
-            <motion.div 
-              ref={promptsContainerRef}
-              className="flex items-center gap-2 mb-2 overflow-x-auto scrollbar-hide"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
-              {displayedPrompts.map((prompt, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-
-                  <PromptButton emoji={prompt.emoji} text={prompt.text} />
-                </motion.div>
-              ))}
-            </motion.div>
+            <LayoutGroup>
+              <motion.div 
+                ref={promptsContainerRef}
+                className="flex items-center gap-2 py-2 overflow-x-auto scrollbar-hide h-7"
+                layout
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                {isRefreshing ? (
+                  <motion.div
+                    key="loading"
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex items-center space-x-2 px-2 py-1 rounded-full bg-blue-500 text-white"
+                  >
+                    <Loader size={16} className="animate-spin" />
+                    <span className="text-xs">Refreshing prompts...</span>
+                  </motion.div>
+                ) : (
+                  displayedPrompts.map((prompt, index) => (
+                    <motion.div
+                      key={prompt.text}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                    >
+                      <PromptButton emoji={prompt.emoji} text={prompt.text} />
+                    </motion.div>
+                  ))
+                )}
+                <RefreshButton />
+              </motion.div>
+            </LayoutGroup>
           </motion.div>
 
           <form onSubmit={handleSearch} className="relative">
