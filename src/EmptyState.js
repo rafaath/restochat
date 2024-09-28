@@ -49,7 +49,7 @@ const LottieAnimation = ({
   );
 };
 
-const EmptyState = ({ theme }) => {
+const EmptyState = ({ theme, onItemClick }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const carouselRef = useRef(null);
@@ -117,6 +117,7 @@ const EmptyState = ({ theme }) => {
                 exit={{ opacity: 0, scale: 0.9, x: -20 }}
                 transition={{ delay: 0.05 * index, duration: 0.3 }}
                 whileHover={{ y: -3, boxShadow: '0px 3px 10px rgba(0,0,0,0.1)' }}
+                onClick={() => onItemClick(item)}
               >
                 <div className="relative h-28">
                   <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />

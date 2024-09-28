@@ -135,7 +135,7 @@ const MenuRecommendationSystem = () => {
 
   const mainContentRef = useRef(null);
 
-
+  // const [selectedItem, setSelectedItem] = useState(null);
 
   const [menuItems, setMenuItems] = useState([]);
 
@@ -145,11 +145,6 @@ const MenuRecommendationSystem = () => {
     console.log("fullMenuData:", fullMenuData);
     setMenuItems(fullMenuData || []);
   }, []);
-
-
-
-
-
 
 
 
@@ -800,7 +795,7 @@ const MenuRecommendationSystem = () => {
       >
         <div className="w-full max-w-4xl mx-auto">
           {conversations.length === 0 ? (
-            <EmptyState theme={theme} />
+            <EmptyState theme={theme} onItemClick={handleItemClick} />
           ) : (
             <div className="space-y-4">
               <AnimatePresence>
