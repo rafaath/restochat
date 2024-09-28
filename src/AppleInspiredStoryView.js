@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -82,11 +82,22 @@ const highlightColors = [
           >
             <Heart size={20} className="text-red-500" />
           </motion.button>
+          <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-semibold ${
+            item.veg_or_non_veg === 'veg' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+          }`}>
+            {item.veg_or_non_veg === 'veg' ? 'Veg' : 'Non-Veg'}
+          </div>
         </div>
         <div className="p-4 sm:p-6 flex flex-col flex-grow">
           <h4 className="text-lg sm:text-xl font-semibold mb-2 text-gray-900 dark:text-white leading-tight">
             {item.name_of_item}
           </h4>
+          <div className="flex items-center mb-2">
+            <Star className="text-yellow-400 mr-1" size={16} />
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {item.rating.toFixed(1)} ({item.number_of_people_rated} ratings)
+            </span>
+          </div>
           <div className="relative flex-grow">
             <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
               {item.description}

@@ -71,6 +71,11 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
           >
             <X size={20} />
           </button>
+          <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-semibold ${
+            item.veg_or_non_veg === 'veg' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+          }`}>
+            {item.veg_or_non_veg === 'veg' ? 'Veg' : 'Non-Veg'}
+          </div>
         </div>
         <div className="p-4 sm:p-6">
           <h3 className={`text-xl sm:text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
@@ -79,7 +84,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
           <div className="flex items-center mb-2 sm:mb-4">
             <Star className="text-yellow-400 mr-1" size={16} />
             <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-              4.5 (120 reviews)
+              {item.rating.toFixed(1)} ({item.number_of_people_rated} ratings)
             </span>
           </div>
           <p className={`mb-4 text-sm sm:text-base ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>

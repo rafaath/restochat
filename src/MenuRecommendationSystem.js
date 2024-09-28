@@ -30,7 +30,7 @@ import EmptyState from './EmptyState';
 import IsolatedMenu from './IsolatedMenu';
 import IsolatedCart from './IsolatedCart';
 import ItemModal from './ItemModal';  // Make sure the path is correct
-import menuItemsData from './full_menu.json';
+import fullMenuData from './full_menu.json';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -135,6 +135,24 @@ const MenuRecommendationSystem = () => {
 
   const mainContentRef = useRef(null);
 
+
+
+  const [menuItems, setMenuItems] = useState([]);
+
+  useEffect(() => {
+    // Load menu items from the JSON file
+    console.log("Loading menu items...");
+    console.log("fullMenuData:", fullMenuData);
+    setMenuItems(fullMenuData || []);
+  }, []);
+
+
+
+
+
+
+
+
   useEffect(() => {
     if (conversations.length > 0 && mainContentRef.current) {
       mainContentRef.current.scrollTop = mainContentRef.current.scrollHeight;
@@ -175,12 +193,12 @@ const MenuRecommendationSystem = () => {
 
 
 
-  const [menuItems, setMenuItems] = useState([]);
+  // const [menuItems, setMenuItems] = useState(null);
 
-  useEffect(() => {
-    // Load menu items from the JSON file
-    setMenuItems(menuItemsData);
-  }, []);
+  // useEffect(() => {
+  //   // Load menu items from the JSON file
+  //   setMenuItems(menuItemsData);
+  // }, []);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMenuItems, setFilteredMenuItems] = useState([]);
@@ -945,7 +963,7 @@ const MenuRecommendationSystem = () => {
   // userName={"John"}
 />
   
-      <AnimatePresence>
+<AnimatePresence>
         {isMenuOpen && (
           <IsolatedMenu
             isOpen={isMenuOpen}
