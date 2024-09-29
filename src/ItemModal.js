@@ -84,7 +84,8 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
           <div className="flex items-center mb-2 sm:mb-4">
             <Star className="text-yellow-400 mr-1" size={16} />
             <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-              {item.rating.toFixed(1)} ({item.number_of_people_rated} ratings)
+              {/* {item.rating.toFixed(1)} ({item.number_of_people_rated} ratings) */}
+              {item.rating != null ? item.rating.toFixed(1) : 'N/A'} ({item.number_of_people_rated || 0} ratings)
             </span>
           </div>
           <p className={`mb-4 text-sm sm:text-base ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
@@ -92,7 +93,8 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
           </p>
           <div className="flex justify-between items-center mb-4 sm:mb-6">
             <p className="text-xl sm:text-2xl font-bold text-blue-600">
-              ₹{item.cost.toFixed(2)}
+              {/* ₹{item.cost.toFixed(2)} */}
+              ₹{item.cost != null ? item.cost.toFixed(2) : 'N/A'}
             </p>
             <div className="flex items-center">
               <button 
