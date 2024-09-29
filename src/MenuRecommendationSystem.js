@@ -751,7 +751,7 @@ const MenuRecommendationSystem = () => {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={() => handleSuggestivePrompt(text)}
-      className={`px-2 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-1 group text-xs flex-shrink-0 ${
+      className={`px-2 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-1 group text-xs flex-shrink-0 h-6 ${
         theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
       }`}
     >
@@ -987,8 +987,72 @@ const MenuRecommendationSystem = () => {
       <footer className={`flex-shrink-0 z-50 ${
         theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
       } backdrop-blur-md`}>
+        <AnimatePresence>
+          {isPromptsExpanded && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className={`absolute bottom-[calc(100%_-_1rem)] left-0 right-0 py-1 ${
+                theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
+              } backdrop-blur-md`}
+            >
+              <LayoutGroup>
+                <motion.div 
+                  ref={promptsContainerRef}
+                  className="flex items-center gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide h-8 px-4"
+                  layout
+                  style={{
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                    WebkitOverflowScrolling: 'touch',
+                  }}
+                >
+                  <div className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r pointer-events-none z-10 ${
+                    theme === 'light'
+                      ? 'from-white to-transparent'
+                      : 'from-gray-900 to-transparent'
+                  }`} />
+                  {isRefreshing ? (
+                    <motion.div
+                      key="loading"
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center space-x-2 px-2 py-1 rounded-full bg-blue-500 text-white w-full"
+                    >
+                      <Loader size={16} className="animate-spin" />
+                      <span className="text-xs">Refreshing prompts...</span>
+                    </motion.div>
+                  ) : (
+                    displayedPrompts.map((prompt, index) => (
+                      <motion.div
+                        key={prompt.text}
+                        layout
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2, delay: index * 0.05 }}
+                      >
+                        <PromptButton emoji={prompt.emoji} text={prompt.text} />
+                      </motion.div>
+                    ))
+                  )}
+                   <div className={`absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l pointer-events-none z-10 ${
+                    theme === 'light'
+                      ? 'from-white to-transparent'
+                      : 'from-gray-900 to-transparent'
+                  }`} />
+                  <RefreshButton />
+                </motion.div>
+              </LayoutGroup>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div className="max-w-4xl mx-auto p-4 space-y-2">
-          <motion.div
+          {/* <motion.div
             initial={false}
             animate={{ height: isPromptsExpanded ? 'auto' : '0' }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
@@ -997,7 +1061,7 @@ const MenuRecommendationSystem = () => {
             <LayoutGroup>
               <motion.div 
                 ref={promptsContainerRef}
-                className="flex items-center gap-2 py-2 overflow-x-auto scrollbar-hide h-7"
+                className="flex items-center gap-2 overflow-x-auto overflow-y-hidden scrollbar-hide h-8"
                 layout
                 style={{
                   scrollbarWidth: 'none',
@@ -1005,6 +1069,7 @@ const MenuRecommendationSystem = () => {
                   WebkitOverflowScrolling: 'touch',
                 }}
               >
+                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
                 {isRefreshing ? (
                   <motion.div
                     key="loading"
@@ -1012,7 +1077,7 @@ const MenuRecommendationSystem = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex items-center space-x-2 px-2 py-1 rounded-full bg-blue-500 text-white"
+                    className="flex items-center space-x-2 px-2 py-1 rounded-full bg-blue-500 text-white w-full"
                   >
                     <Loader size={16} className="animate-spin" />
                     <span className="text-xs">Refreshing prompts...</span>
@@ -1031,10 +1096,11 @@ const MenuRecommendationSystem = () => {
                     </motion.div>
                   ))
                 )}
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
                 <RefreshButton />
               </motion.div>
             </LayoutGroup>
-          </motion.div>
+          </motion.div> */}
 
           <form onSubmit={handleSearch} className="relative">
             <input
