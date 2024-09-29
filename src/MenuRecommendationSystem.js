@@ -95,6 +95,7 @@ const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
 
 
 const MenuRecommendationSystem = () => {
+  const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -405,30 +406,31 @@ const MenuRecommendationSystem = () => {
 
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
-    if (!query.trim()) return;
-  
+    const searchQuery = query.trim();
+    if (!searchQuery) return;
+
     setIsLoading(true);
-    const newConversation = { query, response: 'Waiting for response...', items: [] };
+    const newConversation = { query: searchQuery, response: 'Waiting for response...', items: [] };
     setConversations(prev => [...prev, newConversation]);
-  
+
     const pollInterval = 10000; // 10 seconds
     const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
     let attempts = 0;
-  
+
     const pollForResponse = async () => {
       try {
-        let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(query)}`;
+        let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}`;
         if (chatId) {
           url += `&chat_id=${chatId}`;
         }
-  
+
         const response = await fetch(url);
         const data = await response.json();
-  
+
         if (!chatId && data.chat_id) {
           setChatId(data.chat_id);
         }
-  
+
         if (data.status === 'processing') {
           attempts++;
           if (attempts >= maxAttempts) {
@@ -464,12 +466,13 @@ const MenuRecommendationSystem = () => {
         setIsLoading(false);
       }
     };
-  
+
     pollForResponse();
-  
+
     setQuery('');
+    setSelectedPrompt(null);
     setIsPromptsExpanded(false);
-  }, [query, chatId]);
+  }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
 
 
 
@@ -477,8 +480,8 @@ const MenuRecommendationSystem = () => {
 
   const handleSuggestivePrompt = useCallback((promptText) => {
     setQuery(promptText);
-    handleSearch({ preventDefault: () => {} });
-  }, [handleSearch]);
+    setSelectedPrompt(promptText);
+  }, []);
 
   const toggleTheme = () => setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
 
@@ -745,20 +748,66 @@ const MenuRecommendationSystem = () => {
     }, 100);
   };
 
-  const PromptButton = ({ emoji, text }) => (
-    <motion.button
-      layout
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={() => handleSuggestivePrompt(text)}
-      className={`px-2 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-1 group text-xs flex-shrink-0 h-6 ${
-        theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
-      }`}
-    >
-      <span className="text-sm group-hover:animate-bounce">{emoji}</span>
-      <span className="truncate">{text}</span>
-    </motion.button>
-  );
+  const PromptButton = ({ emoji, text }) => {
+    const isSelected = selectedPrompt === text;
+
+     // Adjust these values to control the animation scale
+     const minScale = 1;     // Minimum scale (when not selected or at the bottom of the animation)
+     const maxScale = 1;  // Maximum scale (when selected and at the peak of the animation)
+ 
+     const buttonVariants = {
+       selected: {
+         scale: [minScale, maxScale, minScale],
+         transition: {
+           duration: 1.5,
+           repeat: Infinity,
+           repeatType: "reverse",
+           ease: "easeInOut"
+         }
+       },
+       notSelected: {
+         scale: minScale
+       }
+     };
+
+    const emojiVariants = {
+      selected: {
+        y: [-2, 2],
+        transition: {
+          duration: 1,
+          repeat: Infinity,
+          repeatType: "reverse",
+          ease: "easeInOut"
+        }
+      },
+      notSelected: {
+        y: 0
+      }
+    };
+
+    return (
+      <motion.button
+        layout
+        variants={buttonVariants}
+        animate={isSelected ? "selected" : "notSelected"}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => handleSuggestivePrompt(text)}
+        className={`px-3 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-1 text-xs flex-shrink-0 h-6 ${
+          theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
+        } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+      >
+        <motion.span 
+          className="text-sm"
+          variants={emojiVariants}
+          animate={isSelected ? "selected" : "notSelected"}
+        >
+          {emoji}
+        </motion.span>
+        <span className="truncate">{text}</span>
+      </motion.button>
+    );
+  };
 
   const RefreshButton = () => (
     <motion.button
@@ -1009,42 +1058,18 @@ const MenuRecommendationSystem = () => {
                     WebkitOverflowScrolling: 'touch',
                   }}
                 >
-                  <div className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r pointer-events-none z-10 ${
-                    theme === 'light'
-                      ? 'from-white to-transparent'
-                      : 'from-gray-900 to-transparent'
-                  }`} />
-                  {isRefreshing ? (
+                  {displayedPrompts.map((prompt, index) => (
                     <motion.div
-                      key="loading"
+                      key={prompt.text}
                       layout
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="flex items-center space-x-2 px-2 py-1 rounded-full bg-blue-500 text-white w-full"
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
                     >
-                      <Loader size={16} className="animate-spin" />
-                      <span className="text-xs">Refreshing prompts...</span>
+                      <PromptButton emoji={prompt.emoji} text={prompt.text} />
                     </motion.div>
-                  ) : (
-                    displayedPrompts.map((prompt, index) => (
-                      <motion.div
-                        key={prompt.text}
-                        layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, delay: index * 0.05 }}
-                      >
-                        <PromptButton emoji={prompt.emoji} text={prompt.text} />
-                      </motion.div>
-                    ))
-                  )}
-                   <div className={`absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l pointer-events-none z-10 ${
-                    theme === 'light'
-                      ? 'from-white to-transparent'
-                      : 'from-gray-900 to-transparent'
-                  }`} />
+                  ))}
                   <RefreshButton />
                 </motion.div>
               </LayoutGroup>
@@ -1103,12 +1128,17 @@ const MenuRecommendationSystem = () => {
           </motion.div> */}
 
           <form onSubmit={handleSearch} className="relative">
-            <input
-              type="text"
-              ref={searchInputRef}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="What are you craving today?"
+          <input
+            type="text"
+            ref={searchInputRef}
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (e.target.value !== selectedPrompt) {
+                setSelectedPrompt(null);
+              }
+            }}
+            placeholder="What are you craving today?"
               className={`w-full p-3 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 text-sm ${
                 theme === 'light' 
                   ? 'bg-gray-100 text-gray-800 placeholder-gray-500' 
@@ -1116,11 +1146,11 @@ const MenuRecommendationSystem = () => {
               }`}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                type="button"
-                onClick={handleVoiceInput}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              type="button"
+              onClick={handleVoiceInput}
                 className={`p-1.5 rounded-full ${
                   isListening 
                     ? 'bg-red-500 text-white' 

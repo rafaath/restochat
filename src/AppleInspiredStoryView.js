@@ -95,14 +95,14 @@ const highlightColors = [
           <div className="flex items-center mb-2">
             <Star className="text-yellow-400 mr-1" size={16} />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              {item.rating.toFixed(1)} ({item.number_of_people_rated} ratings)
+              {item.rating != null ? item.rating.toFixed(1) : 'N/A'} ({item.number_of_people_rated || 0} ratings)
             </span>
           </div>
           <div className="relative flex-grow">
             <p className={`text-sm text-gray-600 dark:text-gray-400 leading-relaxed ${isExpanded ? '' : 'line-clamp-3'}`}>
               {item.description}
             </p>
-            {item.description.length > 150 && (
+            {item.description && item.description.length > 150 && (
               <button
                 onClick={toggleExpansion}
                 className="text-blue-500 hover:text-blue-600 text-sm font-medium flex items-center mt-2 transition-colors duration-200 ease-in-out"
@@ -124,7 +124,9 @@ const highlightColors = [
         </div>
         <div className="p-4 sm:p-6 mt-auto">
           <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-            <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">₹{item.cost.toFixed(2)}</span>
+            <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              ₹{item.cost != null ? item.cost.toFixed(2) : 'N/A'}
+            </span>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -166,34 +168,34 @@ const highlightColors = [
     }, [onAddToCart]);
   
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-[3em] sm:pb-28"> {/* Added bottom padding */}
-        <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white leading-tight tracking-tight">
-          {conversation.query}
-        </h1>
-        <div className="text-base sm:text-lg mb-10 text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
-          <HighlightedText text={conversation.response} items={items} scrollToItem={scrollToItem} />
-        </div>
-        {items.length > 0 && (
-          <div className="mt-12 sm:mt-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white leading-tight tracking-tight">
-              Recommended for You
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
-              {items.map((item, index) => (
-                <ItemCard 
-                  key={item.id}
-                  ref={el => itemRefs.current[item.id] = el}
-                  item={item} 
-                  index={index} 
-                  onAddToCart={handleAddToCart} 
-                />
-              ))}
-            </div>
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-[3em] sm:pb-28">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white leading-tight tracking-tight">
+            {conversation.query}
+          </h1>
+          <div className="text-base sm:text-lg mb-10 text-gray-700 dark:text-gray-300 leading-relaxed space-y-4">
+            <HighlightedText text={conversation.response} items={items} scrollToItem={scrollToItem} />
           </div>
-        )}
-      </div>
-    );
-  });
+          {items.length > 0 && (
+            <div className="mt-12 sm:mt-16">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-gray-900 dark:text-white leading-tight tracking-tight">
+                Recommended for You
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10">
+                {items.map((item, index) => (
+                  <ItemCard 
+                    key={item.id}
+                    ref={el => itemRefs.current[item.id] = el}
+                    item={item} 
+                    index={index} 
+                    onAddToCart={handleAddToCart} 
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    });
   
 
 const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme }) => {
@@ -298,38 +300,41 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
                 </div>
               </motion.div>
             </div>
-            <motion.div 
-              className="absolute bottom-3 right-3 flex items-center space-x-4 bg-white dark:bg-gray-800 rounded-full shadow-lg px-4 py-2"
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, type: "spring", damping: 20, stiffness: 300 }}
-            >
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handlePrev}
-                disabled={activeIndex === 0}
-                className={`p-2 text-gray-800 dark:text-white rounded-full transition-colors ${
-                  activeIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
+            
+            {conversations.length > 1 && (
+              <motion.div 
+                className="absolute bottom-3 right-3 flex items-center space-x-4 bg-white dark:bg-gray-800 rounded-full shadow-lg px-4 py-2"
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.3, type: "spring", damping: 20, stiffness: 300 }}
               >
-                <ChevronLeft size={24} />
-              </motion.button>
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {activeIndex + 1} / {conversations.length}
-              </span>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleNext}
-                disabled={activeIndex === conversations.length - 1}
-                className={`p-2 text-gray-800 dark:text-white rounded-full transition-colors ${
-                  activeIndex === conversations.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-              >
-                <ChevronRight size={24} />
-              </motion.button>
-            </motion.div>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handlePrev}
+                  disabled={activeIndex === 0}
+                  className={`p-2 text-gray-800 dark:text-white rounded-full transition-colors ${
+                    activeIndex === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <ChevronLeft size={24} />
+                </motion.button>
+                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  {activeIndex + 1} / {conversations.length}
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleNext}
+                  disabled={activeIndex === conversations.length - 1}
+                  className={`p-2 text-gray-800 dark:text-white rounded-full transition-colors ${
+                    activeIndex === conversations.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <ChevronRight size={24} />
+                </motion.button>
+              </motion.div>
+            )}
           </motion.div>
           
           <AnimatePresence>
