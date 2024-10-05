@@ -32,6 +32,7 @@ import IsolatedCart from './IsolatedCart';
 import ItemModal from './ItemModal';  // Make sure the path is correct
 import fullMenuData from './full_menu.json';
 import prompts from './prompts.json';
+import { getSimulatedResponse, useSimulatedApi } from './simulatedResponses.js';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -400,10 +401,6 @@ const MenuRecommendationSystem = () => {
   );
 
 
-
-
-
-
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
     const searchQuery = query.trim();
@@ -413,66 +410,119 @@ const MenuRecommendationSystem = () => {
     const newConversation = { query: searchQuery, response: 'Waiting for response...', items: [] };
     setConversations(prev => [...prev, newConversation]);
 
-    const pollInterval = 10000; // 10 seconds
-    const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
-    let attempts = 0;
-
-    const pollForResponse = async () => {
-      try {
+    try {
+      let data;
+      if (useSimulatedApi) {
+        data = await getSimulatedResponse(searchQuery);
+      } else {
         let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}`;
         if (chatId) {
           url += `&chat_id=${chatId}`;
         }
-
         const response = await fetch(url);
-        const data = await response.json();
-
-        if (!chatId && data.chat_id) {
-          setChatId(data.chat_id);
-        }
-
-        if (data.status === 'processing') {
-          attempts++;
-          if (attempts >= maxAttempts) {
-            throw new Error('Max attempts reached');
-          }
-          setConversations(prev => 
-            prev.map((conv, index) => 
-              index === prev.length - 1 
-                ? { ...conv, response: `Still processing... (${attempts * 10} seconds)` }
-                : conv
-            )
-          );
-          setTimeout(pollForResponse, pollInterval);
-        } else {
-          setConversations(prev => 
-            prev.map((conv, index) => 
-              index === prev.length - 1 
-                ? { ...conv, response: data.response_text, items: data.returned_items || [] }
-                : conv
-            )
-          );
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setConversations(prev => 
-          prev.map((conv, index) => 
-            index === prev.length - 1 
-              ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
-              : conv
-          )
-        );
-        setIsLoading(false);
+        data = await response.json();
       }
-    };
 
-    pollForResponse();
+      if (!chatId && data.chat_id) {
+        setChatId(data.chat_id);
+      }
+
+      setConversations(prev => 
+        prev.map((conv, index) => 
+          index === prev.length - 1 
+            ? { ...conv, response: data.response_text, items: data.returned_items || [] }
+            : conv
+        )
+      );
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setConversations(prev => 
+        prev.map((conv, index) => 
+          index === prev.length - 1 
+            ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
+            : conv
+        )
+      );
+    } finally {
+      setIsLoading(false);
+    }
 
     setQuery('');
     setSelectedPrompt(null);
     setIsPromptsExpanded(false);
   }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
+
+
+
+  // const handleSearch = useCallback(async (e) => {
+  //   e?.preventDefault();
+  //   const searchQuery = query.trim();
+  //   if (!searchQuery) return;
+
+  //   setIsLoading(true);
+  //   const newConversation = { query: searchQuery, response: 'Waiting for response...', items: [] };
+  //   setConversations(prev => [...prev, newConversation]);
+
+  //   const pollInterval = 10000; // 10 seconds
+  //   const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
+  //   let attempts = 0;
+
+  //   const pollForResponse = async () => {
+  //     try {
+  //       let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}`;
+  //       if (chatId) {
+  //         url += `&chat_id=${chatId}`;
+  //       }
+
+  //       const response = await fetch(url);
+  //       const data = await response.json();
+
+  //       if (!chatId && data.chat_id) {
+  //         setChatId(data.chat_id);
+  //       }
+
+  //       if (data.status === 'processing') {
+  //         attempts++;
+  //         if (attempts >= maxAttempts) {
+  //           throw new Error('Max attempts reached');
+  //         }
+  //         setConversations(prev => 
+  //           prev.map((conv, index) => 
+  //             index === prev.length - 1 
+  //               ? { ...conv, response: `Still processing... (${attempts * 10} seconds)` }
+  //               : conv
+  //           )
+  //         );
+  //         setTimeout(pollForResponse, pollInterval);
+  //       } else {
+  //         setConversations(prev => 
+  //           prev.map((conv, index) => 
+  //             index === prev.length - 1 
+  //               ? { ...conv, response: data.response_text, items: data.returned_items || [] }
+  //               : conv
+  //           )
+  //         );
+  //         setIsLoading(false);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //       setConversations(prev => 
+  //         prev.map((conv, index) => 
+  //           index === prev.length - 1 
+  //             ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
+  //             : conv
+  //         )
+  //       );
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   pollForResponse();
+
+  //   setQuery('');
+  //   setSelectedPrompt(null);
+  //   setIsPromptsExpanded(false);
+  // }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
 
 
 
