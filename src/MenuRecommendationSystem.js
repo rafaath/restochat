@@ -104,36 +104,6 @@ const MenuRecommendationSystem = () => {
   const [isListening, setIsListening] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [suggestivePrompts, setSuggestivePrompts] = useState([
-    { emoji: "☕", text: "Craft a perfect breakfast" },
-    { emoji: "🍕", text: "Discover our spiciest dish" },
-    { emoji: "🍰", text: "Surprise me with a culinary delight" },
-    { "emoji": "☕", "text": "Start your day with a delightful breakfast" },
-    { "emoji": "🍽", "text": "Discover a dish that will surprise you" },
-    { "emoji": "🍷", "text": "Elevate your dining experience" },
-    { "emoji": "🍽", "text": "Find your next favorite meal" },
-    { "emoji": "🥘", "text": "Savor the chef’s best creation" },
-    { "emoji": "🍴", "text": "Enjoy a top-rated culinary delight" },
-    { "emoji": "🥂", "text": "Indulge in something special" },
-    { "emoji": "🍲", "text": "Discover what everyone’s talking about" },
-    { "emoji": "🍽", "text": "Treat yourself to a must-try dish" },
-    { "emoji": "🍴", "text": "Explore the most loved menu items" },
-    { "emoji": "🍷", "text": "Experience fine dining in every bite" },
-    { "emoji": "🍽", "text": "Discover a dish crafted just for you" },
-    { "emoji": "🥂", "text": "Celebrate with a signature dish" },
-    { "emoji": "🥘", "text": "Find the dish that defines us" },
-    { "emoji": "🍽", "text": "Taste a meal that’s made to impress" },
-    { "emoji": "🍷", "text": "Uncover the hidden gems on our menu" },
-    { "emoji": "🥘", "text": "Dine like a local favorite" },
-    { "emoji": "🍽", "text": "Discover the art of culinary perfection" },
-    { "emoji": "🍴", "text": "Let us recommend something you’ll love" },
-    { "emoji": "🍲", "text": "Explore our top-rated selections" },
-    { "emoji": "🍽", "text": "Taste the essence of our kitchen" },
-    { "emoji": "🍷", "text": "Satisfy your cravings with something special" },
-    { "emoji": "🥘", "text": "Find a dish you’ll come back for" },
-    { "emoji": "🍽", "text": "Indulge in an unforgettable dining experience" },
-    { "emoji": "🥂", "text": "Discover a crowd-pleaser loved by all" }
-  ]);
   const [isPromptsExpanded, setIsPromptsExpanded] = useState(false);
   const searchInputRef = useRef(null);
   const conversationEndRef = useRef(null);

@@ -5,31 +5,43 @@ import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-const Notification = ({ message }) => (
+const Notification = ({ message, theme }) => (
   <motion.div
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20 }}
     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-    className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 z-[60]"
+    className={`fixed top-4 right-4 ${theme === 'light' ? 'bg-green-500' : 'bg-green-600'} text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2 z-[60]`}
   >
     <ShoppingCart size={20} />
     <span>{message}</span>
   </motion.div>
 );
 
-const highlightColors = [
-  'text-blue-500',
-  'text-green-500',
-  'text-purple-500',
-  'text-pink-500',
-  'text-yellow-500',
-  'text-indigo-500',
-  'text-red-500',
-  'text-teal-500'
-];
+const highlightColors = {
+  light: [
+    'text-blue-600',
+    'text-green-600',
+    'text-purple-600',
+    'text-pink-600',
+    'text-yellow-600',
+    'text-indigo-600',
+    'text-red-600',
+    'text-teal-600'
+  ],
+  dark: [
+    'text-blue-400',
+    'text-green-400',
+    'text-purple-400',
+    'text-pink-400',
+    'text-yellow-400',
+    'text-indigo-400',
+    'text-red-400',
+    'text-teal-400'
+  ]
+};
 
-const HighlightedText = ({ text, items, scrollToItem }) => {
+const HighlightedText = ({ text, items, scrollToItem, theme }) => {
   const parts = text.split(/(\*\*.*?\*\*)/g);
   let colorIndex = 0;
 
@@ -38,8 +50,8 @@ const HighlightedText = ({ text, items, scrollToItem }) => {
       {parts.map((part, index) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           const innerText = part.slice(2, -2);
-          const colorClass = highlightColors[colorIndex];
-          colorIndex = (colorIndex + 1) % highlightColors.length;
+          const colorClass = highlightColors[theme][colorIndex];
+          colorIndex = (colorIndex + 1) % highlightColors[theme].length;
           const matchingItem = items.find(item => item.name_of_item.toLowerCase().includes(innerText.toLowerCase()));
 
           return (
@@ -58,7 +70,7 @@ const HighlightedText = ({ text, items, scrollToItem }) => {
   );
 };
 
-const ComboSection = ({ combos, onAddToCart, onAddCombo, setShowCombos }) => {
+const ComboSection = ({ combos, onAddToCart, onAddCombo, setShowCombos, theme }) => {
   const [expandedCombo, setExpandedCombo] = useState(null);
 
   return (
@@ -71,11 +83,11 @@ const ComboSection = ({ combos, onAddToCart, onAddCombo, setShowCombos }) => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3 }}
-          className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md"
+          className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-lg overflow-hidden shadow-md`}
         >
           <div className="p-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{combo.combo_name}</h3>
+              <h3 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{combo.combo_name}</h3>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -85,14 +97,14 @@ const ComboSection = ({ combos, onAddToCart, onAddCombo, setShowCombos }) => {
                 {expandedCombo === combo.combo_id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
               </motion.button>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">{combo.description}</p>
+            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mt-2`}>{combo.description}</p>
             <div className="flex justify-between items-center mt-4">
-              <span className="text-2xl font-bold text-green-600 dark:text-green-400">₹{combo.cost.toFixed(2)}</span>
+              <span className={`text-2xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>₹{combo.cost.toFixed(2)}</span>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onAddCombo(combo)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                className={`${theme === 'light' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center space-x-2`}
               >
                 <Package size={16} />
                 <span>Add Combo</span>
@@ -108,21 +120,21 @@ const ComboSection = ({ combos, onAddToCart, onAddCombo, setShowCombos }) => {
                 transition={{ duration: 0.3 }}
                 className="px-4 pb-4"
               >
-                <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">Combo Items:</h4>
+                <h4 className={`font-semibold ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'} mb-2`}>Combo Items:</h4>
                 {combo.combo_items.map((item) => (
-                  <div key={item.item_id} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                  <div key={item.item_id} className={`flex justify-between items-center py-2 border-b ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'} last:border-b-0`}>
                     <div className="flex items-center space-x-3">
                       <img src={item.image_link} alt={item.name_of_item} className="w-12 h-12 rounded-full object-cover" />
                       <div>
-                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{item.name_of_item}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{item.description}</p>
+                        <p className={`text-sm font-medium ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>{item.name_of_item}</p>
+                        <p className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>{item.description}</p>
                       </div>
                     </div>
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => onAddToCart(item)}
-                      className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold hover:bg-green-600 transition-colors"
+                      className={`${theme === 'light' ? 'bg-green-500 hover:bg-green-600' : 'bg-green-600 hover:bg-green-700'} text-white px-2 py-1 rounded-full text-xs font-semibold transition-colors`}
                     >
                       Add
                     </motion.button>
@@ -137,10 +149,19 @@ const ComboSection = ({ combos, onAddToCart, onAddCombo, setShowCombos }) => {
   );
 };
 
-const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
+const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme }, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCombos, setShowCombos] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const truncateText = (text, maxLength) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
+
+  const descriptionText = showFullDescription
+    ? item.description
+    : truncateText(item.description, 100);
 
   return (
     <motion.div
@@ -150,14 +171,14 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
+      className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
         showCombos ? 'md:col-span-2' : ''
       }`}
     >
       <div
         className={`flex flex-col md:flex-row ${
           showCombos ? 'md:divide-x' : ''
-        } divide-gray-200 dark:divide-gray-700 h-full`}
+        } ${theme === 'light' ? 'divide-gray-200' : 'divide-gray-700'} h-full`}
       >
         <div className={`flex-shrink-0 ${showCombos ? 'md:w-1/2' : 'w-full'} flex flex-col`}>
           <div className="relative">
@@ -170,7 +191,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="p-2 bg-white dark:bg-gray-900 rounded-full shadow-md text-red-500 hover:text-red-600 transition-colors"
+                className={`p-2 ${theme === 'light' ? 'bg-white text-red-500 hover:text-red-600' : 'bg-gray-900 text-red-400 hover:text-red-300'} rounded-full shadow-md transition-colors`}
               >
                 <Heart size={20} />
               </motion.button>
@@ -178,7 +199,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="p-2 bg-white dark:bg-gray-900 rounded-full shadow-md text-blue-500 hover:text-blue-600 transition-colors"
+                className={`p-2 ${theme === 'light' ? 'bg-white text-blue-500 hover:text-blue-600' : 'bg-gray-900 text-blue-400 hover:text-blue-300'} rounded-full shadow-md transition-colors`}
               >
                 <Info size={20} />
               </motion.button>
@@ -194,21 +215,17 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
             </div>
           </div>
           <div className="p-4 flex flex-col flex-grow">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
               {item.name_of_item}
             </h3>
             <div className="mt-2">
-              <p
-                className={`text-sm text-gray-600 dark:text-gray-300 ${
-                  !showFullDescription ? 'line-clamp-3' : ''
-                }`}
-              >
-                {item.description}
+              <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                {descriptionText}
               </p>
               {item.description.length > 120 && (
                 <button
                   onClick={() => setShowFullDescription(!showFullDescription)}
-                  className="text-blue-500 hover:text-blue-600 text-sm mt-1"
+                  className={`${theme === 'light' ? 'text-blue-500 hover:text-blue-600' : 'text-blue-400 hover:text-blue-300'} text-sm mt-1`}
                 >
                   {showFullDescription ? 'See Less' : 'See More'}
                 </button>
@@ -216,7 +233,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
             </div>
             <div className="flex items-center mt-3">
               <Star className="text-yellow-400 mr-1" size={16} />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
+              <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
                 {item.rating
                   ? `${item.rating.toFixed(1)} (${item.number_of_people_rated} ratings)`
                   : 'Not rated yet'}
@@ -224,14 +241,14 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
             </div>
             <div className="mt-auto">
               <div className="flex justify-between items-center mt-3">
-                <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                <span className={`text-2xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
                   ₹{item.cost.toFixed(2)}
                 </span>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => onAddToCart(item)}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors flex items-center space-x-2"
+                  className={`${theme === 'light' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center space-x-2`}
                 >
                   <ShoppingBag size={16} />
                   <span>Add to Cart</span>
@@ -242,11 +259,11 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowCombos(!showCombos)}
-                  className="mt-3 w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:from-purple-600 hover:to-indigo-600 transition-colors flex items-center justify-center space-x-2"
+                  className={`mt-3 w-full ${theme === 'light' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'} text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center justify-center space-x-2`}
                 >
                   <Sparkles size={16} />
                   <span>
-                    {showCombos ? 'Hide' : 'View'} {item.combos.length} Combo
+                  {showCombos ? 'Hide' : 'View'} {item.combos.length} Combo
                     {item.combos.length > 1 ? 's' : ''}
                   </span>
                 </motion.button>
@@ -259,12 +276,12 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="pt-4 border-t border-gray-200 dark:border-gray-700 mt-3"
+                  className={`pt-4 border-t ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'} mt-3`}
                 >
-                  <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <h4 className={`font-semibold ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'} mb-2`}>
                     Additional Information:
                   </h4>
-                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <ul className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} space-y-1`}>
                     <li>Cuisine: {item.cuisine}</li>
                     <li>Meal Time: {item.meal_time}</li>
                     <li>Spiciness: {item.spiciness}</li>
@@ -298,7 +315,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
             >
               <div className="p-6 h-full overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
                     Available Combos
                   </h3>
                 </div>
@@ -307,6 +324,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
                   onAddToCart={onAddToCart}
                   onAddCombo={onAddCombo}
                   setShowCombos={setShowCombos}
+                  theme={theme}
                 />
               </div>
             </motion.div>
@@ -317,9 +335,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo }, ref) => {
   );
 });
 
-
-
-const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo }) => {
+const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo, theme }) => {
   const itemRefs = useRef({});
   const [items, setItems] = useState([]);
 
@@ -343,15 +359,15 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-gray-900 dark:text-white leading-tight">
+      <h2 className={`text-3xl sm:text-4xl font-bold mb-6 ${theme === 'light' ? 'text-gray-900' : 'text-white'} leading-tight`}>
         {conversation.query}
       </h2>
-      <div className="prose dark:prose-invert mb-12">
-        <HighlightedText text={conversation.response} items={items} scrollToItem={scrollToItem} />
+      <div className={`prose ${theme === 'light' ? 'prose-gray' : 'prose-invert'} mb-12`}>
+        <HighlightedText text={conversation.response} items={items} scrollToItem={scrollToItem} theme={theme} />
       </div>
       {items.length > 0 && (
         <div className="space-y-12">
-          <h3 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Recommended Items</h3>
+          <h3 className={`text-2xl font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'} mb-6`}>Recommended Items</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {items.map((item) => (
               <ItemCard
@@ -360,6 +376,7 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
                 item={item}
                 onAddToCart={onAddToCart}
                 onAddCombo={onAddCombo}
+                theme={theme}
               />
             ))}
           </div>
@@ -447,15 +464,15 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-2xl relative flex flex-col"
+            className={`w-full max-w-4xl max-h-[90vh] ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} rounded-2xl overflow-hidden shadow-2xl relative flex flex-col`}
           >
-            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Menu Recommendations</h2>
+            <div className={`flex justify-between items-center p-6 border-b ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>
+              <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Our Recommendations</h2>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={onClose}
-                className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                className={`p-2 rounded-full ${theme === 'light' ? 'bg-gray-200 text-gray-600 hover:bg-gray-300' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'} transition-colors`}
               >
                 <X size={24} />
               </motion.button>
@@ -466,11 +483,12 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
                   conversation={conversations[activeIndex]}
                   onAddToCart={handleAddToCart}
                   onAddCombo={handleAddCombo}
+                  theme={theme}
                 />
               </motion.div>
             </div>
             {conversations.length > 1 && (
-              <div className="flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700">
+              <div className={`flex justify-between items-center p-6 border-t ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -478,13 +496,13 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
                   disabled={activeIndex === 0}
                   className={`p-2 rounded-full ${
                     activeIndex === 0
-                      ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-400'
+                      ? `${theme === 'light' ? 'bg-gray-200 text-gray-400' : 'bg-gray-800 text-gray-600'} cursor-not-allowed`
+                      : `${theme === 'light' ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-600 text-white hover:bg-blue-700'}`
                   } transition-colors`}
                 >
                   <ChevronLeft size={24} />
                 </motion.button>
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                <span className={`text-sm font-medium ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
                   {activeIndex + 1} / {conversations.length}
                 </span>
                 <motion.button
@@ -494,8 +512,8 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
                   disabled={activeIndex === conversations.length - 1}
                   className={`p-2 rounded-full ${
                     activeIndex === conversations.length - 1
-                      ? 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                      : 'bg-blue-500 text-white hover:bg-blue-600 dark:hover:bg-blue-400'
+                      ? `${theme === 'light' ? 'bg-gray-200 text-gray-400' : 'bg-gray-800 text-gray-600'} cursor-not-allowed`
+                      : `${theme === 'light' ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-blue-600 text-white hover:bg-blue-700'}`
                   } transition-colors`}
                 >
                   <ChevronRight size={24} />
@@ -504,7 +522,7 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
             )}
           </motion.div>
           <AnimatePresence>
-            {notification && <Notification message={notification} />}
+            {notification && <Notification message={notification} theme={theme} />}
           </AnimatePresence>
         </motion.div>
       )}
