@@ -116,6 +116,20 @@ const MenuRecommendationSystem = () => {
   const storyContentRef = useRef(null);
   const [chatId, setChatId] = useState(null);
 
+  const [selectedComboItem, setSelectedComboItem] = useState(null);
+
+  // ... (existing code)
+
+  // const handleItemClick = (item) => {
+  //   setSelectedItemFromConversation(item);
+  //   setIsModalOpen(true);
+  // };
+
+  const handleComboItemClick = (item) => {
+    setSelectedComboItem(item);
+    setIsModalOpen(true);
+  };
+
   const clearChat = () => {
     setConversations([]);
     setChatId(null);
@@ -1212,14 +1226,14 @@ const MenuRecommendationSystem = () => {
       )}
   
   <AppleInspiredStoryView
-  isOpen={isStoryOpen}
-  onClose={closeStory}
-  conversations={conversations}
-  initialIndex={activeStoryIndex}
-  addToCart={addToCart}
-  theme={theme}
-  // userName={"John"}
-/>
+        isOpen={isStoryOpen}
+        onClose={closeStory}
+        conversations={conversations}
+        initialIndex={activeStoryIndex}
+        addToCart={addToCart}
+        theme={theme}
+        onItemClick={handleComboItemClick}
+      />
   
 <AnimatePresence>
         {isMenuOpen && (
@@ -1245,6 +1259,19 @@ const MenuRecommendationSystem = () => {
           />
         )}
       </AnimatePresence>
+      {(selectedItemFromConversation || selectedComboItem) && (
+        <ItemModal
+          item={selectedItemFromConversation || selectedComboItem}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setSelectedItemFromConversation(null);
+            setSelectedComboItem(null);
+            setIsModalOpen(false);
+          }}
+          theme={theme}
+          addToCart={addToCart}
+        />
+      )}
   
       {selectedItem && (
         <ItemModal

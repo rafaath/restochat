@@ -4,6 +4,8 @@ import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, Chevron
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Tooltip } from './components/ui/tooltip';
+import { Badge } from './components/ui/badge';
 
 const Notification = ({ message, theme }) => (
   <motion.div
@@ -70,7 +72,8 @@ const HighlightedText = ({ text, items, scrollToItem, theme }) => {
   );
 };
 
-const ComboItem = ({ item, onAddToCart, theme }) => {
+
+const ComboItem = ({ item, onAddToCart, theme, onItemClick }) => {
   const [isHovered, setIsHovered] = useState(false);
   const controls = useAnimation();
 
@@ -88,6 +91,24 @@ const ComboItem = ({ item, onAddToCart, theme }) => {
     hover: { scale: 1.1, transition: { type: 'spring', stiffness: 400, damping: 10 } }
   };
 
+  const renderSpicyIndicator = (spiciness) => {
+    return (
+        <div className="flex items-center mt-1">
+          {[...Array(spiciness)].map((_, i) => (
+            <Sparkles key={i} size={10} className="text-red-500 mr-0.5" />
+          ))}
+          <span className="text-xs ml-1 text-gray-500">Spicy</span>
+        </div>
+    );
+  };
+
+  const renderRating = (rating) => (
+    <div className="flex items-center mt-1">
+      <Star size={12} className="text-yellow-400 mr-0.5" fill="currentColor" />
+      <span className="text-xs text-gray-500">{rating.toFixed(1)}</span>
+    </div>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -95,11 +116,12 @@ const ComboItem = ({ item, onAddToCart, theme }) => {
       exit={{ opacity: 0, y: -20 }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
+      onClick={() => onItemClick(item)}
       className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 ${
         theme === 'light' 
           ? 'bg-white hover:bg-gray-50' 
           : 'bg-gray-800 hover:bg-gray-750'
-      } rounded-lg transition-all duration-300 ease-in-out shadow-sm hover:shadow-md`}
+      } rounded-lg transition-all duration-300 ease-in-out shadow-sm hover:shadow-md cursor-pointer`}
     >
       <div className="flex items-center space-x-3 w-full sm:w-auto">
         <motion.div
@@ -122,22 +144,23 @@ const ComboItem = ({ item, onAddToCart, theme }) => {
               </span>
             </div>
           )}
+          {item.bestseller && (
+            <Badge variant="secondary" className="absolute -bottom-2 left-0 text-xs">
+              Bestseller
+            </Badge>
+          )}
         </motion.div>
         <div className="flex-grow min-w-0">
-          <p className={`text-sm font-medium ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} truncate`}>
+          <p className={`text-sm font-medium ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
             {item.name_of_item}
           </p>
-          <p className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
+          {/* <p className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
             {truncateText(item.description, 50)}
-          </p>
-          {item.spiciness && (
-            <div className="flex items-center mt-1">
-              {[...Array(item.spiciness)].map((_, i) => (
-                <Sparkles key={i} size={10} className="text-red-500 mr-0.5" />
-              ))}
-              <span className="text-xs ml-1 text-gray-500">Spicy</span>
-            </div>
-          )}
+          </p> */}
+          <div className="flex items-center mt-1 space-x-2">
+            {item.spiciness === "spicy" && renderSpicyIndicator(item.spiciness)}
+            {item.rating && renderRating(item.rating)}
+          </div>
         </div>
       </div>
       <div className="flex items-center justify-between w-full sm:w-auto mt-2 sm:mt-0">
@@ -149,7 +172,10 @@ const ComboItem = ({ item, onAddToCart, theme }) => {
           initial="rest"
           animate={controls}
           whileTap={{ scale: 0.95 }}
-          onClick={() => onAddToCart(item)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart(item);
+          }}
           className={`p-2 rounded-full ${
             theme === 'light' 
               ? 'bg-blue-500 hover:bg-blue-600' 
@@ -163,7 +189,7 @@ const ComboItem = ({ item, onAddToCart, theme }) => {
   );
 };
 
-const ComboCard = ({ combo, onAddToCart, onAddCombo, theme }) => {
+const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(0);
@@ -192,9 +218,9 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme }) => {
           : 'bg-gray-800'
       } rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out`}
     >
-      <div className="p-4">
+      <div className="p-4" onClick={toggleExpand}>
         <div className="flex justify-between items-start mb-3">
-          <h3 className={`text-lg font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'} pr-2`}>
+          <h3 className={`text-2xl font-extrabold ${theme === 'light' ? 'text-gray-900' : 'text-white'} pr-2`}>
             {combo.combo_name}
           </h3>
           <motion.button
@@ -207,16 +233,16 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme }) => {
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             } transition-colors duration-200 ease-in-out flex-shrink-0`}
           >
-            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+           {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </motion.button>
         </div>
         <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-3`}>
           {combo.description}
         </p>
         <div className="flex flex-col space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start justify-between">
             <div>
-              <span className={`text-xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+              <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
                 ₹{combo.cost.toFixed(2)}
               </span>
               <motion.div
@@ -230,7 +256,8 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme }) => {
                 Save {savingsPercentage}%
               </motion.div>
             </div>
-            <span className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+            
+            <span className={`text-xs mt-2 mb-2 ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
               Original: ₹{(combo.cost + totalSavings).toFixed(2)}
             </span>
           </div>
@@ -256,11 +283,14 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme }) => {
         className="overflow-hidden"
       >
         <div ref={contentRef} className="p-4 space-y-3 bg-opacity-50 bg-gray-50 dark:bg-opacity-50 dark:bg-gray-700">
-          <h4 className={`font-semibold text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'} mb-2`}>
-            Combo Items:
-          </h4>
           {combo.combo_items.map((item) => (
-            <ComboItem key={item.item_id} item={item} onAddToCart={onAddToCart} theme={theme} />
+            <ComboItem 
+              key={item.item_id} 
+              item={item} 
+              onAddToCart={onAddToCart} 
+              theme={theme}
+              onItemClick={onItemClick}
+            />
           ))}
         </div>
       </motion.div>
@@ -268,7 +298,7 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme }) => {
   );
 };
 
-const ComboSection = ({ combos, onAddToCart, onAddCombo, theme }) => {
+const ComboSection = ({ combos, onAddToCart, onAddCombo, theme, onItemClick }) => {
   return (
     <div className="space-y-4">
       {combos.map((combo) => (
@@ -278,6 +308,7 @@ const ComboSection = ({ combos, onAddToCart, onAddCombo, theme }) => {
           onAddToCart={onAddToCart}
           onAddCombo={onAddCombo}
           theme={theme}
+          onItemClick={onItemClick}
         />
       ))}
     </div>
@@ -290,7 +321,7 @@ const truncateText = (text, maxLength) => {
 };
 
 
-const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme }, ref) => {
+const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onItemClick }, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCombos, setShowCombos] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -328,6 +359,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme }, ref
       className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
         showCombos ? 'md:col-span-2' : ''
       }`}
+      // onClick={() => onItemClick(item)}
     >
       <div
         className={`flex flex-col md:flex-row ${
@@ -475,12 +507,13 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme }, ref
                   </h3>
                 </div>
                 <ComboSection
-                  combos={item.combos}
-                  onAddToCart={onAddToCart}
-                  onAddCombo={onAddCombo}
-                  setShowCombos={setShowCombos}
-                  theme={theme}
-                />
+                combos={item.combos}
+                onAddToCart={onAddToCart}
+                onAddCombo={onAddCombo}
+                setShowCombos={setShowCombos}
+                theme={theme}
+                onItemClick={onItemClick}
+              />
               </div>
             </motion.div>
           )}
@@ -490,7 +523,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme }, ref
   );
 });
 
-const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo, theme }) => {
+const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo, theme, onItemClick }) => {
   const itemRefs = useRef({});
   const [items, setItems] = useState([]);
 
@@ -532,6 +565,7 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
                 onAddToCart={onAddToCart}
                 onAddCombo={onAddCombo}
                 theme={theme}
+                onItemClick={onItemClick}
               />
             ))}
           </div>
@@ -541,7 +575,7 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
   );
 });
 
-const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme }) => {
+const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme, onItemClick }) => {
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [notification, setNotification] = useState(null);
   const controls = useAnimation();
@@ -634,11 +668,12 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
             </div>
             <div ref={scrollContainerRef} className="flex-grow overflow-y-auto">
               <motion.div animate={controls} className="h-full">
-                <IsolatedScrollContent
+              <IsolatedScrollContent
                   conversation={conversations[activeIndex]}
                   onAddToCart={handleAddToCart}
                   onAddCombo={handleAddCombo}
                   theme={theme}
+                  onItemClick={onItemClick}
                 />
               </motion.div>
             </div>
