@@ -15,4 +15,4 @@ export const getSimulatedResponse = (query) => {
   });
 };
 
-export const useSimulatedApi = false; // Set this to false to use the real API
+export const useSimulatedApi = true; // Set this to false to use the real API
