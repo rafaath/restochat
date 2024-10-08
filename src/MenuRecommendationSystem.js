@@ -179,13 +179,13 @@ const MenuRecommendationSystem = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const promptsContainerRef = useRef(null);
 
-  // const handleScroll = (direction) => {
-  //   const container = promptsContainerRef.current;
-  //   if (container) {
-  //     const scrollAmount = direction === 'left' ? -200 : 200;
-  //     container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-  //   }
-  // };
+  const handleScroll = (direction) => {
+    const container = promptsContainerRef.current;
+    if (container) {
+      const scrollAmount = direction === 'left' ? -200 : 200;
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     // Load menu items from the JSON file
@@ -216,26 +216,23 @@ const MenuRecommendationSystem = () => {
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollTop = useRef(0);
-  const headerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      if (scrollTop > lastScrollTop.current && scrollTop > 50) {
-        // Scrolling down
+      const st = window.pageYOffset || document.documentElement.scrollTop;
+      if (st > lastScrollTop.current && st > 50) {
+        // Scrolling down and past the threshold
         setIsHeaderVisible(false);
-      } else {
+      } else if (st < lastScrollTop.current || st <= 50) {
         // Scrolling up or at the top
         setIsHeaderVisible(true);
       }
-      lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
+      lastScrollTop.current = st <= 0 ? 0 : st;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const headerHeight = headerRef.current ? headerRef.current.offsetHeight : 0;
 
 
 
@@ -261,17 +258,6 @@ const MenuRecommendationSystem = () => {
 
 
   
-
-
-
-
-
-
-
-
-
-
-
 
 
   const openStory = (index) => {
@@ -1032,55 +1018,46 @@ const MenuRecommendationSystem = () => {
   
       {!showWelcome && (
         <>
-          <motion.header 
-            ref={headerRef}
-            className={`flex-shrink-0 z-50 shadow-md ${
+          <header 
+            className={`flex-shrink-0 z-50 p-4 shadow-md ${
               theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-900 text-white'
             }`}
-            initial={false}
-            animate={{ 
-              y: isHeaderVisible ? 0 : -headerHeight,
-              opacity: isHeaderVisible ? 1 : 0,
-            }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className="max-w-4xl mx-auto p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">RestoChat</h1>
-                <div className="flex items-center space-x-4">
-                  <motion.button 
-                    onClick={toggleTheme} 
-                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    {theme === 'light' ? '🌙' : '☀️'}
-                  </motion.button>
-                </div>
-              </div>
-              <div className="flex justify-center">
-                <div className="flex space-x-2">
-                  <TabButton
-                    icon={Home}
-                    text="Home"
-                    isActive={activeTab === 'home'}
-                    onClick={() => setActiveTab('home')}
-                  />
-                  <TabButton
-                    icon={MessageCircle}
-                    text="Chat"
-                    isActive={activeTab === 'chat'}
-                    onClick={() => setActiveTab('chat')}
-                  />
-                </div>
+            <div className="max-w-4xl mx-auto flex justify-between items-center">
+              <h1 className="text-2xl font-bold">RestoChat</h1>
+              <div className="flex items-center space-x-4">
+                <motion.button 
+                  onClick={toggleTheme} 
+                  className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  {theme === 'light' ? '🌙' : '☀️'}
+                </motion.button>
               </div>
             </div>
-          </motion.header>
+          </header>
+  
+          <div className="flex justify-center mt-4 mb-2">
+            <div className="flex space-x-2">
+              <TabButton
+                icon={Home}
+                text="Home"
+                isActive={activeTab === 'home'}
+                onClick={() => setActiveTab('home')}
+              />
+              <TabButton
+                icon={MessageCircle}
+                text="Chat"
+                isActive={activeTab === 'chat'}
+                onClick={() => setActiveTab('chat')}
+              />
+            </div>
+          </div>
   
           <main 
             ref={mainContentRef}
-            className="flex-grow overflow-y-auto no-scrollbar"
-            style={{ paddingTop: isHeaderVisible ? 0 : headerHeight }}
+            className="flex-grow overflow-y-auto"
           >
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
@@ -1090,7 +1067,7 @@ const MenuRecommendationSystem = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="h-full overflow-y-auto no-scrollbar"
+                  className="h-full"
                 >
                   <EmptyState 
                     theme={theme} 
@@ -1203,7 +1180,7 @@ const MenuRecommendationSystem = () => {
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className={`absolute bottom-[calc(100%_-_1rem)] left-0 right-0 py-1 ${
                 theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
-              } backdrop-blur-md safe-area-bottom`}
+              } backdrop-blur-md`}
             >
               <LayoutGroup>
                 <motion.div 
