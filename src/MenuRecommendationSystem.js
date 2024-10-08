@@ -1170,7 +1170,7 @@ const MenuRecommendationSystem = () => {
   
           <footer className={`flex-shrink-0 z-50 ${
             theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
-          } backdrop-blur-md`}>
+          } backdrop-blur-md pb-safe`}>
         <AnimatePresence>
           {isPromptsExpanded && (
             <motion.div
@@ -1409,6 +1409,17 @@ const MenuRecommendationSystem = () => {
           </motion.div>
         </motion.div>
       )}
+    <style jsx global>{`
+        :root {
+          --sat: env(safe-area-inset-top);
+          --sar: env(safe-area-inset-right);
+          --sab: env(safe-area-inset-bottom);
+          --sal: env(safe-area-inset-left);
+        }
+        .pb-safe {
+          padding-bottom: var(--sab);
+        }
+      `}</style>
     </div>
   );
 };
