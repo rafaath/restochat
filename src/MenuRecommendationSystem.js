@@ -246,6 +246,33 @@ const MenuRecommendationSystem = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredMenuItems, setFilteredMenuItems] = useState([]);
 
+
+
+
+  const [safeAreaBottom, setSafeAreaBottom] = useState(0);
+
+  useEffect(() => {
+    const updateSafeArea = () => {
+      const safeArea = window.visualViewport ? window.visualViewport.height - document.documentElement.clientHeight : 0;
+      setSafeAreaBottom(safeArea > 20 ? safeArea : 0); // Only apply if the difference is significant
+    };
+
+    updateSafeArea();
+    window.addEventListener('resize', updateSafeArea);
+    return () => window.removeEventListener('resize', updateSafeArea);
+  }, []);
+
+
+
+
+
+
+
+
+
+
+
+
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
     if (isCartOpen) setIsCartOpen(false);
@@ -1005,7 +1032,7 @@ const MenuRecommendationSystem = () => {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   return (
-    <div className={`h-screen flex flex-col overflow-hidden ${
+    <div className={`h-screen flex flex-col overflow-hidden no-scrollbar ${
       theme === 'light' 
         ? 'bg-gradient-to-br from-gray-100 to-gray-200' 
         : 'bg-gradient-to-br from-gray-900 to-gray-800'
@@ -1168,9 +1195,12 @@ const MenuRecommendationSystem = () => {
             <div ref={conversationEndRef} />
           </main>
   
-          <footer className={`flex-shrink-0 z-50 ${
-            theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
-          } backdrop-blur-md pb-safe`}>
+          <footer 
+  className={`flex-shrink-0 z-50 ${
+    theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
+  } backdrop-blur-md`}
+  style={{ paddingBottom: `${safeAreaBottom}px` }}
+>
         <AnimatePresence>
           {isPromptsExpanded && (
             <motion.div
@@ -1409,17 +1439,6 @@ const MenuRecommendationSystem = () => {
           </motion.div>
         </motion.div>
       )}
-    <style jsx global>{`
-        :root {
-          --sat: env(safe-area-inset-top);
-          --sar: env(safe-area-inset-right);
-          --sab: env(safe-area-inset-bottom);
-          --sal: env(safe-area-inset-left);
-        }
-        .pb-safe {
-          padding-bottom: var(--sab);
-        }
-      `}</style>
     </div>
   );
 };

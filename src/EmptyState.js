@@ -135,7 +135,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
   }, [onItemClick]);
 
   return (
-    <div className={`h-full flex flex-col p-2 space-y-1`}>
+    <div className={`h-full flex flex-col p-2 space-y-1 no-scrollbar`}>
       <motion.div 
         className="text-center"
         initial={{ opacity: 0, y: -10 }}
