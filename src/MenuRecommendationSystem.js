@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useAnimation, LayoutGroup } from 'framer-motio
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw
+  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle
 } from 'lucide-react';
 import {
   Dialog,
@@ -117,6 +117,7 @@ const MenuRecommendationSystem = () => {
   const [chatId, setChatId] = useState(null);
 
   const [selectedComboItem, setSelectedComboItem] = useState(null);
+  const [activeTab, setActiveTab] = useState('home');
 
   // ... (existing code)
 
@@ -133,7 +134,7 @@ const MenuRecommendationSystem = () => {
   const clearChat = () => {
     setConversations([]);
     setChatId(null);
-    // You might want to add any other state resets here
+    // setActiveTab('home');
   };
   const isChatStarted = conversations.length > 0;
   const storyControls = useAnimation();
@@ -178,13 +179,13 @@ const MenuRecommendationSystem = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const promptsContainerRef = useRef(null);
 
-  const handleScroll = (direction) => {
-    const container = promptsContainerRef.current;
-    if (container) {
-      const scrollAmount = direction === 'left' ? -200 : 200;
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
+  // const handleScroll = (direction) => {
+  //   const container = promptsContainerRef.current;
+  //   if (container) {
+  //     const scrollAmount = direction === 'left' ? -200 : 200;
+  //     container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+  //   }
+  // };
 
   useEffect(() => {
     // Load menu items from the JSON file
@@ -215,23 +216,26 @@ const MenuRecommendationSystem = () => {
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollTop = useRef(0);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      const st = window.pageYOffset || document.documentElement.scrollTop;
-      if (st > lastScrollTop.current && st > 50) {
-        // Scrolling down and past the threshold
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop > lastScrollTop.current && scrollTop > 50) {
+        // Scrolling down
         setIsHeaderVisible(false);
-      } else if (st < lastScrollTop.current || st <= 50) {
+      } else {
         // Scrolling up or at the top
         setIsHeaderVisible(true);
       }
-      lastScrollTop.current = st <= 0 ? 0 : st;
+      lastScrollTop.current = scrollTop <= 0 ? 0 : scrollTop;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const headerHeight = headerRef.current ? headerRef.current.offsetHeight : 0;
 
 
 
@@ -257,6 +261,17 @@ const MenuRecommendationSystem = () => {
 
 
   
+
+
+
+
+
+
+
+
+
+
+
 
 
   const openStory = (index) => {
@@ -384,6 +399,54 @@ const MenuRecommendationSystem = () => {
     </motion.div>
   );
 
+  const EmptyChatState = () => (
+    <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full"
+      >
+        <div className="flex justify-center mb-4">
+          <MessageCircle size={64} className={`${theme === 'light' ? 'text-gray-400' : 'text-gray-600'}`} />
+        </div>
+        <h2 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+          Start a New Conversation
+        </h2>
+        <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+          Ask about our menu, dietary options, or get personalized recommendations!
+        </p>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => searchInputRef.current?.focus()}
+          className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
+        >
+          Start Chatting
+        </motion.button>
+      </motion.div>
+    </div>
+  );
+
+  const TabButton = ({ icon: Icon, text, isActive, onClick }) => (
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-300 ${
+        isActive
+          ? theme === 'light'
+            ? 'bg-blue-500 text-white'
+            : 'bg-blue-600 text-white'
+          : theme === 'light'
+          ? 'text-gray-600 hover:bg-gray-200'
+          : 'text-gray-400 hover:bg-gray-700'
+      }`}
+    >
+      <Icon size={20} />
+      <span className="font-medium">{text}</span>
+    </motion.button>
+  );
 
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
@@ -434,6 +497,7 @@ const MenuRecommendationSystem = () => {
     setQuery('');
     setSelectedPrompt(null);
     setIsPromptsExpanded(false);
+    setActiveTab('chat');
   }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
 
 
@@ -960,7 +1024,7 @@ const MenuRecommendationSystem = () => {
         ? 'bg-gradient-to-br from-gray-100 to-gray-200' 
         : 'bg-gradient-to-br from-gray-900 to-gray-800'
     }`}>
-       <AnimatePresence>
+      <AnimatePresence>
         {showWelcome && (
           <WelcomeScreen onGetStarted={handleGetStarted} theme={theme} />
         )}
@@ -968,108 +1032,168 @@ const MenuRecommendationSystem = () => {
   
       {!showWelcome && (
         <>
-             <header 
-            className={`flex-shrink-0 z-50 p-4 shadow-md ${
+          <motion.header 
+            ref={headerRef}
+            className={`flex-shrink-0 z-50 shadow-md ${
               theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-900 text-white'
             }`}
+            initial={false}
+            animate={{ 
+              y: isHeaderVisible ? 0 : -headerHeight,
+              opacity: isHeaderVisible ? 1 : 0,
+            }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <div className="max-w-4xl mx-auto flex justify-between items-center">
-              <h1 className="text-2xl font-bold">RestoChat</h1>
-              <div className="flex items-center space-x-4">
-                <ClearChatButton onClearChat={clearChat} theme={theme} isVisible={isChatStarted} />
-                <motion.button 
-                  onClick={toggleTheme} 
-                  className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  {theme === 'light' ? '🌙' : '☀️'}
-                </motion.button>
+            <div className="max-w-4xl mx-auto p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">RestoChat</h1>
+                <div className="flex items-center space-x-4">
+                  <motion.button 
+                    onClick={toggleTheme} 
+                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {theme === 'light' ? '🌙' : '☀️'}
+                  </motion.button>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <div className="flex space-x-2">
+                  <TabButton
+                    icon={Home}
+                    text="Home"
+                    isActive={activeTab === 'home'}
+                    onClick={() => setActiveTab('home')}
+                  />
+                  <TabButton
+                    icon={MessageCircle}
+                    text="Chat"
+                    isActive={activeTab === 'chat'}
+                    onClick={() => setActiveTab('chat')}
+                  />
+                </div>
               </div>
             </div>
-          </header>
+          </motion.header>
   
           <main 
-        ref={mainContentRef}
-        className={`flex-grow overflow-y-auto ${conversations.length === 0 ? 'flex items-center justify-center' : 'p-4'}`}
-      >
-        <div className="w-full max-w-4xl mx-auto">
-          {conversations.length === 0 ? (
-            <EmptyState 
-              theme={theme} 
-              onItemClick={handleItemClick} 
-              addToCart={addToCart}
-            />
-          ) : (
-            <div className="space-y-4">
-              <AnimatePresence>
-                {conversations.map((conv, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="mb-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <motion.div
-                      className={`p-6 rounded-lg shadow-lg cursor-pointer ${
-                        theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
-                      } transition-colors duration-200`}
-                      onClick={() => openStory(index)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-                        {conv.query}
-                      </h3>
-                      <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                        {conv.response.substring(0, 100)}...
-                      </p>
-                      {conv.items.length > 0 && (
-                        <div className="mt-4 flex space-x-2 md:space-x-4 md:p-2 overflow-x-auto md:overflow-x-visible">
-                          {conv.items.slice(0, 3).map((item, itemIndex) => (
-                            <ItemCircle
-                              key={itemIndex}
-                              item={item}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedItemFromConversation(item);
-                              }}
-                            />
-                          ))}
-                          {conv.items.length > 3 && (
-                            <div className="flex flex-col items-center">
-                              <motion.div
-                                className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold cursor-pointer"
-                                whileHover={{ scale: 1.1 }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openStory(index);
-                                }}
-                              >
-                                +{conv.items.length - 3}
-                              </motion.div>
-                              <p className={`text-xs mt-1 text-center w-16 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                                More
-                              </p>
+            ref={mainContentRef}
+            className="flex-grow overflow-y-auto no-scrollbar"
+            style={{ paddingTop: isHeaderVisible ? 0 : headerHeight }}
+          >
+            <AnimatePresence mode="wait">
+              {activeTab === 'home' && (
+                <motion.div
+                  key="home"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full overflow-y-auto no-scrollbar"
+                >
+                  <EmptyState 
+                    theme={theme} 
+                    onItemClick={handleItemClick} 
+                    addToCart={addToCart}
+                  />
+                </motion.div>
+              )}
+              {activeTab === 'chat' && (
+                <motion.div
+                  key="chat"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full p-4"
+                >
+                  {conversations.length === 0 ? (
+                    <EmptyChatState />
+                  ) : (
+                    <div className="space-y-4 max-w-4xl mx-auto">
+                      <motion.div 
+                        className="mb-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <motion.div
+                          className={`p-6 rounded-lg shadow-lg cursor-pointer ${
+                            theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
+                          } transition-colors duration-200`}
+                          onClick={() => openStory(0)}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                            {conversations[0].query}
+                          </h3>
+                          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                            {conversations[0].response.substring(0, 100)}...
+                          </p>
+                          {conversations[0].items.length > 0 && (
+                            <div className="mt-4 flex space-x-2 md:space-x-4 md:p-2 overflow-x-auto md:overflow-x-visible">
+                              {conversations[0].items.slice(0, 3).map((item, itemIndex) => (
+                                <ItemCircle
+                                  key={itemIndex}
+                                  item={item}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedItemFromConversation(item);
+                                  }}
+                                />
+                              ))}
+                              {conversations[0].items.length > 3 && (
+                                <div className="flex flex-col items-center">
+                                  <motion.div
+                                    className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold cursor-pointer"
+                                    whileHover={{ scale: 1.1 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openStory(0);
+                                    }}
+                                  >
+                                    +{conversations[0].items.length - 3}
+                                  </motion.div>
+                                  <p className={`text-xs mt-1 text-center w-16 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+                                    More
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           )}
-                        </div>
+                        </motion.div>
+                      </motion.div>
+                      {conversations.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.3, delay: 0.2 }}
+                        >
+                          <button
+                            onClick={clearChat}
+                            className={`w-full py-3 rounded-lg text-center font-semibold ${
+                              theme === 'light'
+                                ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                                : 'bg-red-900 text-red-200 hover:bg-red-800'
+                            } transition-colors`}
+                          >
+                            Clear Chat and Start New Conversation
+                          </button>
+                        </motion.div>
                       )}
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-          <div ref={conversationEndRef} />
-        </div>
-      </main>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div ref={conversationEndRef} />
+          </main>
   
-      <footer className={`flex-shrink-0 z-50 ${
-        theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
-      } backdrop-blur-md`}>
+          <footer className={`flex-shrink-0 z-50 ${
+            theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
+          } backdrop-blur-md`}>
         <AnimatePresence>
           {isPromptsExpanded && (
             <motion.div
@@ -1079,7 +1203,7 @@ const MenuRecommendationSystem = () => {
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className={`absolute bottom-[calc(100%_-_1rem)] left-0 right-0 py-1 ${
                 theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
-              } backdrop-blur-md`}
+              } backdrop-blur-md safe-area-bottom`}
             >
               <LayoutGroup>
                 <motion.div 
