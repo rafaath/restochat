@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useAnimation, LayoutGroup } from 'framer-motio
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle
+  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle,Moon, Sun
 } from 'lucide-react';
 import {
   Dialog,
@@ -149,6 +149,13 @@ const MenuRecommendationSystem = () => {
 
   const mainContentRef = useRef(null);
 
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef(null);
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, []);
 
   const [displayedPrompts, setDisplayedPrompts] = useState([]);
 
@@ -415,25 +422,34 @@ const MenuRecommendationSystem = () => {
     </div>
   );
 
-  const TabButton = ({ icon: Icon, text, isActive, onClick }) => (
-    <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      onClick={onClick}
-      className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-300 ${
-        isActive
-          ? theme === 'light'
-            ? 'bg-blue-500 text-white'
-            : 'bg-blue-600 text-white'
-          : theme === 'light'
-          ? 'text-gray-600 hover:bg-gray-200'
-          : 'text-gray-400 hover:bg-gray-700'
-      }`}
-    >
-      <Icon size={20} />
-      <span className="font-medium">{text}</span>
-    </motion.button>
-  );
+  const TabButton = React.useMemo(() => {
+    return ({ icon: Icon, isActive, onClick }) => (
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onClick}
+        className={`relative p-2 rounded-full transition-all duration-300 ${
+          isActive
+            ? theme === 'light'
+              ? 'text-blue-600'
+              : 'text-blue-400'
+            : theme === 'light'
+            ? 'text-gray-600 hover:text-gray-800'
+            : 'text-gray-400 hover:text-white'
+        }`}
+      >
+        <Icon size={20} />
+        {isActive && (
+          <motion.div
+            layoutId="activeTab"
+            className="absolute bottom-0 left-0 right-0 h-0.5 bg-current"
+            initial={false}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          />
+        )}
+      </motion.button>
+    );
+  }, [theme]);
 
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
@@ -1061,27 +1077,47 @@ const MenuRecommendationSystem = () => {
   
       {!showWelcome && (
         <>
-          <header 
-            className={`flex-shrink-0 z-50 p-4 shadow-md ${
-              theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-900 text-white'
-            }`}
-          >
-            <div className="max-w-4xl mx-auto flex justify-between items-center">
-              <h1 className="text-2xl font-bold">RestoChat</h1>
-              <div className="flex items-center space-x-4">
-                <motion.button 
-                  onClick={toggleTheme} 
-                  className="p-2 rounded-full bg-gray-200 dark:bg-gray-700"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  {theme === 'light' ? '🌙' : '☀️'}
-                </motion.button>
+           <header 
+        className={`flex-shrink-0 z-50 transition-all duration-300 ${
+          theme === 'light' 
+            ? 'bg-white bg-opacity-90 text-gray-800' 
+            : 'bg-gray-900 bg-opacity-90 text-white'
+        } backdrop-blur-sm`}
+      >
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-lg font-bold">RestoChat</h1>
+              <div className="flex space-x-1">
+                <TabButton
+                  icon={Home}
+                  isActive={activeTab === 'home'}
+                  onClick={() => setActiveTab('home')}
+                />
+                <TabButton
+                  icon={MessageCircle}
+                  isActive={activeTab === 'chat'}
+                  onClick={() => setActiveTab('chat')}
+                />
               </div>
             </div>
-          </header>
+            <motion.button 
+              onClick={toggleTheme} 
+              className={`p-2 rounded-full transition-colors ${
+                theme === 'light' 
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
+                  : 'bg-gray-700 hover:bg-gray-600 text-white'
+              }`}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            </motion.button>
+          </div>
+        </div>
+      </header>
   
-          <div className="flex justify-center mt-4 mb-2">
+          {/* <div className="flex justify-center mt-4 mb-2">
             <div className="flex space-x-2">
               <TabButton
                 icon={Home}
@@ -1096,7 +1132,7 @@ const MenuRecommendationSystem = () => {
                 onClick={() => setActiveTab('chat')}
               />
             </div>
-          </div>
+          </div> */}
   
           <main 
             ref={mainContentRef}
