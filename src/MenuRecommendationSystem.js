@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useAnimation, LayoutGroup } from 'framer-motio
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle,Moon, Sun
+  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle,Moon, Sun, Settings,
 } from 'lucide-react';
 import {
   Dialog,
@@ -131,6 +131,7 @@ const MenuRecommendationSystem = () => {
     setSelectedComboItem(item);
     setIsModalOpen(true);
   };
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const clearChat = () => {
     setConversations([]);
@@ -1058,7 +1059,23 @@ const MenuRecommendationSystem = () => {
 
 
 
-
+  const IconButton = React.useMemo(() => {
+    return ({ icon: Icon, onClick, label }) => (
+      <motion.button 
+        onClick={onClick} 
+        className={`p-2 rounded-full transition-colors ${
+          theme === 'light' 
+            ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
+            : 'bg-gray-700 hover:bg-gray-600 text-white'
+        }`}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        aria-label={label}
+      >
+        <Icon size={18} />
+      </motion.button>
+    );
+  }, [theme]);
 
 
 
@@ -1101,22 +1118,21 @@ const MenuRecommendationSystem = () => {
                 />
               </div>
             </div>
-            <motion.button 
-              onClick={toggleTheme} 
-              className={`p-2 rounded-full transition-colors ${
-                theme === 'light' 
-                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-                  : 'bg-gray-700 hover:bg-gray-600 text-white'
-              }`}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </motion.button>
+            <div className="flex items-center space-x-2">
+              <IconButton 
+                icon={theme === 'light' ? Moon : Sun}
+                onClick={toggleTheme}
+                label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              />
+              <IconButton 
+                icon={Settings}
+                onClick={() => setIsSettingsOpen(true)}
+                label="Open settings"
+              />
+            </div>
           </div>
         </div>
       </header>
-  
           {/* <div className="flex justify-center mt-4 mb-2">
             <div className="flex space-x-2">
               <TabButton
