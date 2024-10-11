@@ -394,7 +394,7 @@ const MenuRecommendationSystem = () => {
     </motion.div>
   );
 
-  const EmptyChatState = () => (
+  const EmptyChatState = React.memo(() => (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -421,7 +421,7 @@ const MenuRecommendationSystem = () => {
         </motion.button>
       </motion.div>
     </div>
-  );
+  ));
 
   const TabButton = React.useMemo(() => {
     return ({ icon: Icon, isActive, onClick }) => (
@@ -1079,6 +1079,13 @@ const MenuRecommendationSystem = () => {
 
 
 
+  const [showEmptyState, setShowEmptyState] = useState(true);
+
+  useEffect(() => {
+    // Only show empty state when there are no conversations and the query is empty
+    setShowEmptyState(conversations.length === 0 && query.trim() === '');
+  }, [conversations, query]);
+
 
   return (
     <div className={`app-container h-screen flex flex-col overflow-hidden ${
@@ -1180,9 +1187,9 @@ const MenuRecommendationSystem = () => {
     transition={{ duration: 0.3 }}
     className="h-full overflow-y-auto p-4"
   >
-    {conversations.length === 0 ? (
-      <EmptyChatState />
-    ) : (
+     {showEmptyState ? (
+                <EmptyChatState theme={theme} searchInputRef={searchInputRef} />
+              ) : (
       <div className="space-y-4 max-w-4xl mx-auto">
         {conversations.map((conversation, index) => (
           <React.Fragment key={index}>
