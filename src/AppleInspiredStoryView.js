@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp, Star, Package, Info, Sparkles, Plus } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp, Star, Package, Info, Sparkles, Plus, Minus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Tooltip } from './components/ui/tooltip';
 import { Badge } from './components/ui/badge';
+import AnimatedAddToCartButton from './AnimatedAddToCartButton';
 
 const Notification = ({ message, theme }) => (
   <motion.div
@@ -189,10 +190,51 @@ const ComboItem = ({ item, onAddToCart, theme, onItemClick }) => {
   );
 };
 
-const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
+const ComboQuantityButton = ({ quantity, onIncrement, onDecrement, theme }) => {
+  return (
+    <motion.div
+      initial={{ scale: 0.9 }}
+      animate={{ scale: 1 }}
+      className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
+        theme === 'light'
+          ? 'bg-blue-100 text-blue-600'
+          : 'bg-blue-900 text-blue-300'
+      }`}
+    >
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={onDecrement}
+        className={`p-1 rounded-full ${
+          theme === 'light'
+            ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+            : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+        }`}
+      >
+        <Minus size={16} />
+      </motion.button>
+      <span className="font-bold text-lg min-w-[20px] text-center">{quantity}</span>
+      <motion.button
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={onIncrement}
+        className={`p-1 rounded-full ${
+          theme === 'light'
+            ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+            : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+        }`}
+      >
+        <Plus size={16} />
+      </motion.button>
+    </motion.div>
+  );
+};
+
+const ComboCard = ({ combo,onAddToCart, onAddCombo, theme, onItemClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(0);
+  const [quantity, setQuantity] = useState(0);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -204,6 +246,18 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
 
   const totalSavings = combo.combo_items.reduce((sum, item) => sum + item.cost, 0) - combo.cost;
   const savingsPercentage = ((totalSavings / combo.combo_items.reduce((sum, item) => sum + item.cost, 0)) * 100).toFixed(0);
+
+  const handleIncrement = () => {
+    setQuantity(prev => prev + 1);
+    onAddCombo(combo, 1);
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 0) {
+      setQuantity(prev => prev - 1);
+      onAddCombo(combo, -1);
+    }
+  };
 
   return (
     <motion.div
@@ -240,40 +294,48 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
           {combo.description}
         </p>
         <div className="flex flex-col space-y-3">
-          <div className="flex flex-col items-start justify-between">
-            <div>
-              <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-                ₹{combo.cost.toFixed(2)}
-              </span>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className={`inline-block ml-2 px-2 py-1 rounded-full text-xs font-semibold ${
-                  theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-green-800 text-green-100'
-                }`}
-              >
-                Save {savingsPercentage}%
-              </motion.div>
-            </div>
-            
-            <span className={`text-xs mt-2 mb-2 ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-              Original: ₹{(combo.cost + totalSavings).toFixed(2)}
-            </span>
-          </div>
+        <div className="flex justify-between items-center">
+        <div>
+          <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+            ₹{combo.cost.toFixed(2)}
+          </span>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className={`inline-block ml-2 px-2 py-1 rounded-full text-xs font-semibold ${
+              theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-green-800 text-green-100'
+            }`}
+          >
+            Save {savingsPercentage}%
+          </motion.div>
+        </div>
+        {quantity > 0 ? (
+          <ComboQuantityButton
+            quantity={quantity}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            theme={theme}
+          />
+        ) : (
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onAddCombo(combo)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleIncrement}
             className={`${
               theme === 'light' 
                 ? 'bg-blue-500 hover:bg-blue-600' 
                 : 'bg-blue-600 hover:bg-blue-700'
-            } text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center space-x-2 w-full shadow-md hover:shadow-lg`}
+            } text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center space-x-2 shadow-md hover:shadow-lg`}
           >
             <Package size={18} />
             <span>Add Combo</span>
           </motion.button>
+        )}
+      </div>
+          <span className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+            Original: ₹{(combo.cost + totalSavings).toFixed(2)}
+          </span>
         </div>
       </div>
       <motion.div
@@ -321,20 +383,31 @@ const truncateText = (text, maxLength) => {
 };
 
 
-const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onItemClick }, ref) => {
+
+const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onItemClick, cart }, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCombos, setShowCombos] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const combosSectionRef = useRef(null);
 
-  const truncateText = (text, maxLength) => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + '...';
-  };
+  const getItemQuantity = useCallback((itemId) => {
+    const cartItem = cart.find(cartItem => cartItem.item_id === itemId);
+    return cartItem ? cartItem.quantity : 0;
+  }, [cart]);
 
-  const descriptionText = showFullDescription
-    ? item.description
-    : truncateText(item.description, 120);
+  const isPartOfCombo = useCallback((itemId) => {
+    const cartItem = cart.find(cartItem => cartItem.item_id === itemId);
+    return cartItem ? cartItem.isPartOfCombo : false;
+  }, [cart]);
+
+  const quantity = getItemQuantity(item.item_id);
+  const itemIsPartOfCombo = isPartOfCombo(item.item_id);
+
+  const handleAddToCart = useCallback((newItem) => {
+    if (!itemIsPartOfCombo) {
+      onAddToCart(newItem);
+    }
+  }, [onAddToCart, itemIsPartOfCombo]);
 
   const handleShowCombos = () => {
     setShowCombos(!showCombos);
@@ -344,9 +417,18 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
           behavior: 'smooth',
           block: 'start',
         });
-      }, 100); // Small delay to ensure the combos section is rendered
+      }, 100);
     }
   };
+
+  const truncateText = (text, maxLength) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + '...';
+  };
+
+  const descriptionText = showFullDescription
+    ? item.description
+    : truncateText(item.description, 120);
 
   return (
     <motion.div
@@ -359,13 +441,8 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
       className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
         showCombos ? 'md:col-span-2' : ''
       }`}
-      // onClick={() => onItemClick(item)}
     >
-      <div
-        className={`flex flex-col md:flex-row ${
-          showCombos ? 'md:divide-x' : ''
-        } ${theme === 'light' ? 'divide-gray-200' : 'divide-gray-700'} h-full`}
-      >
+      <div className={`flex flex-col md:flex-row ${showCombos ? 'md:divide-x' : ''} ${theme === 'light' ? 'divide-gray-200' : 'divide-gray-700'} h-full`}>
         <div className={`flex-shrink-0 ${showCombos ? 'md:w-1/2' : 'w-full'} flex flex-col`}>
           <div className="relative">
             <img
@@ -426,34 +503,37 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
               </span>
             </div>
             <div className="mt-auto">
-              <div className="flex justify-between items-center mt-3">
-                <span className={`text-2xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-                  ₹{item.cost.toFixed(2)}
-                </span>
+        <div className="flex justify-between items-center mt-3">
+          <span className={`text-2xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+            ₹{item.cost.toFixed(2)}
+          </span>
+          {itemIsPartOfCombo ? (
+            <span className={`text-sm font-semibold ${theme === 'light' ? 'text-blue-600' : 'text-blue-400'}`}>
+              Part of Combo
+            </span>
+          ) : (
+            <AnimatedAddToCartButton
+                  item={item}
+                  addToCart={handleAddToCart}
+                  theme={theme}
+                  quantity={quantity}
+            />
+          )}
+        </div>
+              {item.combos && item.combos.length > 0 && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => onAddToCart(item)}
-                  className={`${theme === 'light' ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center space-x-2`}
+                  onClick={handleShowCombos}
+                  className={`mt-3 w-full ${theme === 'light' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'} text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center justify-center space-x-2`}
                 >
-                  <ShoppingBag size={16} />
-                  <span>Add to Cart</span>
+                  <Sparkles size={16} />
+                  <span>
+                    {showCombos ? 'Hide' : 'View'} {item.combos.length} Combo
+                    {item.combos.length > 1 ? 's' : ''}
+                  </span>
                 </motion.button>
-              </div>
-              {item.combos && item.combos.length > 0 && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleShowCombos}
-              className={`mt-3 w-full ${theme === 'light' ? 'bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'} text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors flex items-center justify-center space-x-2`}
-            >
-              <Sparkles size={16} />
-              <span>
-                {showCombos ? 'Hide' : 'View'} {item.combos.length} Combo
-                {item.combos.length > 1 ? 's' : ''}
-              </span>
-            </motion.button>
-          )}
+              )}
             </div>
             <AnimatePresence>
               {isExpanded && (
@@ -507,13 +587,13 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
                   </h3>
                 </div>
                 <ComboSection
-                combos={item.combos}
-                onAddToCart={onAddToCart}
-                onAddCombo={onAddCombo}
-                setShowCombos={setShowCombos}
-                theme={theme}
-                onItemClick={onItemClick}
-              />
+                  combos={item.combos}
+                  onAddToCart={onAddToCart}
+                  onAddCombo={onAddCombo}
+                  setShowCombos={setShowCombos}
+                  theme={theme}
+                  onItemClick={onItemClick}
+                />
               </div>
             </motion.div>
           )}
@@ -523,7 +603,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
   );
 });
 
-const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo, theme, onItemClick }) => {
+const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo, theme, onItemClick, cart }) => {
   const itemRefs = useRef({});
   const [items, setItems] = useState([]);
 
@@ -566,6 +646,8 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
                 onAddCombo={onAddCombo}
                 theme={theme}
                 onItemClick={onItemClick}
+                cart ={cart}
+
               />
             ))}
           </div>
@@ -575,7 +657,7 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
   );
 });
 
-const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme, onItemClick }) => {
+const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme, onItemClick, cart }) => {
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [notification, setNotification] = useState(null);
   const controls = useAnimation();
@@ -622,22 +704,68 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
 
   const handleAddToCart = useCallback(
     (item) => {
-      addToCart(item);
-      setNotification(`${item.name_of_item} added to cart!`);
+      const existingItem = cart.find(cartItem => cartItem.item_id === item.item_id);
+      let newQuantity;
+
+      if (existingItem) {
+        newQuantity = item.quantity;
+        if (newQuantity === 0) {
+          addToCart({ ...item, quantity: 0 });
+          setNotification(`${item.name_of_item} removed from cart!`);
+        } else {
+          addToCart({ ...item, quantity: newQuantity });
+          setNotification(`${item.name_of_item} updated in cart!`);
+        }
+      } else {
+        newQuantity = 1;
+        addToCart({ ...item, quantity: newQuantity });
+        setNotification(`${item.name_of_item} added to cart!`);
+      }
+
       setTimeout(() => setNotification(null), 3000);
     },
-    [addToCart]
+    [addToCart, cart]
   );
 
   const handleAddCombo = useCallback(
-    (combo) => {
-      combo.combo_items.forEach((item) => addToCart(item));
-      setNotification(`${combo.combo_name} added to cart!`);
+    (combo, quantityChange = 1) => {
+      const existingComboIndex = cart.findIndex(item => item.isCombo && item.combo_id === combo.combo_id);
+      
+      if (existingComboIndex !== -1) {
+        // Update existing combo
+        const existingCombo = cart[existingComboIndex];
+        const newQuantity = Math.max(0, existingCombo.quantity + quantityChange);
+        
+        if (newQuantity === 0) {
+          // Remove combo if quantity becomes 0
+          addToCart({ ...existingCombo, quantity: 0 }); // This will remove the item
+        } else {
+          addToCart({ ...existingCombo, quantity: newQuantity });
+        }
+      } else if (quantityChange > 0) {
+        // Add new combo
+        const newComboItem = {
+          isCombo: true,
+          combo_id: combo.combo_id,
+          combo_name: combo.combo_name,
+          cost: combo.cost,
+          quantity: quantityChange,
+          combo_items: combo.combo_items,
+          image_links: combo.combo_items.map(item => item.image_link)
+        };
+        addToCart(newComboItem);
+      }
+  
+      if (quantityChange > 0) {
+        setNotification(`${combo.combo_name} added to cart!`);
+      } else {
+        setNotification(`${combo.combo_name} updated in cart!`);
+      }
       setTimeout(() => setNotification(null), 3000);
     },
-    [addToCart]
+    [addToCart, cart]
   );
-
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -655,6 +783,7 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className={`w-full max-w-4xl max-h-[90vh] ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} rounded-2xl overflow-hidden shadow-2xl relative flex flex-col`}
           >
+            {/* Header */}
             <div className={`flex justify-between items-center p-6 border-b ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>
               <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Our Recommendations</h2>
               <motion.button
@@ -666,17 +795,22 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
                 <X size={24} />
               </motion.button>
             </div>
+
+            {/* Content */}
             <div ref={scrollContainerRef} className="flex-grow overflow-y-auto">
               <motion.div animate={controls} className="h-full">
               <IsolatedScrollContent
-                  conversation={conversations[activeIndex]}
-                  onAddToCart={handleAddToCart}
-                  onAddCombo={handleAddCombo}
-                  theme={theme}
-                  onItemClick={onItemClick}
-                />
+                conversation={conversations[activeIndex]}
+                onAddToCart={handleAddToCart}
+                onAddCombo={handleAddCombo}
+                theme={theme}
+                onItemClick={onItemClick}
+                cart={cart}
+              />
               </motion.div>
             </div>
+
+            {/* Navigation */}
             {conversations.length > 1 && (
               <div className={`flex justify-between items-center p-6 border-t ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>
                 <motion.button

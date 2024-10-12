@@ -1,9 +1,75 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Plus, Minus, ShoppingCart } from 'lucide-react';
+import { X, Plus, Minus, ShoppingCart, Package } from 'lucide-react';
+
+const CombinedImage = ({ images, size = 64 }) => {
+  const imageCount = images.length;
+  const gridSize = Math.ceil(Math.sqrt(imageCount));
+
+  return (
+    <div 
+      style={{
+        width: size,
+        height: size,
+        display: 'grid',
+        gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
+        gridTemplateRows: `repeat(${gridSize}, 1fr)`,
+        gap: '2px',
+        borderRadius: '8px',
+        overflow: 'hidden',
+      }}
+    >
+      {images.map((src, index) => (
+        <img 
+          key={index} 
+          src={src} 
+          alt={`Combo item ${index + 1}`} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      ))}
+    </div>
+  );
+};
 
 const IsolatedCart = ({ isOpen, onClose, theme, cartItems, onIncrement, onDecrement }) => {
   const total = cartItems.reduce((sum, item) => sum + item.cost * item.quantity, 0);
+
+  const renderCartItem = (item, index) => {
+    const isCombo = item.isCombo;
+    return (
+      <div key={index} className={`flex justify-between items-center py-4 ${
+        theme === 'light' ? 'border-b border-gray-200' : 'border-b border-gray-700'
+      }`}>
+        <div className="flex items-center">
+          {isCombo ? (
+            <CombinedImage images={item.combo_items.map(i => i.image_link)} size={64} />
+          ) : (
+            <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-lg mr-4" />
+          )}
+          <div className="ml-4">
+            <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              {isCombo ? (
+                <span className="flex items-center">
+                  <Package size={16} className="mr-2" />
+                  {item.combo_name}
+                </span>
+              ) : item.name_of_item}
+            </h3>
+            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost.toFixed(2)} x {item.quantity}</p>
+          </div>
+        </div>
+        <div className="flex items-center">
+          <button onClick={() => onDecrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+            <Minus size={16} />
+          </button>
+          <span className={`mx-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
+          <button onClick={() => onIncrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+            <Plus size={16} />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <motion.div 
@@ -38,28 +104,7 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, onIncrement, onDecrem
           ) : (
             <>
               <div className="flex-grow">
-                {cartItems.map((item, index) => (
-                  <div key={index} className={`flex justify-between items-center py-4 ${
-                    theme === 'light' ? 'border-b border-gray-200' : 'border-b border-gray-700'
-                  }`}>
-                    <div className="flex items-center">
-                      <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-lg mr-4" />
-                      <div>
-                        <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
-                        <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost.toFixed(2)} x {item.quantity}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <button onClick={() => onDecrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                        <Minus size={16} />
-                      </button>
-                      <span className={`mx-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
-                      <button onClick={() => onIncrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                {cartItems.map(renderCartItem)}
               </div>
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <p className={`text-xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>

@@ -31,7 +31,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
     setTimeout(() => {
       setShowNotification(false);
       onClose();
-    }, 1500);
+    }, 700);
   };
 
   const modalVariants = {

@@ -185,17 +185,7 @@ const MenuRecommendationSystem = () => {
   // const [selectedItem, setSelectedItem] = useState(null);
 
   const [menuItems, setMenuItems] = useState([]);
-
-  const [scrollPosition, setScrollPosition] = useState(0);
   const promptsContainerRef = useRef(null);
-
-  const handleScroll = (direction) => {
-    const container = promptsContainerRef.current;
-    if (container) {
-      const scrollAmount = direction === 'left' ? -200 : 200;
-      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-  };
 
   useEffect(() => {
     // Load menu items from the JSON file
@@ -594,32 +584,45 @@ const MenuRecommendationSystem = () => {
   }, []);
 
   const addToCart = useCallback((item) => {
-    setCart(prev => {
-      const existingItem = prev.find(cartItem => cartItem.name_of_item === item.name_of_item);
-      if (existingItem) {
-        return prev.map(cartItem => 
-          cartItem.name_of_item === item.name_of_item 
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
-      } else {
-        return [...prev, { ...item, quantity: 1 }];
+    setCart(prevCart => {
+      const existingItemIndex = prevCart.findIndex(cartItem => cartItem.item_id === item.item_id);
+      
+      if (existingItemIndex !== -1) {
+        // Item exists in cart
+        const updatedCart = [...prevCart];
+        if (item.quantity === 0) {
+          // Remove item if quantity is 0
+          updatedCart.splice(existingItemIndex, 1);
+        } else {
+          // Update quantity
+          updatedCart[existingItemIndex] = { ...updatedCart[existingItemIndex], quantity: item.quantity };
+        }
+        return updatedCart;
+      } else if (item.quantity > 0) {
+        // Add new item to cart
+        return [...prevCart, item];
       }
+      
+      return prevCart;
     });
   }, []);
 
   const removeFromCart = useCallback((item) => {
-    setCart(prev => {
-      const existingItem = prev.find(cartItem => cartItem.name_of_item === item.name_of_item);
-      if (existingItem.quantity > 1) {
-        return prev.map(cartItem => 
-          cartItem.name_of_item === item.name_of_item 
-            ? { ...cartItem, quantity: cartItem.quantity - 1 }
-            : cartItem
-        );
-      } else {
-        return prev.filter(cartItem => cartItem.name_of_item !== item.name_of_item);
+    setCart(prevCart => {
+      const existingItemIndex = prevCart.findIndex(cartItem => cartItem.item_id === item.item_id);
+      if (existingItemIndex !== -1) {
+        const updatedCart = [...prevCart];
+        if (updatedCart[existingItemIndex].quantity > 1) {
+          updatedCart[existingItemIndex] = {
+            ...updatedCart[existingItemIndex],
+            quantity: updatedCart[existingItemIndex].quantity - 1
+          };
+        } else {
+          updatedCart.splice(existingItemIndex, 1);
+        }
+        return updatedCart;
       }
+      return prevCart;
     });
   }, []);
 
@@ -1173,10 +1176,11 @@ const MenuRecommendationSystem = () => {
                   className="h-full"
                 >
                   <EmptyState 
-                    theme={theme} 
-                    onItemClick={handleItemClick} 
-                    addToCart={addToCart}
-                  />
+  theme={theme} 
+  onItemClick={handleItemClick} 
+  addToCart={addToCart}
+  cart={cart}
+/>
                 </motion.div>
               )}
  {activeTab === 'chat' && (
@@ -1373,11 +1377,13 @@ const MenuRecommendationSystem = () => {
         conversations={conversations}
         initialIndex={activeStoryIndex}
         addToCart={addToCart}
+        removeFromCart = {removeFromCart}
         theme={theme}
         onItemClick={handleComboItemClick}
+        cart={cart}
       />
   
-<AnimatePresence>
+  <AnimatePresence>
         {isMenuOpen && (
           <IsolatedMenu
             isOpen={isMenuOpen}
@@ -1385,11 +1391,12 @@ const MenuRecommendationSystem = () => {
             theme={theme}
             menuItems={menuItems}
             addToCart={addToCart}
+            cart={cart}
           />
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
+     <AnimatePresence>
         {isCartOpen && (
           <IsolatedCart
             isOpen={isCartOpen}

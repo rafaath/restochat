@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Star, ShoppingBag, Check } from 'lucide-react';
 import Lottie from 'lottie-react';
 import animationData from './animation.json';
+import AnimatedAddToCartButton from './AnimatedAddToCartButton';
+
 
 const LottieAnimation = ({ 
   width = 192, 
@@ -49,7 +51,7 @@ const LottieAnimation = ({
   );
 };
 
-const AnimatedAddToCartButton = ({ onClick, theme }) => {
+const AButton = ({ onClick, theme, quantity }) => {
   const [isAdded, setIsAdded] = useState(false);
 
   const handleClick = useCallback(() => {
@@ -62,7 +64,7 @@ const AnimatedAddToCartButton = ({ onClick, theme }) => {
     <motion.button
       onClick={handleClick}
       className={`px-2 py-1 rounded-full text-xs font-medium flex items-center justify-center w-28 h-8 ${
-        isAdded
+        isAdded || quantity > 0
           ? 'bg-green-500 text-white'
           : `bg-blue-600 text-white hover:bg-blue-700`
       } transition-colors duration-300`}
@@ -70,7 +72,7 @@ const AnimatedAddToCartButton = ({ onClick, theme }) => {
       whileTap={{ scale: 0.95 }}
     >
       <AnimatePresence mode="wait">
-        {isAdded ? (
+        {isAdded || quantity > 0 ? (
           <motion.div
             key="check"
             initial={{ opacity: 0, scale: 0.5 }}
@@ -79,7 +81,7 @@ const AnimatedAddToCartButton = ({ onClick, theme }) => {
             className="flex items-center"
           >
             <Check size={14} className="mr-1" />
-            <span className="whitespace-nowrap">Added</span>
+            <span className="whitespace-nowrap">{quantity > 0 ? `Added (${quantity})` : 'Added'}</span>
           </motion.div>
         ) : (
           <motion.div
@@ -98,10 +100,15 @@ const AnimatedAddToCartButton = ({ onClick, theme }) => {
   );
 };
 
-const EmptyState = ({ theme, onItemClick, addToCart }) => {
+const EmptyState = ({ theme, onItemClick, addToCart, cart }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const carouselRef = useRef(null);
+
+  const getItemQuantity = useCallback((itemId) => {
+    const cartItem = cart.find(item => item.item_id === itemId);
+    return cartItem ? cartItem.quantity : 0;
+  }, [cart]);
 
   useEffect(() => {
     import('./full_menu.json').then(data => {
@@ -130,7 +137,8 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
   }, [onItemClick]);
 
   return (
-    <div className="h-full flex flex-col pt-1 p-auto space-y-4 max-w-4xl mx-auto no-scrollbar">
+    <div className="h-full flex flex-col pt-3 space-y-4 max-w-4xl mx-auto no-scrollbar">
+      {/* Header and Lottie Animation */}
       <motion.div 
         className="text-center"
         initial={{ opacity: 0, y: -10 }}
@@ -149,6 +157,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
         <LottieAnimation />
       </div>
 
+      {/* Top-Rated Items Carousel */}
       <div className="flex-grow flex flex-col">
         <h2 className={`text-lg font-extrabold pl-3 text-left bg-gradient-to-r ${headingGradient} text-transparent bg-clip-text mb-4`}>
           Top-Rated Temptations
@@ -166,7 +175,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
             <AnimatePresence>
               {topRatedItems.map((item, index) => (
                 <motion.div
-                  key={item.name_of_item}
+                  key={item.item_id}
                   className={`flex-shrink-0 w-64 h-auto rounded-xl overflow-hidden shadow-md cursor-pointer ${
                     theme === 'light' ? 'bg-white' : 'bg-gray-800'
                   }`}
@@ -177,6 +186,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
                   whileHover={{ y: -3, boxShadow: '0px 3px 10px rgba(0,0,0,0.1)' }}
                   onClick={(event) => handleCardClick(item, event)}
                 >
+                  {/* Item image and rating */}
                   <div className="relative h-40">
                     <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -190,6 +200,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
                       </div>
                     </div>
                   </div>
+                  {/* Item description and add to cart button */}
                   <div className="p-2 flex flex-col justify-between flex-grow">
                     <p className={`text-xs mb-2 line-clamp-2 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
                       {item.description || 'Delicious dish awaits you!'}
@@ -200,8 +211,10 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
                       </span>
                       <div className="add-to-cart-button" onClick={(e) => e.stopPropagation()}>
                         <AnimatedAddToCartButton
-                          onClick={() => addToCart(item)}
-                          theme={theme} 
+                          item={item}
+                          addToCart={addToCart}
+                          theme={theme}
+                          quantity={getItemQuantity(item.item_id)}
                         />
                       </div>
                     </div>
