@@ -394,32 +394,23 @@ const MenuRecommendationSystem = () => {
     </motion.div>
   );
 
-  const EmptyChatState = React.memo(() => (
+  const EmptyChatState = React.memo(({ theme, searchInputRef }) => (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full"
+      <div className="flex justify-center mb-4">
+        <MessageCircle size={64} className={`${theme === 'light' ? 'text-gray-400' : 'text-gray-600'}`} />
+      </div>
+      <h2 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+        Start a New Conversation
+      </h2>
+      <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+        Ask about our menu, dietary options, or get personalized recommendations!
+      </p>
+      <button
+        onClick={() => searchInputRef.current?.focus()}
+        className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
       >
-        <div className="flex justify-center mb-4">
-          <MessageCircle size={64} className={`${theme === 'light' ? 'text-gray-400' : 'text-gray-600'}`} />
-        </div>
-        <h2 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-          Start a New Conversation
-        </h2>
-        <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-          Ask about our menu, dietary options, or get personalized recommendations!
-        </p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => searchInputRef.current?.focus()}
-          className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
-        >
-          Start Chatting
-        </motion.button>
-      </motion.div>
+        Start Chatting
+      </button>
     </div>
   ));
 
@@ -1178,18 +1169,18 @@ const MenuRecommendationSystem = () => {
                   />
                 </motion.div>
               )}
-{activeTab === 'chat' && (
-  <motion.div
-    key="chat"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -20 }}
-    transition={{ duration: 0.3 }}
-    className="h-full overflow-y-auto p-4"
-  >
-     {showEmptyState ? (
-                <EmptyChatState theme={theme} searchInputRef={searchInputRef} />
-              ) : (
+ {activeTab === 'chat' && (
+          <motion.div
+            key="chat"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="h-full overflow-y-auto p-4"
+          >
+            {conversations.length === 0 ? (
+              <EmptyChatState theme={theme} searchInputRef={searchInputRef} />
+            ) : (
       <div className="space-y-4 max-w-4xl mx-auto">
         {conversations.map((conversation, index) => (
           <React.Fragment key={index}>
