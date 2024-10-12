@@ -34,6 +34,7 @@ import fullMenuData from './full_menu.json';
 import prompts from './prompts.json';
 import { getSimulatedResponse, useSimulatedApi } from './simulatedResponses.js';
 import IntegratedClearChatMessage from './ChatHeader.js'
+import ChatInterface from './ChatInterface';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -136,7 +137,7 @@ const MenuRecommendationSystem = () => {
   const clearChat = () => {
     setConversations([]);
     setChatId(null);
-    // setActiveTab('home');
+    // setActiveTab('chat');
   };
   const isChatStarted = conversations.length > 0;
   const storyControls = useAnimation();
@@ -1194,71 +1195,15 @@ const MenuRecommendationSystem = () => {
               onStartChatting={handleStartChatting}
             />
             ) : (
-      <div className="space-y-4 max-w-4xl mx-auto">
-        {conversations.map((conversation, index) => (
-          <React.Fragment key={index}>
-            <motion.div 
-              className="mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <motion.div
-                className={`p-6 rounded-lg shadow-lg cursor-pointer ${
-                  theme === 'light' ? 'bg-white hover:bg-gray-50' : 'bg-gray-800 hover:bg-gray-700'
-                } transition-colors duration-200`}
-                onClick={() => openStory(index)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-                  {conversation.query}
-                </h3>
-                <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                  {conversation.response.substring(0, 100)}...
-                </p>
-                {conversation.items.length > 0 && (
-                  <div className="mt-4 flex space-x-2 md:space-x-4 md:p-2 overflow-x-auto md:overflow-x-visible">
-                    {conversation.items.slice(0, 3).map((item, itemIndex) => (
-                      <ItemCircle
-                        key={itemIndex}
-                        item={item}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedItemFromConversation(item);
-                        }}
-                      />
-                    ))}
-                    {conversation.items.length > 3 && (
-                      <div className="flex flex-col items-center">
-                        <motion.div
-                          className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold cursor-pointer"
-                          whileHover={{ scale: 1.1 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openStory(index);
-                          }}
-                        >
-                          +{conversation.items.length - 3}
-                        </motion.div>
-                        <p className={`text-xs mt-1 text-center w-16 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                          More
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-            {/* Insert the clear chat message after every 3 conversations or at the end */}
-            {(index + 1) % 3 === 0 || index === conversations.length - 1 ? (
-              <IntegratedClearChatMessage onClearChat={clearChat} theme={theme} />
-            ) : null}
-          </React.Fragment>
-        ))}
-      </div>
-    )}
-  </motion.div>
+              <ChatInterface 
+                conversations={conversations}
+                onClearChat={clearChat}
+                theme={theme}
+                openStory={openStory}
+                setSelectedItemFromConversation={setSelectedItemFromConversation}
+              />
+            )}
+          </motion.div>
 )}
             </AnimatePresence>
             <div ref={conversationEndRef} />
