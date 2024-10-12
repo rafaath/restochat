@@ -1399,13 +1399,13 @@ const MenuRecommendationSystem = () => {
      <AnimatePresence>
         {isCartOpen && (
           <IsolatedCart
-            isOpen={isCartOpen}
-            onClose={toggleCart}
-            theme={theme}
-            cartItems={cart}
-            onIncrement={addToCart}
-            onDecrement={removeFromCart}
-          />
+          isOpen={isCartOpen}
+          onClose={toggleCart}
+          theme={theme}
+          cartItems={cart}
+          addToCart={addToCart}
+          removeFromCart={removeFromCart}
+        />
         )}
       </AnimatePresence>
       {(selectedItemFromConversation || selectedComboItem) && (
@@ -1419,6 +1419,7 @@ const MenuRecommendationSystem = () => {
           }}
           theme={theme}
           addToCart={addToCart}
+          cart={cart}
         />
       )}
   
@@ -1429,6 +1430,7 @@ const MenuRecommendationSystem = () => {
           onClose={() => setSelectedItem(null)}
           theme={theme}
           addToCart={addToCart}
+          cart={cart}
         />
       )}
       {selectedItemFromConversation && (
@@ -1438,6 +1440,7 @@ const MenuRecommendationSystem = () => {
     onClose={() => setSelectedItemFromConversation(null)}
     theme={theme}
     addToCart={addToCart}
+    cart={cart}
   />
 )}
   

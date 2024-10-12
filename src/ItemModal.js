@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Plus, Minus, Check } from 'lucide-react';
 
-const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
+const ItemModal = ({ item, isOpen, onClose, theme, addToCart, cart }) => {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
@@ -18,21 +18,24 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    const cartItem = cart.find(cartItem => cartItem.item_id === item.item_id);
+    setQuantity(cartItem ? cartItem.quantity : 1);
+  }, [cart, item]);
+
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
 
-  const addToCartWithQuantity = async () => {
+  const addToCartWithQuantity = useCallback(() => {
     setIsAddingToCart(true);
-    for (let i = 0; i < quantity; i++) {
-      await addToCart(item);
-    }
+    addToCart({ ...item, quantity });
     setIsAddingToCart(false);
     setShowNotification(true);
     setTimeout(() => {
       setShowNotification(false);
       onClose();
     }, 700);
-  };
+  }, [addToCart, item, quantity, onClose]);
 
   const modalVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -84,7 +87,6 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
           <div className="flex items-center mb-2 sm:mb-4">
             <Star className="text-yellow-400 mr-1" size={16} />
             <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-              {/* {item.rating.toFixed(1)} ({item.number_of_people_rated} ratings) */}
               {item.rating != null ? item.rating.toFixed(1) : 'N/A'} ({item.number_of_people_rated || 0} ratings)
             </span>
           </div>
@@ -93,14 +95,13 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart }) => {
           </p>
           <div className="flex justify-between items-center mb-4 sm:mb-6">
             <p className="text-xl sm:text-2xl font-bold text-blue-600">
-              {/* ₹{item.cost.toFixed(2)} */}
               ₹{item.cost != null ? item.cost.toFixed(2) : 'N/A'}
             </p>
             <div className="flex items-center">
               <button 
                 onClick={decrementQuantity}
                 className={`p-2 rounded-full ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'}`}
-                disabled={isAddingToCart}
+                disabled={isAddingToCart || quantity === 1}
               >
                 <Minus size={16} />
               </button>

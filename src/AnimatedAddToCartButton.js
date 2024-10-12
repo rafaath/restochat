@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ShoppingBag, Plus, Minus } from 'lucide-react';
 
-const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
+const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity, size = 'normal' }) => {
   const [isAdded, setIsAdded] = useState(false);
   const [showIncrement, setShowIncrement] = useState(quantity > 0);
 
@@ -36,8 +36,30 @@ const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
     }
   }, [quantity, isAdded]);
 
+  const buttonStyles = theme === 'light'
+    ? 'bg-blue-500 text-white hover:bg-blue-600'
+    : 'bg-blue-600 text-white hover:bg-blue-700';
+
+  const incrementDecrementStyles = theme === 'light'
+    ? 'bg-gray-200 text-gray-800'
+    : 'bg-gray-700 text-gray-200';
+
+  const iconButtonStyles = theme === 'light'
+    ? 'bg-white text-blue-500 hover:bg-gray-100'
+    : 'bg-gray-800 text-blue-400 hover:bg-gray-600';
+
+  const sizeStyles = {
+    normal: 'w-28 h-8 text-xs',
+    large: 'w-40 h-12 text-base'
+  };
+
+  const iconSizes = {
+    normal: 14,
+    large: 20
+  };
+
   return (
-    <motion.div className="relative w-28 h-8">
+    <motion.div className={`relative ${sizeStyles[size]}`}>
       <AnimatePresence initial={false}>
         {!showIncrement ? (
           <motion.button
@@ -46,10 +68,10 @@ const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
             onClick={handleAddToCart}
-            className={`absolute inset-0 px-2 py-1 rounded-full text-xs font-medium flex items-center justify-center ${
+            className={`absolute inset-0 px-2 py-1 rounded-full font-medium flex items-center justify-center ${
               isAdded
                 ? 'bg-green-500 text-white'
-                : `bg-blue-600 text-white hover:bg-blue-700`
+                : buttonStyles
             } transition-colors duration-300`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -63,7 +85,7 @@ const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
                   exit={{ opacity: 0, scale: 0.5 }}
                   className="flex items-center"
                 >
-                  <Check size={14} className="mr-1" />
+                  <Check size={iconSizes[size]} className="mr-1" />
                   <span className="whitespace-nowrap">Added</span>
                 </motion.div>
               ) : (
@@ -74,7 +96,7 @@ const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
                   exit={{ opacity: 0, scale: 0.5 }}
                   className="flex items-center"
                 >
-                  <ShoppingBag size={14} className="mr-1" />
+                  <ShoppingBag size={iconSizes[size]} className="mr-1" />
                   <span className="whitespace-nowrap">Add to Cart</span>
                 </motion.div>
               )}
@@ -86,24 +108,24 @@ const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.5 }}
-            className="absolute inset-0 flex items-center justify-between bg-gray-200 rounded-full p-1"
+            className={`absolute inset-0 flex items-center justify-between ${incrementDecrementStyles} rounded-full p-1`}
           >
             <motion.button
               onClick={handleDecrement}
-              className={`p-1 rounded-full ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-700 text-white'}`}
+              className={`p-1 rounded-full ${iconButtonStyles}`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <Minus size={14} />
+              <Minus size={iconSizes[size]} />
             </motion.button>
-            <span className={`text-sm font-medium ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{quantity}</span>
+            <span className={`font-medium ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{quantity}</span>
             <motion.button
               onClick={handleIncrement}
-              className={`p-1 rounded-full ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-700 text-white'}`}
+              className={`p-1 rounded-full ${iconButtonStyles}`}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
-              <Plus size={14} />
+              <Plus size={iconSizes[size]} />
             </motion.button>
           </motion.div>
         )}

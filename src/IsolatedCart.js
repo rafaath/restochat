@@ -31,8 +31,20 @@ const CombinedImage = ({ images, size = 64 }) => {
   );
 };
 
-const IsolatedCart = ({ isOpen, onClose, theme, cartItems, onIncrement, onDecrement }) => {
+const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFromCart }) => {
   const total = cartItems.reduce((sum, item) => sum + item.cost * item.quantity, 0);
+
+  const handleIncrement = (item) => {
+    addToCart({ ...item, quantity: item.quantity + 1 });
+  };
+
+  const handleDecrement = (item) => {
+    if (item.quantity > 1) {
+      addToCart({ ...item, quantity: item.quantity - 1 });
+    } else {
+      removeFromCart(item);
+    }
+  };
 
   const renderCartItem = (item, index) => {
     const isCombo = item.isCombo;
@@ -59,11 +71,11 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, onIncrement, onDecrem
           </div>
         </div>
         <div className="flex items-center">
-          <button onClick={() => onDecrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+          <button onClick={() => handleDecrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
             <Minus size={16} />
           </button>
           <span className={`mx-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
-          <button onClick={() => onIncrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+          <button onClick={() => handleIncrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
             <Plus size={16} />
           </button>
         </div>

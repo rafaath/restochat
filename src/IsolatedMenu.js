@@ -492,65 +492,96 @@ const renderSearchItemCard = (item) => (
 
   const renderItemModal = () => (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setSelectedItem(null)} />
       <motion.div
-        className={`relative max-w-[90%] w-full sm:max-w-[500px] mx-auto p-6 rounded-2xl ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}
+        className={`relative w-full max-w-3xl mx-auto overflow-hidden rounded-2xl shadow-2xl ${
+          theme === 'light' ? 'bg-white' : 'bg-gray-900'
+        }`}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
-        <button 
-          onClick={() => setSelectedItem(null)}
-          className="absolute top-2 right-2 p-2 rounded-full bg-gray-200 text-gray-800 z-10"
-        >
-          <X size={20} />
-        </button>
-        <img src={selectedItem.image_link} alt={selectedItem.name_of_item} className="w-full h-60 object-cover rounded-lg mb-4" />
-        <h2 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-          {selectedItem.name_of_item}
-        </h2>
-        <div className="flex items-center mb-4">
-          <Star className="text-yellow-400 mr-1" size={20} />
-          <span className={`text-lg ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-            {selectedItem.rating ? selectedItem.rating.toFixed(1) : 'N/A'} ({selectedItem.number_of_people_rated || 0} ratings)
-          </span>
-        </div>
-        <p className={`mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-          {selectedItem.description}
-        </p>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <h3 className={`font-semibold mb-2 ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>Ingredients:</h3>
-            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-              {selectedItem.ingredients}
-            </p>
-          </div>
-          <div>
-            <h3 className={`font-semibold mb-2 ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}>Dietary Info:</h3>
-            <ul className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-              <li>{selectedItem.veg_or_non_veg === 'veg' ? '🥬 Vegetarian' : '🍖 Non-vegetarian'}</li>
-              {selectedItem.is_vegan === 'yes' && <li>🌱 Vegan</li>}
-              {selectedItem.is_gluten_free === 'yes' && <li>🌾 Gluten-free</li>}
-              {selectedItem.is_dairy_free === 'yes' && <li>🥛 Dairy-free</li>}
-            </ul>
+        <div className="relative h-80">
+          <img 
+            src={selectedItem.image_link} 
+            alt={selectedItem.name_of_item} 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70" />
+          <button 
+            onClick={() => setSelectedItem(null)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-300"
+          >
+            <X size={24} />
+          </button>
+          <div className="absolute bottom-4 left-6 right-6">
+            <h2 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
+              {selectedItem.name_of_item}
+            </h2>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center bg-yellow-400 rounded-full px-2 py-1">
+                <Star className="text-yellow-900 mr-1" size={16} />
+                <span className="text-sm font-semibold text-yellow-900">
+                  {selectedItem.rating ? selectedItem.rating.toFixed(1) : 'N/A'}
+                </span>
+              </div>
+              <span className="text-sm text-gray-200">
+                ({selectedItem.number_of_people_rated || 0} ratings)
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-2xl font-bold text-blue-600">₹{selectedItem.cost.toFixed(2)}</p>
-          <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => addToCart(selectedItem)}
-          className="bg-blue-500 text-white px-6 py-2 rounded-full text-lg font-semibold"
-        >
-          Add to Cart
-    </motion.button>    
+        <div className="p-6">
+          <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>
+            {selectedItem.description}
+          </p>
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <h3 className={`font-semibold mb-2 text-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>Ingredients</h3>
+              <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                {selectedItem.ingredients}
+              </p>
+            </div>
+            <div>
+              <h3 className={`font-semibold mb-2 text-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>Dietary Info</h3>
+              <div className="flex flex-wrap gap-2">
+                <span className={`px-3 py-1 rounded-full text-sm ${
+                  selectedItem.veg_or_non_veg === 'veg' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {selectedItem.veg_or_non_veg === 'veg' ? '🥬 Vegetarian' : '🍖 Non-vegetarian'}
+                </span>
+                {selectedItem.is_vegan === 'yes' && (
+                  <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">🌱 Vegan</span>
+                )}
+                {selectedItem.is_gluten_free === 'yes' && (
+                  <span className="px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800">🌾 Gluten-free</span>
+                )}
+                {selectedItem.is_dairy_free === 'yes' && (
+                  <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">🥛 Dairy-free</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-between items-center">
+            <div>
+              <p className={`text-sm mb-1 ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>Price</p>
+              <p className="text-3xl font-bold text-blue-600">₹{selectedItem.cost.toFixed(2)}</p>
+            </div>
+            <AnimatedAddToCartButton 
+            item={selectedItem} 
+            addToCart={addToCart} 
+            theme={theme} 
+            quantity={getItemQuantity(selectedItem.item_id)}
+            size="large"  // Use the large size here
+          />
+          </div>
         </div>
       </motion.div>
     </motion.div>
