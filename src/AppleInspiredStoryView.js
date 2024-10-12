@@ -154,9 +154,9 @@ const ComboItem = ({ item, onAddToCart, theme, onItemClick }) => {
           <p className={`text-sm font-medium ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
             {item.name_of_item}
           </p>
-          {/* <p className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
+          <p className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'} mt-1`}>
             {truncateText(item.description, 50)}
-          </p> */}
+          </p>
           <div className="flex items-center mt-1 space-x-2">
             {item.spiciness === "spicy" && renderSpicyIndicator(item.spiciness)}
             {item.rating && renderRating(item.rating)}
@@ -218,7 +218,7 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
           : 'bg-gray-800'
       } rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out`}
     >
-      <div className="p-4" onClick={toggleExpand}>
+      <div className="p-4">
         <div className="flex justify-between items-start mb-3">
           <h3 className={`text-2xl font-extrabold ${theme === 'light' ? 'text-gray-900' : 'text-white'} pr-2`}>
             {combo.combo_name}
