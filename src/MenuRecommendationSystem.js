@@ -394,7 +394,7 @@ const MenuRecommendationSystem = () => {
     </motion.div>
   );
 
-  const EmptyChatState = React.memo(({ theme, searchInputRef }) => (
+  const EmptyChatState = React.memo(({ theme, searchInputRef, onStartChatting }) => (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
       <div className="flex justify-center mb-4">
         <MessageCircle size={64} className={`${theme === 'light' ? 'text-gray-400' : 'text-gray-600'}`} />
@@ -406,7 +406,10 @@ const MenuRecommendationSystem = () => {
         Ask about our menu, dietary options, or get personalized recommendations!
       </p>
       <button
-        onClick={() => searchInputRef.current?.focus()}
+        onClick={() => {
+          searchInputRef.current?.focus();
+          onStartChatting();
+        }}
         className="bg-blue-500 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
       >
         Start Chatting
@@ -1077,6 +1080,12 @@ const MenuRecommendationSystem = () => {
     setShowEmptyState(conversations.length === 0 && query.trim() === '');
   }, [conversations, query]);
 
+  const handleStartChatting = () => {
+    setIsPromptsExpanded(true);
+    // If you want to switch to the chat tab as well:
+    setActiveTab('chat');
+  };
+
 
   return (
     <div className={`app-container h-screen flex flex-col overflow-hidden ${
@@ -1150,7 +1159,7 @@ const MenuRecommendationSystem = () => {
   
           <main 
             ref={mainContentRef}
-            className="flex-grow overflow-y-auto"
+            className="flex-grow overflow-y-auto no-scrollbar"
           >
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
@@ -1179,7 +1188,11 @@ const MenuRecommendationSystem = () => {
             className="h-full overflow-y-auto p-4"
           >
             {conversations.length === 0 ? (
-              <EmptyChatState theme={theme} searchInputRef={searchInputRef} />
+              <EmptyChatState 
+              theme={theme} 
+              searchInputRef={searchInputRef} 
+              onStartChatting={handleStartChatting}
+            />
             ) : (
       <div className="space-y-4 max-w-4xl mx-auto">
         {conversations.map((conversation, index) => (

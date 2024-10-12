@@ -130,7 +130,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
   }, [onItemClick]);
 
   return (
-    <div className="h-full flex flex-col p-4 space-y-4 max-w-4xl mx-auto no-scrollbar">
+    <div className="h-full flex flex-col pt-1 p-auto space-y-4 max-w-4xl mx-auto no-scrollbar">
       <motion.div 
         className="text-center"
         initial={{ opacity: 0, y: -10 }}
@@ -150,14 +150,14 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
       </div>
 
       <div className="flex-grow flex flex-col">
-        <h2 className={`text-lg font-extrabold text-left bg-gradient-to-r ${headingGradient} text-transparent bg-clip-text mb-4`}>
+        <h2 className={`text-lg font-extrabold pl-3 text-left bg-gradient-to-r ${headingGradient} text-transparent bg-clip-text mb-4`}>
           Top-Rated Temptations
         </h2>
 
         <div className="relative flex-grow">
           <motion.div
             ref={carouselRef}
-            className="flex overflow-x-auto scrollbar-hide space-x-4 pl-1 pb-4 h-full no-scrollbar"
+            className="flex overflow-x-auto scrollbar-hide space-x-4 pl-3 pr-2 pb-4 h-auto no-scrollbar"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
@@ -217,7 +217,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
               <div
                 key={index}
                 className={`h-1 rounded-full transition-all duration-300 ${
-                  scrollPosition >= index / 5 && scrollPosition <= (index + 1) / 5
+                  scrollPosition >= index / 6 && scrollPosition <= (index + 1) / 6
                     ? 'w-4 bg-blue-600'
                     : 'w-2 bg-gray-300'
                 }`}
@@ -226,7 +226,7 @@ const EmptyState = ({ theme, onItemClick, addToCart }) => {
           </div>
         </div>
 
-        <p className={`text-xs text-center mt-4 ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+        <p className={`text-xs text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
           Explore favorites, dietary choices, and flavors designed to delight.
           <br />
           <span className="italic text-xs">We're in beta. Answers may vary.</span>
