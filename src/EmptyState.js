@@ -4,6 +4,7 @@ import { Star, ShoppingBag, Check, Package, Percent, Crown, Award, Gift, Plus, M
 import Lottie from 'lottie-react';
 import animationData from './animation.json';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
+import ComboDetailsModal from './ComboDetailsModal';
 
 
 const LottieAnimation = ({ 
@@ -186,7 +187,7 @@ const ComboAnimatedAddToCartButton = ({ combo, addToCart, removeFromCart, theme,
 };
 
 
-const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, cart }) => {
+const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, cart }) => {
   const [quantity, setQuantity] = useState(0);
 
   useEffect(() => {
@@ -194,7 +195,8 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, cart }) => {
     setQuantity(comboInCart ? comboInCart.quantity : 0);
   }, [cart, combo.combo_id]);
 
-  const handleIncrement = () => {
+  const handleIncrement = (e) => {
+    e.stopPropagation();
     setQuantity(prev => prev + 1);
     const enhancedComboItem = {
       ...combo,
@@ -210,11 +212,23 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, cart }) => {
     onAddToCart(enhancedComboItem);
   };
 
-  const handleDecrement = () => {
+  const handleDecrement = (e) => {
+    e.stopPropagation();
     if (quantity > 0) {
       setQuantity(prev => prev - 1);
       onRemoveFromCart({ isCombo: true, combo_id: combo.combo_id });
     }
+  };
+
+  const handleClick = () => {
+    const firstItemImage = combo.combo_items[0]?.image_link;
+    const enhancedCombo = {
+      ...combo,
+      image_links: combo.combo_items.map(item => item.image_link),
+      image_link: firstItemImage || combo.image_link,
+    };
+    console.log('Combo clicked:', enhancedCombo); // Debug log
+    onItemClick(enhancedCombo);
   };
 
   const getPrestigeBadge = () => {
@@ -266,7 +280,8 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, cart }) => {
         theme === 'light' ? 'bg-white' : 'bg-gray-800'
       } rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border ${
         theme === 'light' ? 'border-gray-200' : 'border-gray-700'
-      }`}
+      } cursor-pointer`}
+      onClick={handleClick}
     >
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
@@ -305,11 +320,14 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, cart }) => {
         </div>
         <div className="mt-4">
           {quantity > 0 ? (
-            <div className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
+            <div 
+            className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
               theme === 'light'
                 ? 'bg-blue-50 text-blue-800'
                 : 'bg-blue-900 text-blue-200'
-            }`}>
+            }`}
+            onClick={(e) => e.stopPropagation()} // Prevent triggering onItemClick
+          >
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -379,6 +397,8 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
   const [topCombos, setTopCombos] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [comboScrollPosition, setComboScrollPosition] = useState(0);
+  const [selectedCombo, setSelectedCombo] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const carouselRef = useRef(null);
   const comboCarouselRef = useRef(null);
 
@@ -421,6 +441,11 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
       onItemClick(item);
     }
   }, [onItemClick]);
+
+  const handleComboClick = (combo) => {
+    setSelectedCombo(combo);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="h-full flex flex-col pt-3 space-y-6 max-w-4xl mx-auto no-scrollbar">
@@ -541,7 +566,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
             transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
             onScroll={() => handleScroll(comboCarouselRef, setComboScrollPosition)}
           >
-            <AnimatePresence>
+             <AnimatePresence>
               {topCombos.map((combo, index) => (
                 <motion.div
                   key={combo.combo_id}
@@ -556,7 +581,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
                     onAddToCart={addToCart}
                     onRemoveFromCart={removeFromCart}
                     theme={theme}
-                    onItemClick={onItemClick}
+                    onItemClick={() => handleComboClick(combo)}
                     cart={cart}
                   />
                 </motion.div>
@@ -585,6 +610,12 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
             <br />
             <span className="italic text-xs">We're in beta. Answers may vary.</span>
           </p>
+          <ComboDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        combo={selectedCombo}
+        theme={theme}
+      />
         </div>
       );
     };

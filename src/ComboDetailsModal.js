@@ -1,14 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, Clock, Utensils, DollarSign, Percent, Award, Leaf } from 'lucide-react';
 
 const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
+
   if (!isOpen || !combo) return null;
 
   const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.3, ease: "easeOut" } },
-    exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2, ease: "easeIn" } }
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 }
+  };
+
+  const contentVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: 50 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { delay: 0.1, duration: 0.3, ease: "easeOut" } },
+    exit: { opacity: 0, scale: 0.8, y: 50, transition: { duration: 0.2, ease: "easeIn" } }
   };
 
   const itemVariants = {
@@ -19,47 +36,57 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
   const getDiscountPercentage = () => {
     if (combo.cost && combo.discounted_cost) {
       const discount = ((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0);
-      return parseInt(discount, 10); // Convert to integer
+      return parseInt(discount, 10);
     }
     return 0;
   };
 
   const discountPercentage = getDiscountPercentage();
-  const isVeg = combo.combo_items.every(item => item.veg_or_non_veg === 'veg');
+  const isVeg = combo.combo_items && combo.combo_items.every(item => item.veg_or_non_veg === 'veg');
+
+  const fallbackImageUrl = 'https://via.placeholder.com/400x200?text=No+Image+Available';
+  const displayImage = combo.image_links?.[0] || combo.image_link || combo.combo_items?.[0]?.image_link || fallbackImageUrl;
 
   return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center no-scrollbar">
+      <div className="absolute inset-0 " onClick={onClose} />
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          variants={modalVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="fixed inset-0 bg-black bg-opacity-50  flex items-center justify-center no-scrollbar overflow-hidden"
+          style={{ minHeight: '-webkit-fill-available' }}
           onClick={onClose}
         >
           <motion.div
-            variants={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-3xl rounded-2xl shadow-2xl h-[90%] overflow-y-auto no-scrollbar ${
+            variants={contentVariants}
+            className={`w-full max-w-3xl rounded-2xl shadow-2xl max-h-[90vh] no-scrollbar overflow-y-auto m-4 ${
               theme === 'light' ? 'bg-white' : 'bg-gray-800'
             }`}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative">
-              <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black to-transparent opacity-60"></div>
-              <img 
-                src={combo.image_links[0]} 
-                alt={combo.combo_name} 
-                className="w-full h-40 object-cover"
-              />
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
-              >
-                <X size={20} />
-              </button>
+            <div className="sticky top-0 z-10">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-b from-black to-transparent opacity-60"></div>
+                <img 
+                  src={displayImage}
+                  alt={combo.combo_name} 
+                  className="w-full h-40 object-cover"
+                  onError={(e) => {
+                    console.log('Image failed to load, using fallback');
+                    e.target.src = fallbackImageUrl;
+                  }}
+                />
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
             
             <div className="p-6">
@@ -68,13 +95,21 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
               </h2>
               
               <div className="flex flex-wrap items-center gap-4 mb-4">
-                {isVeg ? (
-                  <span className="flex items-center px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                    <Leaf size={14} className="mr-1" /> Vegetarian
-                  </span>
-                ) : (
-                  <span className="flex items-center px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm">
-                    <Utensils size={14} className="mr-1" /> Non-Vegetarian
+                {isVeg !== undefined && (
+                  <span className={`flex items-center px-2 py-1 rounded-full text-sm ${
+                    isVeg 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {isVeg ? (
+                      <>
+                        <Leaf size={14} className="mr-1" /> Vegetarian
+                      </>
+                    ) : (
+                      <>
+                        <Utensils size={14} className="mr-1" /> Non-Vegetarian
+                      </>
+                    )}
                   </span>
                 )}
                 {combo.combo_type && (
@@ -105,48 +140,52 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
               </p>
               
               <div className="flex items-baseline gap-2 mb-6">
-              <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-                ₹{combo.discounted_cost ? combo.discounted_cost.toFixed(2) : combo.cost.toFixed(2)}
-              </span>
-              {discountPercentage > 0 && (
+                <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+                  ₹{combo.discounted_cost ? combo.discounted_cost.toFixed(2) : combo.cost.toFixed(2)}
+                </span>
+                {discountPercentage > 0 && (
+                  <>
+                    <span className={`text-lg line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      ₹{combo.cost.toFixed(2)}
+                    </span>
+                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                      {discountPercentage}% OFF
+                    </span>
+                  </>
+                )}
+              </div>
+              
+              {combo.combo_items && combo.combo_items.length > 0 && (
                 <>
-                  <span className={`text-lg line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
-                    ₹{combo.cost.toFixed(2)}
-                  </span>
-                  <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
-                    {discountPercentage}% OFF
-                  </span>
+                  <h3 className={`text-xl font-semibold mb-3 ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
+                    Items in this combo:
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    {combo.combo_items.map((item, index) => (
+                      <motion.div
+                        key={index}
+                        variants={itemVariants}
+                        initial="hidden"
+                        animate="visible"
+                        transition={{ delay: index * 0.1 }}
+                        className={`flex items-center p-3 rounded-lg ${
+                          theme === 'light' ? 'bg-gray-100' : 'bg-gray-700'
+                        }`}
+                      >
+                        <img src={item.image_link || fallbackImageUrl} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-md mr-4" />
+                        <div>
+                          <h4 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
+                            {item.name_of_item}
+                          </h4>
+                          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                            {item.description ? item.description.substring(0, 50) + '...' : 'No description available'}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
                 </>
               )}
-            </div>
-              
-              <h3 className={`text-xl font-semibold mb-3 ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
-                Items in this combo:
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                {combo.combo_items.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    transition={{ delay: index * 0.1 }}
-                    className={`flex items-center p-3 rounded-lg ${
-                      theme === 'light' ? 'bg-gray-100' : 'bg-gray-700'
-                    }`}
-                  >
-                    <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-md mr-4" />
-                    <div>
-                      <h4 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
-                        {item.name_of_item}
-                      </h4>
-                      <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-                        {item.description ? item.description.substring(0, 300) : 'No description available'}{/*  + '...'    Add that  */ }
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
               
               {combo.nutrition && (
                 <div className="mb-6">
@@ -168,7 +207,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
                 </div>
               )}
               
-              {combo.additional_info && (
+              {combo.additional_info && combo.additional_info.length > 0 && (
                 <div className="mb-6">
                   <h3 className={`text-xl font-semibold mb-3 ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
                     Additional Information
@@ -180,11 +219,13 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
                   </ul>
                 </div>
               )}
-            </div>
+             </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
+    </div>
+    
   );
 };
 
