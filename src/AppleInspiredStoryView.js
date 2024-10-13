@@ -755,7 +755,17 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
   );
 });
 
-const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, addToCart, theme, onItemClick, cart }) => {
+const AppleInspiredStoryView = ({ 
+  isOpen, 
+  onClose, 
+  conversations, 
+  initialIndex, 
+  addToCart, 
+  removeFromCart,  // Add this line
+  theme, 
+  onItemClick, 
+  cart 
+}) => {
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const [notification, setNotification] = useState(null);
   const controls = useAnimation();
@@ -802,66 +812,38 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
 
   const handleAddToCart = useCallback(
     (item) => {
-      const existingItem = cart.find(cartItem => cartItem.item_id === item.item_id);
-      let newQuantity;
-
-      if (existingItem) {
-        newQuantity = item.quantity;
-        if (newQuantity === 0) {
-          addToCart({ ...item, quantity: 0 });
-          setNotification(`${item.name_of_item} removed from cart!`);
-        } else {
-          addToCart({ ...item, quantity: newQuantity });
-          setNotification(`${item.name_of_item} updated in cart!`);
-        }
-      } else {
-        newQuantity = 1;
-        addToCart({ ...item, quantity: newQuantity });
-        setNotification(`${item.name_of_item} added to cart!`);
-      }
-
+      addToCart(item);
+      setNotification(`${item.name_of_item} added to cart!`);
       setTimeout(() => setNotification(null), 3000);
     },
-    [addToCart, cart]
+    [addToCart]
   );
 
   const handleAddCombo = useCallback(
     (combo, quantityChange = 1) => {
-      const existingComboIndex = cart.findIndex(item => item.isCombo && item.combo_id === combo.combo_id);
-      
-      if (existingComboIndex !== -1) {
-        // Update existing combo
-        const existingCombo = cart[existingComboIndex];
-        const newQuantity = Math.max(0, existingCombo.quantity + quantityChange);
-        
-        if (newQuantity === 0) {
-          // Remove combo if quantity becomes 0
-          addToCart({ ...existingCombo, quantity: 0 }); // This will remove the item
-        } else {
-          addToCart({ ...existingCombo, quantity: newQuantity });
-        }
-      } else if (quantityChange > 0) {
-        // Add new combo
+      if (quantityChange > 0) {
         const newComboItem = {
           isCombo: true,
           combo_id: combo.combo_id,
           combo_name: combo.combo_name,
-          cost: combo.cost,
-          quantity: quantityChange,
+          cost: combo.discounted_cost || combo.cost,
+          quantity: 1,
           combo_items: combo.combo_items,
-          image_links: combo.combo_items.map(item => item.image_link)
+          image_links: combo.combo_items.map(item => item.image_link),
         };
         addToCart(newComboItem);
-      }
-  
-      if (quantityChange > 0) {
         setNotification(`${combo.combo_name} added to cart!`);
       } else {
-        setNotification(`${combo.combo_name} removed from cart!`);
+        const comboInstances = cart.filter(item => item.isCombo && item.combo_id === combo.combo_id);
+        if (comboInstances.length > 0) {
+          const lastCombo = comboInstances[comboInstances.length - 1];
+          removeFromCart(lastCombo);
+          setNotification(`${combo.combo_name} removed from cart!`);
+        }
       }
       setTimeout(() => setNotification(null), 3000);
     },
-    [addToCart, cart]
+    [addToCart, removeFromCart, cart]
   );
   
   return (

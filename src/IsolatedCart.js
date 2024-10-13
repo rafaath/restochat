@@ -49,7 +49,7 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
   const renderCartItem = (item, index) => {
     const isCombo = item.isCombo;
     return (
-      <div key={index} className={`flex justify-between items-center py-4 ${
+      <div key={isCombo ? item.uniqueId : item.item_id} className={`flex justify-between items-center py-4 ${
         theme === 'light' ? 'border-b border-gray-200' : 'border-b border-gray-700'
       }`}>
         <div className="flex items-center">
@@ -71,11 +71,14 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
           </div>
         </div>
         <div className="flex items-center">
-          <button onClick={() => handleDecrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+          <button onClick={() => removeFromCart(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
             <Minus size={16} />
           </button>
           <span className={`mx-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
-          <button onClick={() => handleIncrement(item)} className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+          <button 
+            onClick={() => addToCart(item)} 
+            className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}
+          >
             <Plus size={16} />
           </button>
         </div>

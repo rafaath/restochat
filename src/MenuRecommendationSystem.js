@@ -583,46 +583,45 @@ const MenuRecommendationSystem = () => {
     });
   }, []);
 
-  const addToCart = useCallback((item) => {
+  const addToCart = useCallback((newItem) => {
     setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(cartItem => cartItem.item_id === item.item_id);
+      // For combos, always add as a new item
+      if (newItem.isCombo) {
+        return [...prevCart, { ...newItem, uniqueId: Date.now() }];
+      }
+
+      // For regular items, update quantity if exists, otherwise add new
+      const existingItemIndex = prevCart.findIndex(item => item.item_id === newItem.item_id);
       
       if (existingItemIndex !== -1) {
-        // Item exists in cart
         const updatedCart = [...prevCart];
-        if (item.quantity === 0) {
-          // Remove item if quantity is 0
-          updatedCart.splice(existingItemIndex, 1);
-        } else {
-          // Update quantity
-          updatedCart[existingItemIndex] = { ...updatedCart[existingItemIndex], quantity: item.quantity };
-        }
+        updatedCart[existingItemIndex] = {
+          ...updatedCart[existingItemIndex],
+          quantity: updatedCart[existingItemIndex].quantity + 1
+        };
         return updatedCart;
-      } else if (item.quantity > 0) {
-        // Add new item to cart
-        return [...prevCart, item];
+      } else {
+        return [...prevCart, { ...newItem, quantity: 1 }];
       }
-      
-      return prevCart;
     });
   }, []);
 
-  const removeFromCart = useCallback((item) => {
+  const removeFromCart = useCallback((itemToRemove) => {
     setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(cartItem => cartItem.item_id === item.item_id);
-      if (existingItemIndex !== -1) {
-        const updatedCart = [...prevCart];
-        if (updatedCart[existingItemIndex].quantity > 1) {
-          updatedCart[existingItemIndex] = {
-            ...updatedCart[existingItemIndex],
-            quantity: updatedCart[existingItemIndex].quantity - 1
-          };
-        } else {
-          updatedCart.splice(existingItemIndex, 1);
-        }
-        return updatedCart;
+      if (itemToRemove.isCombo) {
+        // For combos, remove the specific instance
+        return prevCart.filter(item => item.uniqueId !== itemToRemove.uniqueId);
+      } else {
+        // For regular items, decrease quantity or remove
+        return prevCart.map(item => {
+          if (item.item_id === itemToRemove.item_id) {
+            return item.quantity > 1 
+              ? { ...item, quantity: item.quantity - 1 }
+              : null;
+          }
+          return item;
+        }).filter(Boolean);
       }
-      return prevCart;
     });
   }, []);
 
@@ -1372,16 +1371,16 @@ const MenuRecommendationSystem = () => {
       )}
   
   <AppleInspiredStoryView
-        isOpen={isStoryOpen}
-        onClose={closeStory}
-        conversations={conversations}
-        initialIndex={activeStoryIndex}
-        addToCart={addToCart}
-        removeFromCart = {removeFromCart}
-        theme={theme}
-        onItemClick={handleComboItemClick}
-        cart={cart}
-      />
+      isOpen={isStoryOpen}
+      onClose={closeStory}
+      conversations={conversations}
+      initialIndex={activeStoryIndex}
+      addToCart={addToCart}
+      removeFromCart={removeFromCart}  // Add this line
+      theme={theme}
+      onItemClick={handleComboItemClick}
+      cart={cart}
+    />
   
   <AnimatePresence>
         {isMenuOpen && (
