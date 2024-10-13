@@ -41,9 +41,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
             animate="visible"
             exit="exit"
             onClick={(e) => e.stopPropagation()}
-            className={`w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden ${
-              theme === 'light' ? 'bg-white' : 'bg-gray-800'
-            }`}
+            className={`w-full max-w-3xl rounded-2xl shadow-2xl h-[90%] overflow-y-auto no-scrollbar ${
+                theme === 'light' ? 'bg-white' : 'bg-gray-800'
+              }`}
+                           
           >
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black to-transparent opacity-60"></div>
@@ -139,7 +140,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
                         {item.name_of_item}
                       </h4>
                       <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-                        {item.description ? item.description.substring(0, 50) + '...' : 'No description available'}
+                        {item.description ? item.description.substring(0, 300) : 'No description available'}{/*  + '...'    Add that  */ }
                       </p>
                     </div>
                   </motion.div>

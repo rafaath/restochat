@@ -640,7 +640,7 @@ const MenuRecommendationSystem = () => {
       }).filter(Boolean);
     });
   }, []);
-
+  
   const handleVoiceInput = useCallback(() => {
     if ('webkitSpeechRecognition' in window) {
       const recognition = new window.webkitSpeechRecognition();

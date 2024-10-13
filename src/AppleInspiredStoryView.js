@@ -822,15 +822,36 @@ const AppleInspiredStoryView = ({
   const handleAddCombo = useCallback(
     (combo, quantityChange = 1) => {
       if (quantityChange > 0) {
-        const newComboItem = {
+        const enhancedComboItem = {
           isCombo: true,
           combo_id: combo.combo_id,
           combo_name: combo.combo_name,
-          cost: combo.discounted_cost || combo.cost,
-          combo_items: combo.combo_items,
+          cost: combo.cost,
+          discounted_cost: combo.discounted_cost || combo.cost,
+          quantity: 1,
+          combo_items: combo.combo_items.map(item => ({
+            ...item,
+            description: item.description || 'Delicious item in this combo',
+            veg_or_non_veg: item.veg_or_non_veg || 'non-veg' // Default to non-veg if not specified
+          })),
           image_links: combo.combo_items.map(item => item.image_link),
+          combo_type: combo.combo_type || 'Standard', // Default to 'Standard' if not specified
+          // rating: combo.rating || 4.5, // Default rating if not available
+          // preparation_time: combo.preparation_time || '20-30', // Default prep time if not available
+          description: combo.description || `Enjoy our ${combo.combo_name} combo, a perfect mix of flavors and value.`,
+          // nutrition: combo.nutrition || {
+          //   calories: '600-800 kcal',
+          //   protein: '20-25g',
+          //   carbs: '70-80g',
+          //   fat: '25-30g'
+          // },
+          additional_info: combo.additional_info || [
+            'Perfect for sharing',
+            'Includes a mix of appetizers and main course',
+            'Value for money'
+          ]
         };
-        addToCart(newComboItem);
+        addToCart(enhancedComboItem);
         setNotification(`${combo.combo_name} added to cart!`);
       } else {
         const comboToRemove = cart.find(item => item.isCombo && item.combo_id === combo.combo_id);
