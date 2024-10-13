@@ -9,15 +9,15 @@ import ComboDetailsModal from './ComboDetailsModal';
 
 const LottieAnimation = ({ 
   width = 192, 
-  height = 128, 
-  zoom = 2,
+  height = 120, 
+  zoom = 33,
   speed = 1,
   loop = true,
   autoplay = true,
 }) => {
   return (
     <div 
-      className="mx-auto my-1 overflow-hidden" 
+      className="mx-auto overflow-hidden" 
       style={{ width: `${width}px`, height: `${height}px` }}
     >
       <div 
