@@ -18,11 +18,13 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
 
   const getDiscountPercentage = () => {
     if (combo.cost && combo.discounted_cost) {
-      return ((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0);
+      const discount = ((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0);
+      return parseInt(discount, 10); // Convert to integer
     }
-    return null;
+    return 0;
   };
 
+  const discountPercentage = getDiscountPercentage();
   const isVeg = combo.combo_items.every(item => item.veg_or_non_veg === 'veg');
 
   return (
@@ -42,9 +44,8 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
             exit="exit"
             onClick={(e) => e.stopPropagation()}
             className={`w-full max-w-3xl rounded-2xl shadow-2xl h-[90%] overflow-y-auto no-scrollbar ${
-                theme === 'light' ? 'bg-white' : 'bg-gray-800'
-              }`}
-                           
+              theme === 'light' ? 'bg-white' : 'bg-gray-800'
+            }`}
           >
             <div className="relative">
               <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-black to-transparent opacity-60"></div>
@@ -104,20 +105,20 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
               </p>
               
               <div className="flex items-baseline gap-2 mb-6">
-                <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-                  ₹{combo.discounted_cost ? combo.discounted_cost.toFixed(2) : combo.cost.toFixed(2)}
-                </span>
-                {combo.discounted_cost && (
-                  <>
-                    <span className={`text-lg line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      ₹{combo.cost.toFixed(2)}
-                    </span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
-                      {getDiscountPercentage()}% OFF
-                    </span>
-                  </>
-                )}
-              </div>
+              <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+                ₹{combo.discounted_cost ? combo.discounted_cost.toFixed(2) : combo.cost.toFixed(2)}
+              </span>
+              {discountPercentage > 0 && (
+                <>
+                  <span className={`text-lg line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+                    ₹{combo.cost.toFixed(2)}
+                  </span>
+                  <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+                    {discountPercentage}% OFF
+                  </span>
+                </>
+              )}
+            </div>
               
               <h3 className={`text-xl font-semibold mb-3 ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
                 Items in this combo:
