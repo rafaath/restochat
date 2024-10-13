@@ -585,43 +585,59 @@ const MenuRecommendationSystem = () => {
 
   const addToCart = useCallback((newItem) => {
     setCart(prevCart => {
-      // For combos, always add as a new item
       if (newItem.isCombo) {
-        return [...prevCart, { ...newItem, uniqueId: Date.now() }];
-      }
-
-      // For regular items, update quantity if exists, otherwise add new
-      const existingItemIndex = prevCart.findIndex(item => item.item_id === newItem.item_id);
-      
-      if (existingItemIndex !== -1) {
-        const updatedCart = [...prevCart];
-        updatedCart[existingItemIndex] = {
-          ...updatedCart[existingItemIndex],
-          quantity: updatedCart[existingItemIndex].quantity + 1
-        };
-        return updatedCart;
+        const existingComboIndex = prevCart.findIndex(
+          item => item.isCombo && item.combo_id === newItem.combo_id
+        );
+        
+        if (existingComboIndex !== -1) {
+          // Increment quantity of existing combo
+          const updatedCart = [...prevCart];
+          updatedCart[existingComboIndex] = {
+            ...updatedCart[existingComboIndex],
+            quantity: updatedCart[existingComboIndex].quantity + 1
+          };
+          return updatedCart;
+        } else {
+          // Add new combo with quantity 1
+          return [...prevCart, { ...newItem, quantity: 1, uniqueId: Date.now() }];
+        }
       } else {
-        return [...prevCart, { ...newItem, quantity: 1 }];
+        // Existing logic for regular items
+        const existingItemIndex = prevCart.findIndex(item => item.item_id === newItem.item_id);
+        
+        if (existingItemIndex !== -1) {
+          const updatedCart = [...prevCart];
+          updatedCart[existingItemIndex] = {
+            ...updatedCart[existingItemIndex],
+            quantity: updatedCart[existingItemIndex].quantity + 1
+          };
+          return updatedCart;
+        } else {
+          return [...prevCart, { ...newItem, quantity: 1 }];
+        }
       }
     });
   }, []);
 
   const removeFromCart = useCallback((itemToRemove) => {
     setCart(prevCart => {
-      if (itemToRemove.isCombo) {
-        // For combos, remove the specific instance
-        return prevCart.filter(item => item.uniqueId !== itemToRemove.uniqueId);
-      } else {
-        // For regular items, decrease quantity or remove
-        return prevCart.map(item => {
-          if (item.item_id === itemToRemove.item_id) {
-            return item.quantity > 1 
+      return prevCart.map(item => {
+        if (itemToRemove.isCombo) {
+          if (item.combo_id === itemToRemove.combo_id && item.uniqueId === itemToRemove.uniqueId) {
+            return item.quantity > 1
               ? { ...item, quantity: item.quantity - 1 }
               : null;
           }
-          return item;
-        }).filter(Boolean);
-      }
+        } else {
+          if (item.item_id === itemToRemove.item_id) {
+            return item.quantity > 1
+              ? { ...item, quantity: item.quantity - 1 }
+              : null;
+          }
+        }
+        return item;
+      }).filter(Boolean);
     });
   }, []);
 

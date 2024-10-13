@@ -827,17 +827,15 @@ const AppleInspiredStoryView = ({
           combo_id: combo.combo_id,
           combo_name: combo.combo_name,
           cost: combo.discounted_cost || combo.cost,
-          quantity: 1,
           combo_items: combo.combo_items,
           image_links: combo.combo_items.map(item => item.image_link),
         };
         addToCart(newComboItem);
         setNotification(`${combo.combo_name} added to cart!`);
       } else {
-        const comboInstances = cart.filter(item => item.isCombo && item.combo_id === combo.combo_id);
-        if (comboInstances.length > 0) {
-          const lastCombo = comboInstances[comboInstances.length - 1];
-          removeFromCart(lastCombo);
+        const comboToRemove = cart.find(item => item.isCombo && item.combo_id === combo.combo_id);
+        if (comboToRemove) {
+          removeFromCart(comboToRemove);
           setNotification(`${combo.combo_name} removed from cart!`);
         }
       }
