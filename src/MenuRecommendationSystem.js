@@ -624,7 +624,7 @@ const MenuRecommendationSystem = () => {
     setCart(prevCart => {
       return prevCart.map(item => {
         if (itemToRemove.isCombo) {
-          if (item.combo_id === itemToRemove.combo_id && item.uniqueId === itemToRemove.uniqueId) {
+          if (item.isCombo && item.combo_id === itemToRemove.combo_id) {
             return item.quantity > 1
               ? { ...item, quantity: item.quantity - 1 }
               : null;
@@ -1190,13 +1190,13 @@ const MenuRecommendationSystem = () => {
                   transition={{ duration: 0.3 }}
                   className="h-full"
                 >
-                  <EmptyState 
-  theme={theme} 
-  onItemClick={handleItemClick} 
-  addToCart={addToCart}
-  removeFromCart = {removeFromCart}
-  cart={cart}
-/>
+                   <EmptyState 
+                theme={theme} 
+                onItemClick={handleItemClick} 
+                addToCart={addToCart}
+                removeFromCart={removeFromCart}
+                cart={cart}
+              />
                 </motion.div>
               )}
  {activeTab === 'chat' && (
