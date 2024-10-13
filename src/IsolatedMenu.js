@@ -183,7 +183,7 @@ const Notification = ({ show, theme }) => {
 // };
 
 
-const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, cart }) => {
+const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFromCart, cart }) => {
   const [view, setView] = useState('explore');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
@@ -380,11 +380,12 @@ const renderScrollItemCard = (item) => (
     <div className="flex justify-between items-center mt-auto">
       <p className="text-blue-500 font-bold text-sm">₹{item.cost.toFixed(2)}</p>
       <AnimatedAddToCartButton 
-          item={item} 
-          addToCart={addToCart} 
-          theme={theme} 
-          quantity={getItemQuantity(item.item_id)}
-        />
+      item={item} 
+      addToCart={addToCart}
+      removeFromCart={removeFromCart}
+      theme={theme} 
+      quantity={getItemQuantity(item.item_id)}
+    />
     </div>
   </motion.div>
 );
@@ -430,11 +431,12 @@ const renderSearchItemCard = (item) => (
       <div className="flex justify-between items-center mt-3">
         <p className="text-blue-500 font-bold text-lg">₹{item.cost.toFixed(2)}</p>
         <AnimatedAddToCartButton 
-          item={item} 
-          addToCart={addToCart} 
-          theme={theme} 
-          quantity={getItemQuantity(item.item_id)}
-        />
+      item={item} 
+      addToCart={addToCart}
+      removeFromCart={removeFromCart}
+      theme={theme} 
+      quantity={getItemQuantity(item.item_id)}
+    />
       </div>
     </div>
   </motion.div>
@@ -479,11 +481,12 @@ const renderSearchItemCard = (item) => (
           <div className="flex justify-between items-center">
             <p className="text-blue-500 font-bold">₹{item.cost.toFixed(2)}</p>
             <AnimatedAddToCartButton 
-          item={item} 
-          addToCart={addToCart} 
-          theme={theme} 
-          quantity={getItemQuantity(item.item_id)}
-        />
+      item={item} 
+      addToCart={addToCart}
+      removeFromCart={removeFromCart}
+      theme={theme} 
+      quantity={getItemQuantity(item.item_id)}
+    />
           </div>
         </div>
       </div>
@@ -577,6 +580,7 @@ const renderSearchItemCard = (item) => (
             <AnimatedAddToCartButton 
             item={selectedItem} 
             addToCart={addToCart} 
+            removeFromCart={removeFromCart}
             theme={theme} 
             quantity={getItemQuantity(selectedItem.item_id)}
             size="large"  // Use the large size here

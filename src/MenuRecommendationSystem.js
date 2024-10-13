@@ -1194,6 +1194,7 @@ const MenuRecommendationSystem = () => {
   theme={theme} 
   onItemClick={handleItemClick} 
   addToCart={addToCart}
+  removeFromCart = {removeFromCart}
   cart={cart}
 />
                 </motion.div>
@@ -1392,7 +1393,7 @@ const MenuRecommendationSystem = () => {
       conversations={conversations}
       initialIndex={activeStoryIndex}
       addToCart={addToCart}
-      removeFromCart={removeFromCart}  // Add this line
+      removeFromCart={removeFromCart}
       theme={theme}
       onItemClick={handleComboItemClick}
       cart={cart}
@@ -1400,14 +1401,15 @@ const MenuRecommendationSystem = () => {
   
   <AnimatePresence>
         {isMenuOpen && (
-          <IsolatedMenu
-            isOpen={isMenuOpen}
-            onClose={toggleMenu}
-            theme={theme}
-            menuItems={menuItems}
-            addToCart={addToCart}
-            cart={cart}
-          />
+         <IsolatedMenu
+         isOpen={isMenuOpen}
+         onClose={toggleMenu}
+         theme={theme}
+         menuItems={menuItems}
+         addToCart={addToCart}
+         removeFromCart={removeFromCart}
+         cart={cart}
+       />
         )}
       </AnimatePresence>
 

@@ -482,7 +482,7 @@ const truncateText = (text, maxLength) => {
 
 
 
-const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onItemClick, cart }, ref) => {
+const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddCombo, theme, onItemClick, cart }, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCombos, setShowCombos] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -611,11 +611,12 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
             </span>
           ) : (
             <AnimatedAddToCartButton
-                  item={item}
-                  addToCart={handleAddToCart}
-                  theme={theme}
-                  quantity={quantity}
-            />
+        item={item}
+        addToCart={handleAddToCart}
+        removeFromCart={removeFromCart}
+        theme={theme}
+        quantity={quantity}
+      />
           )}
         </div>
               {item.combos && item.combos.length > 0 && (
@@ -701,7 +702,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart, onAddCombo, theme, onIte
   );
 });
 
-const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddCombo, theme, onItemClick, cart }) => {
+const IsolatedScrollContent = React.memo(({ conversation, onAddToCart,removeFromCart, onAddCombo, theme, onItemClick, cart }) => {
   const itemRefs = useRef({});
   const [items, setItems] = useState([]);
 
@@ -741,6 +742,7 @@ const IsolatedScrollContent = React.memo(({ conversation, onAddToCart, onAddComb
                 ref={(el) => (itemRefs.current[item.id] = el)}
                 item={item}
                 onAddToCart={onAddToCart}
+                removeFromCart = {removeFromCart}
                 onAddCombo={onAddCombo}
                 theme={theme}
                 onItemClick={onItemClick}
@@ -901,6 +903,7 @@ const AppleInspiredStoryView = ({
               <IsolatedScrollContent
                 conversation={conversations[activeIndex]}
                 onAddToCart={handleAddToCart}
+                removeFromCart ={removeFromCart}
                 onAddCombo={handleAddCombo}
                 theme={theme}
                 onItemClick={onItemClick}

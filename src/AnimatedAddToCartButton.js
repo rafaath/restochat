@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ShoppingBag, Plus, Minus } from 'lucide-react';
 
-const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity, size = 'normal' }) => {
+const AnimatedAddToCartButton = ({ item, addToCart, removeFromCart, theme, quantity, size = 'normal' }) => {
   const [isAdded, setIsAdded] = useState(false);
   const [showIncrement, setShowIncrement] = useState(quantity > 0);
 
@@ -23,12 +23,13 @@ const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity, size = 'nor
 
   const handleDecrement = useCallback((e) => {
     e.stopPropagation();
-    const newQuantity = Math.max(0, quantity - 1);
-    addToCart({ ...item, quantity: newQuantity });
-    if (newQuantity === 0) {
-      setShowIncrement(false);
+    if (quantity > 0) {
+      removeFromCart(item);
+      if (quantity === 1) {
+        setShowIncrement(false);
+      }
     }
-  }, [addToCart, item, quantity]);
+  }, [removeFromCart, item, quantity]);
 
   useEffect(() => {
     if (quantity > 0 && !isAdded) {

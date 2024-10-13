@@ -100,7 +100,7 @@ const AButton = ({ onClick, theme, quantity }) => {
   );
 };
 
-const EmptyState = ({ theme, onItemClick, addToCart, cart }) => {
+const EmptyState = ({ theme, onItemClick, addToCart,removeFromCart, cart }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
   const carouselRef = useRef(null);
@@ -213,6 +213,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, cart }) => {
                         <AnimatedAddToCartButton
                           item={item}
                           addToCart={addToCart}
+                          removeFromCart = {removeFromCart}
                           theme={theme}
                           quantity={getItemQuantity(item.item_id)}
                         />
