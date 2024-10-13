@@ -39,7 +39,7 @@ const MessageBubble = React.memo(({ isUser, content, theme, children }) => {
           isUser
             ? 'bg-gradient-to-br from-blue-400 to-blue-500 text-white'
             : theme === 'light'
-            ? 'bg-gray-100 text-gray-800'
+            ? 'bg-white text-gray-800'
             : 'bg-gray-800 text-gray-100'
         } shadow-sm`}
       >
@@ -68,7 +68,7 @@ const MessageBubble = React.memo(({ isUser, content, theme, children }) => {
             {isExpanded ? content : truncatedContent}
           </ReactMarkdown>
         </div>
-        {content.length > 150 && (
+        {content.length > 120 && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -151,7 +151,7 @@ const ConversationFlow = React.memo(({ conversation, theme, openStory, setSelect
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mt-4 flex space-x-4 overflow-x-auto py-2 px-1 -mx-1 scrollbar-hide"
+            className="mt-4 flex space-x-4 overflow-x-auto py-2 px-1 -mx-1 no-scrollbar"
           >
             {conversation.items.slice(0, 3).map((item, itemIndex) => (
               <ItemCircle
