@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp, Star, Package, Info, Sparkles, Plus, Minus } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ShoppingBag, Heart, ShoppingCart, ChevronDown, ChevronUp,Crown, Award, Gift, Star, Package, Info, Sparkles, Plus, Minus, Utensils, Percent, Leaf } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -193,12 +193,12 @@ const ComboItem = ({ item, onAddToCart, theme, onItemClick }) => {
 const ComboQuantityButton = ({ quantity, onIncrement, onDecrement, theme }) => {
   return (
     <motion.div
-      initial={{ scale: 0.9 }}
+      initial={{ scale: 0.95 }}
       animate={{ scale: 1 }}
-      className={`flex items-center space-x-2 px-3 py-1 rounded-full ${
+      className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
         theme === 'light'
-          ? 'bg-blue-100 text-blue-600'
-          : 'bg-blue-900 text-blue-300'
+          ? 'bg-blue-100 text-blue-800'
+          : 'bg-blue-900 text-blue-200'
       }`}
     >
       <motion.button
@@ -209,11 +209,11 @@ const ComboQuantityButton = ({ quantity, onIncrement, onDecrement, theme }) => {
           theme === 'light'
             ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
             : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
-        }`}
+        } transition-colors duration-200`}
       >
-        <Minus size={16} />
+        <Minus size={18} />
       </motion.button>
-      <span className="font-bold text-lg min-w-[20px] text-center">{quantity}</span>
+      <span className="font-bold text-xl min-w-[40px] text-center">{quantity}</span>
       <motion.button
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
@@ -222,19 +222,19 @@ const ComboQuantityButton = ({ quantity, onIncrement, onDecrement, theme }) => {
           theme === 'light'
             ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
             : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
-        }`}
+        } transition-colors duration-200`}
       >
-        <Plus size={16} />
+        <Plus size={18} />
       </motion.button>
     </motion.div>
   );
 };
 
-const ComboCard = ({ combo,onAddToCart, onAddCombo, theme, onItemClick }) => {
+const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [quantity, setQuantity] = useState(0);
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState(0);
-  const [quantity, setQuantity] = useState(0);
 
   useEffect(() => {
     if (contentRef.current) {
@@ -243,9 +243,6 @@ const ComboCard = ({ combo,onAddToCart, onAddCombo, theme, onItemClick }) => {
   }, [isExpanded]);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
-
-  const totalSavings = combo.combo_items.reduce((sum, item) => sum + item.cost, 0) - combo.cost;
-  const savingsPercentage = ((totalSavings / combo.combo_items.reduce((sum, item) => sum + item.cost, 0)) * 100).toFixed(0);
 
   const handleIncrement = () => {
     setQuantity(prev => prev + 1);
@@ -259,103 +256,204 @@ const ComboCard = ({ combo,onAddToCart, onAddCombo, theme, onItemClick }) => {
     }
   };
 
+  const getPrestigeBadge = () => {
+    const badges = {
+      vip: { icon: Crown, color: 'yellow', text: 'VIP' },
+      premium: { icon: Award, color: 'purple', text: 'Premium' },
+      standard: { icon: Gift, color: 'blue', text: 'Standard' }
+    };
+
+    const { icon: Icon, color, text } = badges[combo.combo_type] || badges.standard;
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className={`flex items-center space-x-1 px-3 py-1.5 rounded-full ${
+          theme === 'light' 
+            ? `bg-${color}-100 text-${color}-800` 
+            : `bg-${color}-900 text-${color}-200`
+        } shadow-sm`}
+      >
+        <Icon size={16} />
+        <span className="text-xs font-semibold">{text}</span>
+      </motion.div>
+    );
+  };
+
+  const isComboVeg = combo.combo_items.every(item => item.veg_or_non_veg === 'veg');
+
+  const getVegNonVegPill = () => {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+        className={`flex items-center space-x-1 px-3 py-1.5 rounded-full ${
+          isComboVeg
+            ? theme === 'light' 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-green-900 text-green-200'
+            : theme === 'light'
+              ? 'bg-red-100 text-red-800'
+              : 'bg-red-900 text-red-200'
+        } shadow-sm`}
+      >
+        <Leaf size={16} className={isComboVeg ? 'text-green-600' : 'text-red-600'} />
+        <span className="text-xs font-semibold">{isComboVeg ? 'Veg' : 'Non-Veg'}</span>
+      </motion.div>
+    );
+  };
+
+  const savingsAmount = combo.cost - combo.discounted_cost;
+  const savingsPercentage = ((savingsAmount / combo.cost) * 100).toFixed(0);
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.4, type: 'spring', stiffness: 100 }}
       className={`${
-        theme === 'light' 
-          ? 'bg-white' 
-          : 'bg-gray-800'
-      } rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out`}
+        theme === 'light' ? 'bg-white' : 'bg-gray-800'
+      } rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border ${
+        theme === 'light' ? 'border-gray-200' : 'border-gray-700'
+      }`}
     >
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <h3 className={`text-2xl font-extrabold ${theme === 'light' ? 'text-gray-900' : 'text-white'} pr-2`}>
-            {combo.combo_name}
-          </h3>
+      <div className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex flex-col space-y-2">
+            <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+              {combo.combo_name}
+            </h3>
+            <div className="flex flex-wrap items-center gap-2">
+              {getPrestigeBadge()}
+              {getVegNonVegPill()}
+              {combo.has_discount === 'yes' && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                    theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-blue-900 text-blue-200'
+                  } shadow-sm`}
+                >
+                  {/* <Percent size={12} /> */}
+                  <span>Save {savingsPercentage}%</span>
+                </motion.div>
+              )}
+            </div>
+          </div>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.1, rotate: isExpanded ? -180 : 0 }}
+            whileTap={{ scale: 0.9 }}
             onClick={toggleExpand}
-            className={`p-1 rounded-full ${
+            className={`p-2 rounded-full ${
               theme === 'light' 
                 ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            } transition-colors duration-200 ease-in-out flex-shrink-0`}
+            } transition-colors duration-200 ease-in-out shadow-sm`}
           >
-           {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </motion.button>
         </div>
-        <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-3`}>
+        <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-4`}>
           {combo.description}
         </p>
-        <div className="flex flex-col space-y-3">
-        <div className="flex justify-between items-center">
-        <div>
-          <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-            ₹{combo.cost.toFixed(2)}
-          </span>
+        <div className="flex justify-between items-end mb-4">
+          <div className="flex items-baseline space-x-2">
+            <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+              ₹{combo.discounted_cost.toFixed(2)}
+            </span>
+            {combo.has_discount === 'yes' && (
+              <span className={`text-sm line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+                ₹{combo.cost.toFixed(2)}
+              </span>
+            )}
+          </div>
+        </div>
+        <div className="mt-4">
+          {quantity > 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
+                theme === 'light'
+                  ? 'bg-blue-50 text-blue-800'
+                  : 'bg-blue-900 text-blue-200'
+              } shadow-sm`}
+            >
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleDecrement}
+                className={`p-1 rounded-full ${
+                  theme === 'light'
+                    ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+                    : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+                } transition-colors duration-200 shadow-sm`}
+              >
+                <ChevronDown size={20} />
+              </motion.button>
+              <span className="font-bold text-xl min-w-[40px] text-center">{quantity}</span>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleIncrement}
+                className={`p-1 rounded-full ${
+                  theme === 'light'
+                    ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+                    : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+                } transition-colors duration-200 shadow-sm`}
+              >
+                <ChevronUp size={20} />
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleIncrement}
+              className={`w-full ${
+                theme === 'light' 
+                  ? 'bg-blue-500 hover:bg-blue-600' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-200 ease-in-out flex items-center justify-center space-x-2 shadow-md hover:shadow-lg`}
+            >
+              <Package size={20} />
+              <span>Add Combo</span>
+            </motion.button>
+          )}
+        </div>
+      </div>
+      <AnimatePresence>
+        {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className={`inline-block ml-2 px-2 py-1 rounded-full text-xs font-semibold ${
-              theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-green-800 text-green-100'
-            }`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: contentHeight, opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+            className="overflow-hidden"
           >
-            Save {savingsPercentage}%
+            <div ref={contentRef} className={`p-4 space-y-4 ${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900'}`}>
+              <h4 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} mb-2`}>
+                Combo Items
+              </h4>
+              {combo.combo_items.map((item) => (
+                <ComboItem 
+                  key={item.item_id} 
+                  item={item} 
+                  onAddToCart={onAddToCart} 
+                  theme={theme}
+                  onItemClick={onItemClick}
+                />
+              ))}
+            </div>
           </motion.div>
-        </div>
-        {quantity > 0 ? (
-          <ComboQuantityButton
-            quantity={quantity}
-            onIncrement={handleIncrement}
-            onDecrement={handleDecrement}
-            theme={theme}
-          />
-        ) : (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleIncrement}
-            className={`${
-              theme === 'light' 
-                ? 'bg-blue-500 hover:bg-blue-600' 
-                : 'bg-blue-600 hover:bg-blue-700'
-            } text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ease-in-out flex items-center justify-center space-x-2 shadow-md hover:shadow-lg`}
-          >
-            <Package size={18} />
-            <span>Add Combo</span>
-          </motion.button>
         )}
-      </div>
-          <span className={`text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-            Original: ₹{(combo.cost + totalSavings).toFixed(2)}
-          </span>
-        </div>
-      </div>
-      <motion.div
-        initial={false}
-        animate={{ height: isExpanded ? contentHeight : 0 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="overflow-hidden"
-      >
-        <div ref={contentRef} className="p-4 space-y-3 bg-opacity-50 bg-gray-50 dark:bg-opacity-50 dark:bg-gray-700">
-          {combo.combo_items.map((item) => (
-            <ComboItem 
-              key={item.item_id} 
-              item={item} 
-              onAddToCart={onAddToCart} 
-              theme={theme}
-              onItemClick={onItemClick}
-            />
-          ))}
-        </div>
-      </motion.div>
+      </AnimatePresence>
     </motion.div>
   );
 };
@@ -759,7 +857,7 @@ const AppleInspiredStoryView = ({ isOpen, onClose, conversations, initialIndex, 
       if (quantityChange > 0) {
         setNotification(`${combo.combo_name} added to cart!`);
       } else {
-        setNotification(`${combo.combo_name} updated in cart!`);
+        setNotification(`${combo.combo_name} removed from cart!`);
       }
       setTimeout(() => setNotification(null), 3000);
     },

@@ -88,10 +88,10 @@
         ],
         "cost": 1170,
         "description": "A vegetarian-friendly combination with deep, savory Asian flavors and a spicy kick.",
-        "discount_pct": 0,
-        "discounted_cost": 1170,
-        "has_discount": "no",
-        "combo_type": "standard",
+        "discount_pct": 10,
+        "discounted_cost": 999,
+        "has_discount": "yes",
+        "combo_type": "vip",
         "combo_items": [
           {
             "item_id": 114,
