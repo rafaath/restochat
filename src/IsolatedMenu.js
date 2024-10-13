@@ -32,7 +32,7 @@ const HorizontalScroll = ({ items, renderItem }) => {
   return (
     <div 
       ref={scrollContainerRef}
-      className="flex overflow-x-auto space-x-4 py-2 no-scrollbar"
+      className="flex overflow-x-auto space-x-4 px-2 py-4 no-scrollbar"
       style={{ scrollBehavior: 'smooth', overflowY: 'hidden' }}
     >
       {items.map((item, index) => (
@@ -656,7 +656,7 @@ const renderSearchItemCard = (item) => (
               <TabButton icon={Sparkles} text="Discover" isActive={view === 'discover'} onClick={() => setView('discover')} />
             </div>
           </div>
-          <div className="flex-grow overflow-y-auto p-4 scrollbar-hide">
+          <div className="flex-grow overflow-y-auto p-4 no-scrollbar">
             {loading ? (
               <div className="h-full flex items-center justify-center">
                 <Loader className="animate-spin text-blue-500" size={48} />

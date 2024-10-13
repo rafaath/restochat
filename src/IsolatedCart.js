@@ -1,6 +1,7 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingCart, Package } from 'lucide-react';
+import ComboDetailsModal from './ComboDetailsModal'; // Make sure to import the new component
 
 const CombinedImage = ({ images, size = 64 }) => {
   const imageCount = images.length;
@@ -33,6 +34,7 @@ const CombinedImage = ({ images, size = 64 }) => {
 
 const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFromCart }) => {
   const total = cartItems.reduce((sum, item) => sum + item.cost * item.quantity, 0);
+  const [selectedCombo, setSelectedCombo] = useState(null);
 
   const handleIncrement = (item) => {
     addToCart({ ...item, quantity: item.quantity + 1 });
@@ -46,15 +48,19 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
     }
   };
 
-  const renderCartItem = (item, index) => {
+  const renderCartItem = (item) => {
     const isCombo = item.isCombo;
     return (
-      <div key={isCombo ? `${item.combo_id}-${item.uniqueId}` : item.item_id} className={`flex justify-between items-center py-4 ${
-        theme === 'light' ? 'border-b border-gray-200' : 'border-b border-gray-700'
-      }`}>
-        <div className="flex items-center">
+      <div 
+        key={isCombo ? `${item.combo_id}-${item.uniqueId}` : item.item_id} 
+        className={`flex justify-between items-center py-4 ${
+          theme === 'light' ? 'border-b border-gray-200' : 'border-b border-gray-700'
+        }`}
+        onClick={() => isCombo && setSelectedCombo(item)}
+      >
+        <div className="flex items-center cursor-pointer">
           {isCombo ? (
-            <CombinedImage images={item.combo_items.map(i => i.image_link)} size={64} />
+            <CombinedImage images={item.image_links} size={64} />
           ) : (
             <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-lg mr-4" />
           )}
@@ -71,15 +77,15 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
           </div>
         </div>
         <div className="flex items-center">
-        <button 
-            onClick={() => removeFromCart(item)} 
+          <button 
+            onClick={(e) => { e.stopPropagation(); removeFromCart(item); }} 
             className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}
           >
             <Minus size={16} />
           </button>
           <span className={`mx-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
           <button 
-            onClick={() => addToCart(item)} 
+            onClick={(e) => { e.stopPropagation(); addToCart(item); }} 
             className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}
           >
             <Plus size={16} />
@@ -136,6 +142,12 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
           )}
         </div>
       </motion.div>
+      <ComboDetailsModal
+        isOpen={!!selectedCombo}
+        onClose={() => setSelectedCombo(null)}
+        combo={selectedCombo}
+        theme={theme}
+      />
     </motion.div>
   );
 };
