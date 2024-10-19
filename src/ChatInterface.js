@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { ChevronRight, ChevronDown, MessageCircle,  Sparkles, ArrowRight } from 'lucide-react';
+import { ChevronRight, ChevronDown, MessageCircle,  Sparkles, ArrowRight, Utensils } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const truncateText = (text, maxLength) => {
+  if (!text) return '';
   if (text.length <= maxLength) return text;
   const truncated = text.slice(0, maxLength).trim();
   return truncated.replace(/\s+\S*$/, '') + '...';
@@ -14,7 +15,11 @@ const truncateText = (text, maxLength) => {
 const MessageBubble = React.memo(({ isUser, content, theme, children }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const shouldReduceMotion = useReducedMotion();
-  const truncatedContent = useMemo(() => truncateText(content, 150), [content]);
+  const safeContent = content || ''; // Provide a default empty string if content is null or undefined
+  const truncatedContent = useMemo(() => truncateText(safeContent, 150), [safeContent]);
+
+  console.log('MessageBubble safeContent:', safeContent);
+  console.log('MessageBubble truncatedContent:', truncatedContent);
 
   const toggleExpand = useCallback(() => setIsExpanded(prev => !prev), []);
 
@@ -65,10 +70,10 @@ const MessageBubble = React.memo(({ isUser, content, theme, children }) => {
               }
             }}
           >
-            {isExpanded ? content : truncatedContent}
+            {isExpanded ? safeContent : truncatedContent}
           </ReactMarkdown>
         </div>
-        {content.length > 120 && (
+        {safeContent.length > 120 && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -93,28 +98,48 @@ const MessageBubble = React.memo(({ isUser, content, theme, children }) => {
   );
 });
 
-const ItemCircle = React.memo(({ item, onClick, theme }) => (
-  <motion.div
-    whileHover={{ scale: 1.05, y: -2 }}
-    whileTap={{ scale: 0.98 }}
-    className="flex flex-col items-center"
-    onClick={onClick}
-  >
-    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white dark:border-gray-700 shadow-md">
-      <img
-        src={item.image_link}
-        alt={item.name_of_item}
-        className="w-full h-full object-cover"
-        loading="lazy"
-      />
-    </div>
-    <p className={`text-xs mt-1.5 text-center w-20 truncate ${
-      theme === 'light' ? 'text-gray-600' : 'text-gray-300'
-    }`}>
-      {item.name_of_item}
-    </p>
-  </motion.div>
-));
+const ItemCircle = React.memo(({ item, onClick, theme }) => {
+  const renderImage = () => {
+    if (item.image_link) {
+      return (
+        <img
+          src={item.image_link}
+          alt={item.name_of_item}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      );
+    } else {
+      return (
+        <div className={`w-full h-full flex items-center justify-center ${
+          theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'
+        }`}>
+          <Utensils size={24} className={theme === 'light' ? 'text-gray-400' : 'text-gray-500'} />
+        </div>
+      );
+    }
+  };
+
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      className="flex flex-col items-center"
+      onClick={onClick}
+    >
+      <div className={`w-16 h-16 rounded-full overflow-hidden border-2 ${
+        theme === 'light' ? 'border-white' : 'border-gray-700'
+      } shadow-md`}>
+        {renderImage()}
+      </div>
+      <p className={`text-xs mt-1.5 text-center w-20 truncate ${
+        theme === 'light' ? 'text-gray-600' : 'text-gray-300'
+      }`}>
+        {item.name_of_item}
+      </p>
+    </motion.div>
+  );
+});
 
 const MoreItemsButton = React.memo(({ count, onClick, theme }) => (
   <motion.div
@@ -139,13 +164,14 @@ const MoreItemsButton = React.memo(({ count, onClick, theme }) => (
 ));
 
 const ConversationFlow = React.memo(({ conversation, theme, openStory, setSelectedItemFromConversation, index }) => {
+  console.log('ConversationFlow conversation:', conversation);
   const handleItemClick = useCallback((item) => setSelectedItemFromConversation(item), [setSelectedItemFromConversation]);
   const handleOpenStory = useCallback(() => openStory(index), [openStory, index]);
 
   return (
     <>
       <MessageBubble isUser={true} content={conversation.query} theme={theme} />
-      <MessageBubble isUser={false} content={conversation.response} theme={theme}>
+      <MessageBubble isUser={false} content={conversation?.response ?? ''}  theme={theme}>
         {conversation.items.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, Plus, Minus, Check } from 'lucide-react';
+import { X, Star, Plus, Minus, Check, Utensils } from 'lucide-react';
 
 const ItemModal = ({ item, isOpen, onClose, theme, addToCart, cart }) => {
   const [quantity, setQuantity] = useState(1);
@@ -49,6 +49,26 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, cart }) => {
     exit: { opacity: 0, y: -50 }
   };
 
+  const renderImage = () => {
+    if (item.image_link) {
+      return (
+        <img
+          src={item.image_link}
+          alt={item.name_of_item}
+          className="w-full h-48 sm:h-64 object-cover"
+        />
+      );
+    } else {
+      return (
+        <div className={`w-full h-48 sm:h-64 flex items-center justify-center ${
+          theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'
+        }`}>
+          <Utensils size={48} className={theme === 'light' ? 'text-gray-400' : 'text-gray-500'} />
+        </div>
+      );
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -63,11 +83,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, cart }) => {
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
         <div className="relative">
-          <img
-            src={item.image_link}
-            alt={item.name_of_item}
-            className="w-full h-48 sm:h-64 object-cover"
-          />
+          {renderImage()}
           <button 
             onClick={onClose}
             className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
@@ -91,7 +107,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, cart }) => {
             </span>
           </div>
           <p className={`mb-4 text-sm sm:text-base ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-            {item.description}
+            {item.description || "No description available."}
           </p>
           <div className="flex justify-between items-center mb-4 sm:mb-6">
             <p className="text-xl sm:text-2xl font-bold text-blue-600">

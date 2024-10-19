@@ -233,14 +233,6 @@ const ComboQuantityButton = ({ quantity, onIncrement, onDecrement, theme }) => {
 const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [quantity, setQuantity] = useState(0);
-  const contentRef = useRef(null);
-  const [contentHeight, setContentHeight] = useState(0);
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setContentHeight(contentRef.current.scrollHeight);
-    }
-  }, [isExpanded]);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -310,15 +302,10 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
   const savingsPercentage = ((savingsAmount / combo.cost) * 100).toFixed(0);
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.4, type: 'spring', stiffness: 100 }}
+    <div
       className={`${
         theme === 'light' ? 'bg-white' : 'bg-gray-800'
-      } rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border ${
+      } rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border no-scrollbar ${
         theme === 'light' ? 'border-gray-200' : 'border-gray-700'
       }`}
     >
@@ -340,15 +327,12 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
                     theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-blue-900 text-blue-200'
                   } shadow-sm`}
                 >
-                  {/* <Percent size={12} /> */}
                   <span>Save {savingsPercentage}%</span>
                 </motion.div>
               )}
             </div>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.1, rotate: isExpanded ? -180 : 0 }}
-            whileTap={{ scale: 0.9 }}
+          <button
             onClick={toggleExpand}
             className={`p-2 rounded-full ${
               theme === 'light' 
@@ -357,7 +341,7 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
             } transition-colors duration-200 ease-in-out shadow-sm`}
           >
             {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </motion.button>
+          </button>
         </div>
         <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-4`}>
           {combo.description}
@@ -376,18 +360,14 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
         </div>
         <div className="mt-4">
           {quantity > 0 ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+            <div
               className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
                 theme === 'light'
                   ? 'bg-blue-50 text-blue-800'
                   : 'bg-blue-900 text-blue-200'
               } shadow-sm`}
             >
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={handleDecrement}
                 className={`p-1 rounded-full ${
                   theme === 'light'
@@ -395,12 +375,10 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
                     : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
                 } transition-colors duration-200 shadow-sm`}
               >
-                <ChevronDown size={20} />
-              </motion.button>
+                <Minus size={20} />
+              </button>
               <span className="font-bold text-xl min-w-[40px] text-center">{quantity}</span>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={handleIncrement}
                 className={`p-1 rounded-full ${
                   theme === 'light'
@@ -408,13 +386,11 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
                     : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
                 } transition-colors duration-200 shadow-sm`}
               >
-                <ChevronUp size={20} />
-              </motion.button>
-            </motion.div>
+                <Plus size={20} />
+              </button>
+            </div>
           ) : (
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
+            <button
               onClick={handleIncrement}
               className={`w-full ${
                 theme === 'light' 
@@ -424,43 +400,38 @@ const ComboCard = ({ combo, onAddToCart, onAddCombo, theme, onItemClick }) => {
             >
               <Package size={20} />
               <span>Add Combo</span>
-            </motion.button>
+            </button>
           )}
         </div>
       </div>
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: contentHeight, opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="overflow-hidden"
-          >
-            <div ref={contentRef} className={`p-4 space-y-4 ${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900'}`}>
-              <h4 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} mb-2`}>
-                Combo Items
-              </h4>
-              {combo.combo_items.map((item) => (
-                <ComboItem 
-                  key={item.item_id} 
-                  item={item} 
-                  onAddToCart={onAddToCart} 
-                  theme={theme}
-                  onItemClick={onItemClick}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      <div 
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isExpanded ? 'max-h-[1000px]' : 'max-h-0'
+        }`}
+      >
+        <div className={`p-4 space-y-4 ${theme === 'light' ? 'bg-gray-50' : 'bg-gray-900'}`}>
+          <h4 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'} mb-2`}>
+            Combo Items
+          </h4>
+          {combo.combo_items.map((item) => (
+            <ComboItem 
+              key={item.item_id} 
+              item={item} 
+              onAddToCart={onAddToCart} 
+              theme={theme}
+              onItemClick={onItemClick}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
+
 const ComboSection = ({ combos, onAddToCart, onAddCombo, theme, onItemClick }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 no-scrollbar">
       {combos.map((combo) => (
         <ComboCard
           key={combo.combo_id}
@@ -482,7 +453,7 @@ const truncateText = (text, maxLength) => {
 
 
 
-const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddCombo, theme, onItemClick, cart }, ref) => {
+const ItemCard = React.forwardRef(({ item, onAddToCart, removeFromCart, onAddCombo, theme, onItemClick, cart }, ref) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCombos, setShowCombos] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
@@ -520,13 +491,34 @@ const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddComb
   };
 
   const truncateText = (text, maxLength) => {
+    if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.slice(0, maxLength) + '...';
   };
 
-  const descriptionText = showFullDescription
-    ? item.description
-    : truncateText(item.description, 120);
+  const descriptionText = item.description
+    ? (showFullDescription
+        ? item.description
+        : truncateText(item.description, 120))
+    : "Discover a delightful culinary experience with this exquisite dish.";
+
+  const renderImage = () => {
+    if (item.image_link) {
+      return (
+        <img
+          src={item.image_link}
+          alt={item.name_of_item}
+          className="w-full h-48 object-cover"
+        />
+      );
+    } else {
+      return (
+        <div className={`w-full h-48 flex items-center justify-center ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'}`}>
+          <Utensils size={48} className={`${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`} />
+        </div>
+      );
+    }
+  };
 
   return (
     <motion.div
@@ -536,18 +528,14 @@ const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddComb
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl ${
+      className={`${theme === 'light' ? 'bg-white' : 'bg-gray-800'} rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl no-scrollbar ${
         showCombos ? 'md:col-span-2' : ''
       }`}
     >
-      <div className={`flex flex-col md:flex-row ${showCombos ? 'md:divide-x' : ''} ${theme === 'light' ? 'divide-gray-200' : 'divide-gray-700'} h-full`}>
+      <div className={`flex flex-col no-scrollbar md:flex-row ${showCombos ? 'md:divide-x' : ''} ${theme === 'light' ? 'divide-gray-200' : 'divide-gray-700'} h-full`}>
         <div className={`flex-shrink-0 ${showCombos ? 'md:w-1/2' : 'w-full'} flex flex-col`}>
           <div className="relative">
-            <img
-              src={item.image_link}
-              alt={item.name_of_item}
-              className="w-full h-48 object-cover"
-            />
+            {renderImage()}
             <div className="absolute top-2 right-2 flex space-x-2">
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -583,7 +571,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddComb
               <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
                 {descriptionText}
               </p>
-              {item.description.length > 120 && (
+              {item.description && item.description.length > 120 && (
                 <button
                   onClick={() => setShowFullDescription(!showFullDescription)}
                   className={`${theme === 'light' ? 'text-blue-500 hover:text-blue-600' : 'text-blue-400 hover:text-blue-300'} text-sm mt-1`}
@@ -601,24 +589,24 @@ const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddComb
               </span>
             </div>
             <div className="mt-auto">
-        <div className="flex justify-between items-center mt-3">
-          <span className={`text-2xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-            ₹{item.cost.toFixed(2)}
-          </span>
-          {itemIsPartOfCombo ? (
-            <span className={`text-sm font-semibold ${theme === 'light' ? 'text-blue-600' : 'text-blue-400'}`}>
-              Part of Combo
-            </span>
-          ) : (
-            <AnimatedAddToCartButton
-        item={item}
-        addToCart={handleAddToCart}
-        removeFromCart={removeFromCart}
-        theme={theme}
-        quantity={quantity}
-      />
-          )}
-        </div>
+              <div className="flex justify-between items-center mt-3">
+                <span className={`text-2xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+                  ₹{item.cost.toFixed(2)}
+                </span>
+                {itemIsPartOfCombo ? (
+                  <span className={`text-sm font-semibold ${theme === 'light' ? 'text-blue-600' : 'text-blue-400'}`}>
+                    Part of Combo
+                  </span>
+                ) : (
+                  <AnimatedAddToCartButton
+                    item={item}
+                    addToCart={handleAddToCart}
+                    removeFromCart={removeFromCart}
+                    theme={theme}
+                    quantity={quantity}
+                  />
+                )}
+              </div>
               {item.combos && item.combos.length > 0 && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -647,18 +635,19 @@ const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddComb
                     Additional Information:
                   </h4>
                   <ul className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'} space-y-1`}>
-                    <li>Cuisine: {item.cuisine}</li>
-                    <li>Meal Time: {item.meal_time}</li>
-                    <li>Spiciness: {item.spiciness}</li>
+                    <li>Cuisine: {item.cuisine || 'Not specified'}</li>
+                    <li>Meal Time: {item.meal_time || 'Anytime'}</li>
+                    <li>Spiciness: {item.spiciness || 'Not specified'}</li>
                     <li>Allergens: {item.allergens_present || 'None'}</li>
                     <li>
                       Dietary: {item.is_vegan ? 'Vegan' : ''}{' '}
                       {item.is_gluten_free ? 'Gluten-free' : ''}
+                      {!item.is_vegan && !item.is_gluten_free ? 'Standard' : ''}
                     </li>
-                    <li>Energy: {item.energy}</li>
-                    <li>Protein: {item.protein}</li>
-                    <li>Fat: {item.fat}</li>
-                    <li>Carbohydrates: {item.carbohydrates}</li>
+                    <li>Energy: {item.energy || 'Not available'}</li>
+                    <li>Protein: {item.protein || 'Not available'}</li>
+                    <li>Fat: {item.fat || 'Not available'}</li>
+                    <li>Carbohydrates: {item.carbohydrates || 'Not available'}</li>
                   </ul>
                 </motion.div>
               )}
@@ -677,7 +666,7 @@ const ItemCard = React.forwardRef(({ item, onAddToCart,removeFromCart, onAddComb
                 duration: 0.5,
                 ease: [0.43, 0.13, 0.23, 0.96],
               }}
-              className="md:w-1/2 overflow-hidden"
+              className="md:w-1/2 overflow-hidden no-scrollbar"
             >
               <div className="p-6 h-full overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">

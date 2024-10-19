@@ -510,11 +510,19 @@ const renderSearchItemCard = (item) => (
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
         <div className="relative h-80">
-          <img 
-            src={selectedItem.image_link} 
-            alt={selectedItem.name_of_item} 
-            className="w-full h-full object-cover"
-          />
+          {selectedItem.image_link ? (
+            <img 
+              src={selectedItem.image_link} 
+              alt={selectedItem.name_of_item} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className={`w-full h-full flex items-center justify-center ${
+              theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'
+            }`}>
+              <ImageIcon size={64} className={theme === 'light' ? 'text-gray-400' : 'text-gray-500'} />
+            </div>
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70" />
           <button 
             onClick={() => setSelectedItem(null)}
@@ -541,13 +549,13 @@ const renderSearchItemCard = (item) => (
         </div>
         <div className="p-6">
           <p className={`text-lg mb-6 ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>
-            {selectedItem.description}
+            {selectedItem.description || "No description available."}
           </p>
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
               <h3 className={`font-semibold mb-2 text-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>Ingredients</h3>
               <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-                {selectedItem.ingredients}
+                {selectedItem.ingredients || "Ingredients information not available."}
               </p>
             </div>
             <div>
