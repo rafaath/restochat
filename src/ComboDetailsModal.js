@@ -41,6 +41,9 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
     return 0;
   };
 
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
   const discountPercentage = getDiscountPercentage();
   const isVeg = combo.combo_items && combo.combo_items.every(item => item.veg_or_non_veg === 'veg');
 
@@ -48,7 +51,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
   const displayImage = combo.image_links?.[0] || combo.image_link || combo.combo_items?.[0]?.image_link || fallbackImageUrl;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center no-scrollbar">
+    <div className="fixed inset-0 z-[9999] flex items-center  justify-center no-scrollbar">
       <div className="absolute inset-0 " onClick={onClose} />
     <AnimatePresence>
       {isOpen && (
@@ -57,7 +60,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="fixed inset-0 bg-black bg-opacity-50  flex items-center justify-center no-scrollbar overflow-hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center no-scrollbar overflow-hidden"
           style={{ minHeight: '-webkit-fill-available' }}
           onClick={onClose}
         >
@@ -114,7 +117,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
                 )}
                 {combo.combo_type && (
                   <span className="flex items-center px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                    <Award size={14} className="mr-1" /> {combo.combo_type}
+                    <Award size={14} className="mr-1" /> {capitalizeFirstLetter(combo.combo_type)}
                   </span>
                 )}
                 {combo.rating && (
@@ -148,8 +151,8 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
                     <span className={`text-lg line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
                       ₹{combo.cost.toFixed(2)}
                     </span>
-                    <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
-                      {discountPercentage}% OFF
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                      Save {discountPercentage}%
                     </span>
                   </>
                 )}
@@ -178,7 +181,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
                             {item.name_of_item}
                           </h4>
                           <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-                            {item.description ? item.description.substring(0, 50) + '...' : 'No description available'}
+                            {item.description ? item.description.substring(0, 500): 'No description available'} {/* + '...' */}
                           </p>
                         </div>
                       </motion.div>

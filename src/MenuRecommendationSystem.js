@@ -437,129 +437,132 @@ const MenuRecommendationSystem = () => {
     );
   }, [theme]);
 
-  const handleSearch = useCallback(async (e) => {
-    e?.preventDefault();
-    const searchQuery = query.trim();
-    if (!searchQuery) return;
-
-    setIsLoading(true);
-    const newConversation = { query: searchQuery, response: 'Waiting for response...', items: [] };
-    setConversations(prev => [...prev, newConversation]);
-
-    try {
-      let data;
-      if (useSimulatedApi) {
-        data = await getSimulatedResponse(searchQuery);
-      } else {
-        let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}`;
-        if (chatId) {
-          url += `&chat_id=${chatId}`;
-        }
-        const response = await fetch(url);
-        data = await response.json();
-      }
-
-      if (!chatId && data.chat_id) {
-        setChatId(data.chat_id);
-      }
-
-      setConversations(prev => 
-        prev.map((conv, index) => 
-          index === prev.length - 1 
-            ? { ...conv, response: data.response_text, items: data.returned_items || [] }
-            : conv
-        )
-      );
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setConversations(prev => 
-        prev.map((conv, index) => 
-          index === prev.length - 1 
-            ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
-            : conv
-        )
-      );
-    } finally {
-      setIsLoading(false);
-    }
-
-    setQuery('');
-    setSelectedPrompt(null);
-    setIsPromptsExpanded(false);
-    setActiveTab('chat');
-  }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
-
-
-
   // const handleSearch = useCallback(async (e) => {
   //   e?.preventDefault();
   //   const searchQuery = query.trim();
   //   if (!searchQuery) return;
 
+  //   setActiveTab('chat'); // Switch to chat tab immediately
+
+  //   // Add user's query to conversations
+  //   setConversations(prev => [...prev, { query: searchQuery, response: null, items: [] }]);
+
   //   setIsLoading(true);
-  //   const newConversation = { query: searchQuery, response: 'Waiting for response...', items: [] };
-  //   setConversations(prev => [...prev, newConversation]);
 
-  //   const pollInterval = 10000; // 10 seconds
-  //   const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
-  //   let attempts = 0;
-
-  //   const pollForResponse = async () => {
-  //     try {
-  //       let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}&search_engine=vector`;
+  //   try {
+  //     let data;
+  //     if (useSimulatedApi) {
+  //       data = await getSimulatedResponse(searchQuery);
+  //     } else {
+  //       let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}`;
   //       if (chatId) {
   //         url += `&chat_id=${chatId}`;
   //       }
-
   //       const response = await fetch(url);
-  //       const data = await response.json();
-
-  //       if (!chatId && data.chat_id) {
-  //         setChatId(data.chat_id);
-  //       }
-
-  //       if (data.status === 'processing') {
-  //         attempts++;
-  //         if (attempts >= maxAttempts) {
-  //           throw new Error('Max attempts reached');
-  //         }
-  //         setConversations(prev => 
-  //           prev.map((conv, index) => 
-  //             index === prev.length - 1 
-  //               ? { ...conv, response: `Still processing... (${attempts * 10} seconds)` }
-  //               : conv
-  //           )
-  //         );
-  //         setTimeout(pollForResponse, pollInterval);
-  //       } else {
-  //         setConversations(prev => 
-  //           prev.map((conv, index) => 
-  //             index === prev.length - 1 
-  //               ? { ...conv, response: data.response_text, items: data.returned_items || [] }
-  //               : conv
-  //           )
-  //         );
-  //         setIsLoading(false);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //       setConversations(prev => 
-  //         prev.map((conv, index) => 
-  //           index === prev.length - 1 
-  //             ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
-  //             : conv
-  //         )
-  //       );
-  //       setIsLoading(false);
+  //       data = await response.json();
   //     }
-  //   };
 
-  //   pollForResponse();
+  //     if (!chatId && data.chat_id) {
+  //       setChatId(data.chat_id);
+  //     }
+
+  //     // Update the last conversation with the response
+  //     setConversations(prev => 
+  //       prev.map((conv, index) => 
+  //         index === prev.length - 1 
+  //           ? { ...conv, response: data.response_text, items: data.returned_items || [] }
+  //           : conv
+  //       )
+  //     );
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //     // Update the last conversation with the error message
+  //     setConversations(prev => 
+  //       prev.map((conv, index) => 
+  //         index === prev.length - 1 
+  //           ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
+  //           : conv
+  //       )
+  //     );
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
 
   //   setQuery('');
   //   setSelectedPrompt(null);
   //   setIsPromptsExpanded(false);
-  // }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
+  // }, [query, chatId, setChatId, setConversations, setActiveTab, setIsPromptsExpanded]);
+
+
+  const handleSearch = useCallback(async (e) => {
+    e?.preventDefault();
+    const searchQuery = query.trim();
+    if (!searchQuery) return;
+
+    
+   setActiveTab('chat'); // Switch to chat tab immediately
+   setConversations(prev => [...prev, { query: searchQuery, response: null, items: [] }]);
+   setIsLoading(true);
+    const pollInterval = 10000; // 10 seconds
+    const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
+    let attempts = 0;
+
+    const pollForResponse = async () => {
+      try {
+        let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}&search_engine=vector`;
+        if (chatId) {
+          url += `&chat_id=${chatId}`;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!chatId && data.chat_id) {
+          setChatId(data.chat_id);
+        }
+
+        if (data.status === 'processing') {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            throw new Error('Max attempts reached');
+          }
+          setConversations(prev => 
+            prev.map((conv, index) => 
+              index === prev.length - 1 
+                ? { ...conv, response: `Still processing... (${attempts * 10} seconds)` }
+                : conv
+            )
+          );
+          setTimeout(pollForResponse, pollInterval);
+        } else {
+          setConversations(prev => 
+            prev.map((conv, index) => 
+              index === prev.length - 1 
+                ? { ...conv, response: data.response_text, items: data.returned_items || [] }
+                : conv
+            )
+          );
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setConversations(prev => 
+          prev.map((conv, index) => 
+            index === prev.length - 1 
+              ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
+              : conv
+          )
+        );
+        setIsLoading(false);
+      }
+    };
+
+    pollForResponse();
+
+    setQuery('');
+    setSelectedPrompt(null);
+    setIsPromptsExpanded(false);
+  }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
 
 
 
@@ -639,6 +642,14 @@ const MenuRecommendationSystem = () => {
         return item;
       }).filter(Boolean);
     });
+  }, []);
+
+  const handleChatButtonClick = useCallback(() => {
+    setActiveTab('chat');
+    setIsPromptsExpanded(true);
+    setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 100);
   }, []);
   
   const handleVoiceInput = useCallback(() => {
@@ -1176,58 +1187,59 @@ const MenuRecommendationSystem = () => {
             </div>
           </div> */}
   
-          <main 
-            ref={mainContentRef}
-            className="flex-grow overflow-y-auto no-scrollbar"
-          >
-            <AnimatePresence mode="wait">
-              {activeTab === 'home' && (
-                <motion.div
-                  key="home"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full"
-                >
-                   <EmptyState 
+  <main 
+        ref={mainContentRef}
+        className="flex-grow overflow-y-auto no-scrollbar"
+      >
+        <AnimatePresence mode="wait">
+          {activeTab === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="h-full"
+            >
+              <EmptyState 
                 theme={theme} 
                 onItemClick={handleItemClick} 
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 cart={cart}
               />
-                </motion.div>
+            </motion.div>
+          )}
+          {activeTab === 'chat' && (
+            <motion.div
+              key="chat"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="h-full overflow-y-auto p-4"
+            >
+              {conversations.length === 0 ? (
+                <EmptyChatState 
+                  theme={theme} 
+                  searchInputRef={searchInputRef} 
+                  onStartChatting={handleStartChatting}
+                />
+              ) : (
+                <ChatInterface 
+                  conversations={conversations}
+                  onClearChat={clearChat}
+                  theme={theme}
+                  openStory={openStory}
+                  setSelectedItemFromConversation={setSelectedItemFromConversation}
+                  isLoading={isLoading}
+                />
               )}
- {activeTab === 'chat' && (
-          <motion.div
-            key="chat"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="h-full overflow-y-auto p-4"
-          >
-            {conversations.length === 0 ? (
-              <EmptyChatState 
-              theme={theme} 
-              searchInputRef={searchInputRef} 
-              onStartChatting={handleStartChatting}
-            />
-            ) : (
-              <ChatInterface 
-                conversations={conversations}
-                onClearChat={clearChat}
-                theme={theme}
-                openStory={openStory}
-                setSelectedItemFromConversation={setSelectedItemFromConversation}
-              />
-            )}
-          </motion.div>
-)}
-            </AnimatePresence>
-            <div ref={conversationEndRef} />
-          </main>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <div ref={conversationEndRef} />
+      </main>
   
           <footer className={`flex-shrink-0 z-50 ${
             theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
@@ -1401,15 +1413,16 @@ const MenuRecommendationSystem = () => {
   
   <AnimatePresence>
         {isMenuOpen && (
-         <IsolatedMenu
-         isOpen={isMenuOpen}
-         onClose={toggleMenu}
-         theme={theme}
-         menuItems={menuItems}
-         addToCart={addToCart}
-         removeFromCart={removeFromCart}
-         cart={cart}
-       />
+        <IsolatedMenu
+        isOpen={isMenuOpen}
+        onClose={toggleMenu}
+        theme={theme}
+        menuItems={menuItems}
+        addToCart={addToCart}
+        removeFromCart={removeFromCart}
+        cart={cart}
+        onChatButtonClick={handleChatButtonClick}
+      />
         )}
       </AnimatePresence>
 
@@ -1464,7 +1477,7 @@ const MenuRecommendationSystem = () => {
   />
 )}
   
-      {isLoading && (
+      {/* {isLoading && (
         <motion.div 
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           initial={{ opacity: 0 }}
@@ -1479,7 +1492,7 @@ const MenuRecommendationSystem = () => {
             <Loader size={48} className="text-white animate-spin" />
           </motion.div>
         </motion.div>
-      )}
+      )} */}
     <style jsx global>{`
         :root {
           --vh: 1vh;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Plus, Minus, Star, Check, AlertCircle, Image as ImageIcon, Filter, Sparkles, Coffee, Pizza, Cake, Compass, ChevronRight, ChevronLeft, Loader, ShoppingBag } from 'lucide-react';
+import { X, Search, Plus, Minus, Star, Check, AlertCircle, Image as ImageIcon, Filter, Sparkles, Coffee, Pizza, Cake, Compass, ChevronRight, ChevronLeft, Loader, ShoppingBag, MessageCircle  } from 'lucide-react';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
 
 const HorizontalScroll = ({ items, renderItem }) => {
@@ -183,7 +183,7 @@ const Notification = ({ show, theme }) => {
 // };
 
 
-const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFromCart, cart }) => {
+const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFromCart, cart, onChatButtonClick }) => {
   const [view, setView] = useState('explore');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
@@ -266,8 +266,38 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
           <HorizontalScroll items={items} renderItem={renderScrollItemCard} />
         </div>
       ))}
+      <motion.div
+        className={`p-6 rounded-lg ${theme === 'light' ? 'bg-blue-100' : 'bg-blue-900'} shadow-md`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="mb-4 md:mb-0 md:mr-4">
+            <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-blue-800' : 'text-blue-200'}`}>
+              Can't find what you're looking for?
+            </h3>
+            <p className={`${theme === 'light' ? 'text-blue-700' : 'text-blue-300'}`}>
+              Try our AI Chat and get the perfect dish you deserve!
+            </p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              onClose();
+              onChatButtonClick();
+            }}
+            className="px-6 py-2 bg-blue-500 text-white rounded-full font-semibold flex items-center"
+          >
+            <MessageCircle className="mr-2" size={20} />
+            Chat Now
+          </motion.button>
+        </div>
+      </motion.div>
     </div>
   );
+
 
   const renderSearchView = () => {
     return (
