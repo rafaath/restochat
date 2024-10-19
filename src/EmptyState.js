@@ -5,6 +5,7 @@ import Lottie from 'lottie-react';
 import animationData from './animation.json';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
 import ComboDetailsModal from './ComboDetailsModal';
+import { Tooltip } from './components/ui/tooltip';
 
 
 const LottieAnimation = ({ 
@@ -93,7 +94,6 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
       image_links: combo.combo_items.map(item => item.image_link),
       image_link: firstItemImage || combo.image_link,
     };
-    console.log('Combo clicked:', enhancedCombo); // Debug log
     onItemClick(enhancedCombo);
   };
 
@@ -146,94 +146,99 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
         theme === 'light' ? 'bg-white' : 'bg-gray-800'
       } rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out border ${
         theme === 'light' ? 'border-gray-200' : 'border-gray-700'
-      } cursor-pointer`}
+      } cursor-pointer flex flex-col h-full`}
       onClick={handleClick}
     >
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex flex-col space-y-2">
-            <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
-              {combo.combo_name}
-            </h3>
-            <div className="flex flex-wrap items-center gap-2">
-              {getPrestigeBadge()}
-              {getVegNonVegPill()}
-              {combo.has_discount === 'yes' && (
-                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-semibold ${
-                  theme === 'light' ? 'bg-blue-100 text-blue-800' : 'bg-blue-900 text-blue-200'
-                }`}>
-                  <Percent size={12} />
-                  <span>Save {((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0)}%</span>
-                </div>
-              )}
+      <div className="p-6 flex-grow flex flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex flex-col space-y-2">
+              <h3 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'} line-clamp-2`}>
+                {combo.combo_name}
+              </h3>
+              <div className="flex flex-wrap items-center gap-2">
+                {getPrestigeBadge()}
+                {getVegNonVegPill()}
+                
+              </div>
             </div>
           </div>
+          <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-2 line-clamp-2`}>
+            {combo.description}
+          </p>
         </div>
-        <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-4`}>
-          {combo.description}
-        </p>
-        <div className="flex justify-between items-end mb-4">
-          <div className="flex items-baseline space-x-2">
-            <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-              ₹{combo.discounted_cost.toFixed(2)}
-            </span>
-            {combo.has_discount === 'yes' && (
-              <span className={`text-sm line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
-                ₹{combo.cost.toFixed(2)}
+        <div className="mt-auto">
+          <div className="flex justify-between items-end mb-4">
+            <div className="flex items-baseline space-x-2">
+              <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+                ₹{combo.discounted_cost.toFixed(2)}
+              </span>
+              {combo.has_discount === 'yes' && (
+                <span className={`text-sm line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  ₹{combo.cost.toFixed(2)}
+                </span>
+              )}
+              {combo.has_discount === 'yes' && (
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-blue-900 text-blue-200'
+              }`}>
+                Save {((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0)}%
               </span>
             )}
-          </div>
-        </div>
-        <div className="mt-4">
-          {quantity > 0 ? (
-            <div 
-            className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
-              theme === 'light'
-                ? 'bg-blue-50 text-blue-800'
-                : 'bg-blue-900 text-blue-200'
-            }`}
-            onClick={(e) => e.stopPropagation()} // Prevent triggering onItemClick
-          >
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleDecrement}
-                className={`p-1 rounded-full ${
-                  theme === 'light'
-                    ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
-                    : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
-                }`}
-              >
-                <ChevronDown size={20} />
-              </motion.button>
-              <span className="font-bold text-xl min-w-[40px] text-center">{quantity}</span>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleIncrement}
-                className={`p-1 rounded-full ${
-                  theme === 'light'
-                    ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
-                    : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
-                }`}
-              >
-                <ChevronUp size={20} />
-              </motion.button>
             </div>
-          ) : (
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={handleIncrement}
-              className={`w-full ${
-                theme === 'light' 
-                  ? 'bg-blue-500 hover:bg-blue-600' 
-                  : 'bg-blue-600 hover:bg-blue-700'
-              } text-white px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-200 ease-in-out`}
+          </div>
+          
+          <div className="mt-4">
+            {quantity > 0 ? (
+              <div 
+              className={`flex items-center justify-between w-full px-4 py-2 rounded-lg ${
+                theme === 'light'
+                  ? 'bg-blue-50 text-blue-800'
+                  : 'bg-blue-900 text-blue-200'
+              }`}
+              onClick={(e) => e.stopPropagation()}
             >
-              Add Combo
-            </motion.button>
-          )}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleDecrement}
+                  className={`p-1 rounded-full ${
+                    theme === 'light'
+                      ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+                      : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+                  }`}
+                >
+                  <ChevronDown size={20} />
+                </motion.button>
+                <span className="font-bold text-xl min-w-[40px] text-center">{quantity}</span>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleIncrement}
+                  className={`p-1 rounded-full ${
+                    theme === 'light'
+                      ? 'bg-blue-200 text-blue-700 hover:bg-blue-300'
+                      : 'bg-blue-800 text-blue-200 hover:bg-blue-700'
+                  }`}
+                >
+                  <ChevronUp size={20} />
+                </motion.button>
+              </div>
+            ) : (
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handleIncrement}
+                className={`w-full ${
+                  theme === 'light' 
+                    ? 'bg-blue-500 hover:bg-blue-600' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                } text-white px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-200 ease-in-out`}
+              >
+                Add Combo
+              </motion.button>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>
