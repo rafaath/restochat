@@ -67,13 +67,14 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
     setQuantity(prev => prev + 1);
     const enhancedComboItem = {
       ...combo,
+      combo_type: combo.combo_type || 'Standard',
       isCombo: true,
       quantity: 1,
       image_links: combo.combo_items.map(item => item.image_link),
       combo_items: combo.combo_items.map(item => ({
         ...item,
-        description: item.description || 'Delicious item in this combo',
-        veg_or_non_veg: item.veg_or_non_veg || 'non-veg'
+        description: item.description || 'No Description Avaliable',
+        veg_or_non_veg: item.veg_or_non_veg || 'N/A'
       }))
     };
     onAddToCart(enhancedComboItem);

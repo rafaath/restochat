@@ -134,6 +134,12 @@ const MenuRecommendationSystem = () => {
   };
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  const clearCart = () => {
+    setCart([]); // Assuming you're using React state to manage cart items
+    // Or if you're using a state management library:
+    // dispatch({ type: 'CLEAR_CART' });
+  };
+
   const clearChat = () => {
     setConversations([]);
     setChatId(null);
@@ -1435,6 +1441,7 @@ const MenuRecommendationSystem = () => {
           cartItems={cart}
           addToCart={addToCart}
           removeFromCart={removeFromCart}
+          clearCart={clearCart}
         />
         )}
       </AnimatePresence>

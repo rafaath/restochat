@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ShoppingCart, Package } from 'lucide-react';
-import ComboDetailsModal from './ComboDetailsModal'; // Make sure to import the new component
+import { X, Plus, Minus, ShoppingCart, Package, Trash2 } from 'lucide-react';
+import ComboDetailsModal from './ComboDetailsModal';
 
 const CombinedImage = ({ images, size = 64 }) => {
   const imageCount = images.length;
@@ -32,30 +32,24 @@ const CombinedImage = ({ images, size = 64 }) => {
   );
 };
 
-const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFromCart }) => {
+const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFromCart, clearCart }) => {
   const total = cartItems.reduce((sum, item) => sum + item.cost * item.quantity, 0);
   const [selectedCombo, setSelectedCombo] = useState(null);
 
-  const handleIncrement = (item) => {
-    addToCart({ ...item, quantity: item.quantity + 1 });
-  };
-
-  const handleDecrement = (item) => {
-    if (item.quantity > 1) {
-      addToCart({ ...item, quantity: item.quantity - 1 });
-    } else {
-      removeFromCart(item);
-    }
-  };
-
   const renderCartItem = (item) => {
     const isCombo = item.isCombo;
+    const comboBackgroundColor = theme === 'light' ? 'bg-blue-50' : 'bg-blue-900';
+    const comboBorderColor = theme === 'light' ? 'border-blue-200' : 'border-blue-700';
+    const comboTextColor = theme === 'light' ? 'text-blue-800' : 'text-blue-100';
+
     return (
       <div 
         key={isCombo ? `${item.combo_id}-${item.uniqueId}` : item.item_id} 
-        className={`flex justify-between items-center py-4 ${
-          theme === 'light' ? 'border-b border-gray-200' : 'border-b border-gray-700'
-        }`}
+        className={`flex justify-between items-center py-4 px-3 rounded-lg mb-2 ${
+          isCombo 
+            ? `${comboBackgroundColor} ${comboBorderColor} border`
+            : theme === 'light' ? 'bg-white border-b border-gray-200' : 'bg-gray-800 border-b border-gray-700'
+        } transition-all duration-300 ease-in-out hover:shadow-md`}
         onClick={() => isCombo && setSelectedCombo(item)}
       >
         <div className="flex items-center cursor-pointer">
@@ -65,7 +59,7 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
             <img src={item.image_link} alt={item.name_of_item} className="w-16 h-16 object-cover rounded-lg mr-4" />
           )}
           <div className="ml-4">
-            <h3 className={`font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+            <h3 className={`font-semibold ${isCombo ? comboTextColor : theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
               {isCombo ? (
                 <span className="flex items-center">
                   <Package size={16} className="mr-2" />
@@ -73,20 +67,20 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
                 </span>
               ) : item.name_of_item}
             </h3>
-            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost.toFixed(2)} x {item.quantity}</p>
+            <p className={`text-sm ${isCombo ? 'opacity-80' : ''} ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>₹{item.cost.toFixed(2)} x {item.quantity}</p>
           </div>
         </div>
         <div className="flex items-center">
           <button 
             onClick={(e) => { e.stopPropagation(); removeFromCart(item); }} 
-            className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}
+            className={`p-1 ${isCombo ? comboTextColor : theme === 'light' ? 'text-gray-600' : 'text-gray-300'} hover:bg-opacity-20 hover:bg-gray-500 rounded-full transition-colors`}
           >
             <Minus size={16} />
           </button>
-          <span className={`mx-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
+          <span className={`mx-2 ${isCombo ? comboTextColor : theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.quantity}</span>
           <button 
             onClick={(e) => { e.stopPropagation(); addToCart(item); }} 
-            className={`p-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}
+            className={`p-1 ${isCombo ? comboTextColor : theme === 'light' ? 'text-gray-600' : 'text-gray-300'} hover:bg-opacity-20 hover:bg-gray-500 rounded-full transition-colors`}
           >
             <Plus size={16} />
           </button>
@@ -115,7 +109,7 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
         <div className="p-6 h-full flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>Your Cart</h2>
-            <button onClick={onClose} className={theme === 'light' ? 'text-gray-600' : 'text-gray-300'}>
+            <button onClick={onClose} className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} hover:bg-opacity-20 hover:bg-gray-500 p-1 rounded-full transition-colors`}>
               <X size={24} />
             </button>
           </div>
@@ -134,6 +128,17 @@ const IsolatedCart = ({ isOpen, onClose, theme, cartItems, addToCart, removeFrom
                 <p className={`text-xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
                   Total: ₹{total.toFixed(2)}
                 </p>
+                <button
+                  onClick={clearCart}
+                  className={`w-full mt-4 py-3 rounded-full font-semibold flex items-center justify-center transition-colors ${
+                    theme === 'light'
+                      ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                      : 'bg-red-900 text-red-100 hover:bg-red-800'
+                  }`}
+                >
+                  <Trash2 size={20} className="mr-2" />
+                  Clear Cart
+                </button>
                 <button className="w-full mt-4 bg-blue-500 text-white py-3 rounded-full font-semibold hover:bg-blue-600 transition-colors">
                   Proceed to Checkout
                 </button>
