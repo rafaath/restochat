@@ -23,17 +23,19 @@ const AnimatedAddToCartButton = ({ item, addToCart, removeFromCart, theme, quant
 
   const handleDecrement = useCallback((e) => {
     e.stopPropagation();
-    if (quantity > 0) {
+    if (quantity > 1) {
       removeFromCart(item);
-      if (quantity === 1) {
-        setShowIncrement(false);
-      }
+    } else if (quantity === 1) {
+      removeFromCart(item);
+      setShowIncrement(false);
     }
   }, [removeFromCart, item, quantity]);
 
   useEffect(() => {
     if (quantity > 0 && !isAdded) {
       setShowIncrement(true);
+    } else if (quantity === 0) {
+      setShowIncrement(false);
     }
   }, [quantity, isAdded]);
 

@@ -585,6 +585,7 @@ const renderSearchItemCard = (item) => (
               <p className={`text-sm mb-1 ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>Price</p>
               <p className="text-3xl font-bold text-blue-600">₹{selectedItem.cost.toFixed(2)}</p>
             </div>
+            <div className='mt-4'>
             <AnimatedAddToCartButton 
             item={selectedItem} 
             addToCart={addToCart} 
@@ -593,6 +594,7 @@ const renderSearchItemCard = (item) => (
             quantity={getItemQuantity(selectedItem.item_id)}
             size="large"  // Use the large size here
           />
+          </div>
           </div>
         </div>
       </motion.div>
