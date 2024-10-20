@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, ShoppingBag, Check, Package, Percent, Crown, Award, Gift, Plus, Minus, Leaf, ChevronUp, ChevronDown } from 'lucide-react';
+import { Star, ShoppingBag, Check, Package, Percent, Crown, Award, Gift, Plus, Minus, Leaf, ChevronUp, ChevronDown, Shuffle } from 'lucide-react';
 import Lottie from 'lottie-react';
 import animationData from './animation.json';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
 import ComboDetailsModal from './ComboDetailsModal';
-import { Tooltip } from './components/ui/tooltip';
+import RollTheDice from './RollTheDice';
 
 
 const LottieAnimation = ({ 
@@ -246,7 +246,9 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
   );
 };
 
-const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => {
+
+
+const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuItems }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [topCombos, setTopCombos] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -255,11 +257,21 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const carouselRef = useRef(null);
   const comboCarouselRef = useRef(null);
+  const [isRollTheDiceOpen, setIsRollTheDiceOpen] = useState(false);
 
   const getItemQuantity = useCallback((itemId) => {
     const cartItem = cart.find(item => item.item_id === itemId);
     return cartItem ? cartItem.quantity : 0;
   }, [cart]);
+
+  const DiceIcon = ({ size = 24, color = 'currentColor' }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 6C3 4.34315 4.34315 3 6 3H18C19.6569 3 21 4.34315 21 6V18C21 19.6569 19.6569 21 18 21H6C4.34315 21 3 19.6569 3 18V6Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M7 8H7.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M12 12H12.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M17 16H17.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
 
   useEffect(() => {
     // Fetch top-rated items
@@ -321,6 +333,28 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
       <div className="flex-shrink-0">
         <LottieAnimation />
       </div>
+
+      {/* Roll the Dice Button */}
+      <motion.div
+        className="flex justify-center my-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <motion.button
+          whileHover={{ scale: 1.05, boxShadow: "0px 0px 8px rgba(0,0,0,0.2)" }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsRollTheDiceOpen(true)}
+          className={`px-6 py-3 rounded-full font-bold text-lg flex items-center space-x-2 ${
+            theme === 'light' 
+              ? 'bg-blue-500 text-white hover:bg-blue-600' 
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          } transition-colors duration-300`}
+        >
+          <DiceIcon size={24} />
+          <span>Roll the Dice!</span>
+        </motion.button>
+      </motion.div>
 
       {/* Top-Rated Items Carousel */}
       <div className="flex-grow flex flex-col">
@@ -469,6 +503,15 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart }) => 
         onClose={() => setIsModalOpen(false)}
         combo={selectedCombo}
         theme={theme}
+      />
+      <RollTheDice
+        isOpen={isRollTheDiceOpen}
+        onClose={() => setIsRollTheDiceOpen(false)}
+        theme={theme}
+        menuItems={menuItems}
+        addToCart={addToCart}
+        removeFromCart={removeFromCart}
+        cart={cart}
       />
         </div>
       );

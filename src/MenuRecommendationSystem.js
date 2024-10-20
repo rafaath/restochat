@@ -1213,6 +1213,7 @@ const MenuRecommendationSystem = () => {
                 addToCart={addToCart}
                 removeFromCart={removeFromCart}
                 cart={cart}
+                menuItems={menuItems}
               />
             </motion.div>
           )}
