@@ -66,7 +66,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
         >
           <motion.div
             variants={contentVariants}
-            className={`w-full max-w-3xl rounded-2xl shadow-2xl max-h-[90vh] no-scrollbar overflow-y-auto m-4 ${
+            className={`w-full max-w-3xl rounded-2xl shadow-2xl max-h-[70vh] no-scrollbar overflow-y-auto m-4 ${
               theme === 'light' ? 'bg-white' : 'bg-gray-800'
             }`}
             onClick={(e) => e.stopPropagation()}

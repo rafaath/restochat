@@ -1,12 +1,23 @@
+import React, { useState, useEffect } from 'react';
 import { useSignUp } from "@clerk/clerk-react";
-import { useState } from "react";
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function CustomSignUp() {
+const CustomSignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
-  const [step, setStep] = useState("phoneNumber");
+  const [step, setStep] = useState("details");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (location.state && location.state.phoneNumber) {
+      setPhoneNumber(location.state.phoneNumber);
+    }
+  }, [location.state]);
 
   if (!isLoaded) {
     return null;
@@ -14,73 +25,141 @@ export default function CustomSignUp() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (step === "phoneNumber") {
+    setError("");
+
+    if (step === "details") {
       try {
         await signUp.create({
           phoneNumber,
-          firstName: name,
+          username,
+          password
         });
-        await signUp.preparePhoneNumberVerification();
-        setStep("verificationCode");
+        const response = await signUp.preparePhoneNumberVerification();
+        if (response.status === "complete") {
+          // If phone verification is not required, complete the sign-up
+          await setActive({ session: response.createdSessionId });
+          navigate('/');
+        } else {
+          setStep("verification");
+        }
       } catch (err) {
         console.error("Error: ", err.message);
+        setError(err.message);
       }
-    } else {
+    } else if (step === "verification") {
       try {
         const completeSignUp = await signUp.attemptPhoneNumberVerification({
           code: verificationCode,
         });
         if (completeSignUp.status !== "complete") {
           console.log(JSON.stringify(completeSignUp, null, 2));
+          setError("Verification failed. Please try again.");
         } else {
           await setActive({ session: completeSignUp.createdSessionId });
+          navigate('/');
         }
       } catch (err) {
         console.error("Error: ", err.message);
+        setError(err.message);
       }
     }
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        {step === "phoneNumber" && (
-          <>
-            <div>
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="phoneNumber">Phone Number</label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
-            </div>
-          </>
-        )}
-        {step === "verificationCode" && (
-          <div>
-            <label htmlFor="verificationCode">Verification Code</label>
-            <input
-              type="text"
-              id="verificationCode"
-              value={verificationCode}
-              onChange={(e) => setVerificationCode(e.target.value)}
-            />
-          </div>
-        )}
-        <button type="submit">
-          {step === "phoneNumber" ? "Sign Up" : "Verify"}
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Sign up for an account
+          </h2>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="text-red-500 text-center">{error}</div>
+          )}
+          {step === "details" ? (
+            <>
+              <div className="rounded-md shadow-sm -space-y-px">
+                <div>
+                  <label htmlFor="phone-number" className="sr-only">Phone Number</label>
+                  <input
+                    id="phone-number"
+                    name="phone"
+                    type="tel"
+                    required
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="Phone Number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="username" className="sr-only">Username</label>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="sr-only">Password</label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Sign Up
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="rounded-md shadow-sm -space-y-px">
+                <div>
+                  <label htmlFor="verification-code" className="sr-only">Verification Code</label>
+                  <input
+                    id="verification-code"
+                    name="code"
+                    type="text"
+                    required
+                    className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    placeholder="Verification Code"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <button
+                  type="submit"
+                  className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Verify
+                </button>
+              </div>
+            </>
+          )}
+        </form>
+      </div>
     </div>
   );
-}
+};
+
+export default CustomSignUp;

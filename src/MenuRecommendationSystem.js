@@ -1163,9 +1163,9 @@ const MenuRecommendationSystem = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-            <span>Welcome, {user.username || user.phoneNumbers[0].phoneNumber}</span>
+            <span className='text-xs'>Welcome, {user.username || user.phoneNumbers[0].phoneNumber}</span>
             {/* Add a sign out button */}
-            <button onClick={() => window.Clerk.signOut()}>Sign Out</button>
+            <button className='text-xs' onClick={() => window.Clerk.signOut()}>Sign Out</button>
               {/* <IconButton 
                 icon={theme === 'light' ? Moon : Sun}
                 onClick={toggleTheme}
