@@ -132,7 +132,7 @@ const CustomSlider = ({ value, onChange, theme }) => {
     }, [priceRange]);
   
     return (
-        <div className="z-[9999] no-scrollbar">
+        <div className="z-[9999] inset-0 no-scrollbar">
           <AnimatePresence>
             {isOpen && (
               <motion.div 
