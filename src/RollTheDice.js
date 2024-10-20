@@ -132,29 +132,33 @@ const CustomSlider = ({ value, onChange, theme }) => {
     }, [priceRange]);
   
     return (
-      <div className="z-[9999] no-scrollbar">
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div 
-              className="fixed inset-0 z-[9999] overflow-hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <div 
-                className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" 
-                onClick={onClose}
-              />
+        <div className="z-[9999] no-scrollbar">
+          <AnimatePresence>
+            {isOpen && (
               <motion.div 
-                className={`absolute inset-x-0 bottom-0 ${
-                  theme === 'light' ? 'bg-white' : 'bg-gray-900'
-                } rounded-t-3xl overflow-hidden shadow-lg`}
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", damping: 30, stiffness: 300 }}
-                style={{ height: 'calc(100% - 1rem)', maxHeight: '100vh' }}
+                className="fixed inset-0 z-[9999] overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
+                <div 
+                  className="absolute inset-0 bg-black bg-opacity-50" 
+                  onClick={onClose}
+                />
+                <motion.div 
+                  className={`absolute inset-x-0 bottom-0 ${
+                    theme === 'light' ? 'bg-white' : 'bg-gray-900'
+                  } rounded-t-3xl overflow-hidden shadow-lg`}
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "100%" }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                  style={{ 
+                    height: 'calc(100% - 1rem)', 
+                    maxHeight: '100vh',
+                    transform: 'translateZ(0)', // Create a new stacking context
+                  }}
+                >
                 <div className="h-full flex flex-col p-6">
                   <div className="flex justify-between items-center mb-6">
                     <h2 className={`text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>

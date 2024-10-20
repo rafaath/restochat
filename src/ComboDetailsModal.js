@@ -60,13 +60,13 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme }) => {
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur flex items-center justify-center no-scrollbar overflow-hidden"
+          className="fixed inset-0 bg-black bg-opacity-70  flex items-center justify-center no-scrollbar overflow-hidden"
           style={{ minHeight: '-webkit-fill-available' }}
           onClick={onClose}
         >
           <motion.div
             variants={contentVariants}
-            className={`w-full max-w-3xl rounded-2xl shadow-2xl max-h-[70vh] no-scrollbar overflow-y-auto m-4 ${
+            className={`w-full max-w-3xl rounded-2xl shadow-2xl max-h-[75vh] no-scrollbar overflow-y-auto m-4 ${
               theme === 'light' ? 'bg-white' : 'bg-gray-800'
             }`}
             onClick={(e) => e.stopPropagation()}
