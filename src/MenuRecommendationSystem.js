@@ -33,7 +33,7 @@ import ItemModal from './ItemModal';  // Make sure the path is correct
 import fullMenuData from './full_menu.json';
 import prompts from './prompts.json';
 import { getSimulatedResponse, useSimulatedApi } from './simulatedResponses.js';
-
+import { useUser } from '@clerk/clerk-react';
 import ChatInterface from './ChatInterface';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -117,6 +117,7 @@ const MenuRecommendationSystem = () => {
   const storyRef = useRef(null);
   const storyContentRef = useRef(null);
   const [chatId, setChatId] = useState(null);
+  const { user } = useUser();
 
   const [selectedComboItem, setSelectedComboItem] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
@@ -1162,7 +1163,10 @@ const MenuRecommendationSystem = () => {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <IconButton 
+            <span>Welcome, {user.username || user.phoneNumbers[0].phoneNumber}</span>
+            {/* Add a sign out button */}
+            <button onClick={() => window.Clerk.signOut()}>Sign Out</button>
+              {/* <IconButton 
                 icon={theme === 'light' ? Moon : Sun}
                 onClick={toggleTheme}
                 label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
@@ -1171,7 +1175,7 @@ const MenuRecommendationSystem = () => {
                 icon={Settings}
                 onClick={() => setIsSettingsOpen(true)}
                 label="Open settings"
-              />
+              /> */}
             </div>
           </div>
         </div>
