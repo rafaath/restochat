@@ -1044,7 +1044,7 @@ const MenuRecommendationSystem = () => {
           }
           transition={{ duration: 0.3 }}
         >
-          <Icon size={24} />
+          <Icon size={20} />
           {badge !== null && (
             <motion.div
               initial={{ scale: 0 }}
@@ -1055,7 +1055,7 @@ const MenuRecommendationSystem = () => {
             </motion.div>
           )}
         </motion.div>
-        <span className="text-xs font-medium">{text}</span>
+        <span className="text-[0.7rem] font-medium">{text}</span>
       </motion.button>
     );
   }, [theme, isPromptsExpanded, inspireControls]);
@@ -1262,7 +1262,7 @@ const MenuRecommendationSystem = () => {
         <div ref={conversationEndRef} />
       </main>
   
-          <footer className={`flex-shrink-0 z-50 ${
+          <footer className={`flex-shrink-0 z-50 shadow-3xl ${
             theme === 'light' ? 'bg-white bg-opacity-90' : 'bg-gray-900 bg-opacity-90'
           } backdrop-blur-md`}>
         <AnimatePresence>
@@ -1305,7 +1305,7 @@ const MenuRecommendationSystem = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        <div className="max-w-4xl mx-auto p-4 space-y-2">
+        <div className="max-w-4xl mx-auto px-4 py-3 space-y-2">
           {/* <motion.div
             initial={false}
             animate={{ height: isPromptsExpanded ? 'auto' : '0' }}

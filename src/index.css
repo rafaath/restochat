@@ -2,14 +2,29 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-body {
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+}
+
+html, body {
   margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  background-color: white;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
   user-select: none;
@@ -18,17 +33,12 @@ body {
   -webkit-text-size-adjust: none;
 }
 
-html, body {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
-
 #root {
   height: 100%;
+  width: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  padding: var(--safe-area-inset-top) var(--safe-area-inset-right) var(--safe-area-inset-bottom) var(--safe-area-inset-left);
 }
 
 code {
@@ -36,6 +46,7 @@ code {
     monospace;
 }
 
+/* Existing utility classes and custom styles */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
@@ -45,10 +56,10 @@ code {
     scrollbar-width: none;
   }
 }
+
 .story-content::-webkit-scrollbar {
   display: none;
 }
-
 
 .custom-scrollbar {
   scrollbar-width: thin;
@@ -87,13 +98,14 @@ code {
   animation: gradient-animation 15s ease infinite;
 }
 
-@layer utilities {
+/* No need to repeat this as it's already defined above */
+/* @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
-}
+} */

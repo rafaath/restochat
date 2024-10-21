@@ -871,7 +871,7 @@ const AppleInspiredStoryView = ({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`w-full max-w-4xl max-h-[90vh] ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} rounded-2xl overflow-hidden shadow-2xl relative flex flex-col`}
+            className={`w-full max-w-4xl max-h-[80vh] ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} rounded-2xl overflow-hidden shadow-2xl relative flex flex-col`}
           >
             {/* Header */}
             <div className={`flex justify-between items-center p-6 border-b ${theme === 'light' ? 'border-gray-200' : 'border-gray-700'}`}>

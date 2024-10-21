@@ -180,7 +180,7 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
                 </span>
               )}
               {combo.has_discount === 'yes' && (
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-[0.65rem] font-semibold ${
                 theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-blue-900 text-blue-200'
               }`}>
                 Save {((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0)}%
@@ -493,7 +493,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
             </div>
           </div>
     
-          <p className={`text-xs text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+          <p className={`text-xs pb-7 text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
             Explore favorites, combos, dietary choices, and flavors designed to delight.
             <br />
             <span className="italic text-xs">We're in beta. Answers may vary.</span>
