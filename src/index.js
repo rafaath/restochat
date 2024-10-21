@@ -4,6 +4,22 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Attempt to hide the address bar
+window.addEventListener('load', () => {
+  window.scrollTo(0, 1);
+});
+
+// // Handle "Add to Home Screen" prompt
+// let deferredPrompt;
+
+// window.addEventListener('beforeinstallprompt', (e) => {
+//   e.preventDefault();
+//   deferredPrompt = e;
+//   // You can show your custom "Add to Home Screen" prompt here
+//   // For example:
+//   // showAddToHomeScreenPrompt();
+// });
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
