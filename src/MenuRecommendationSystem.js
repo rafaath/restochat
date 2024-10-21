@@ -35,6 +35,7 @@ import prompts from './prompts.json';
 import { getSimulatedResponse, useSimulatedApi } from './simulatedResponses.js';
 import { useUser } from '@clerk/clerk-react';
 import ChatInterface from './ChatInterface';
+import RollTheDice from './RollTheDice';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -157,6 +158,14 @@ const MenuRecommendationSystem = () => {
 
 
   const mainContentRef = useRef(null);
+
+  const [isRollTheDiceOpen, setIsRollTheDiceOpen] = useState(false);
+
+  // ... existing functions and effects ...
+
+  const handleOpenRollTheDice = useCallback(() => {
+    setIsRollTheDiceOpen(true);
+  }, []);
 
   const [headerHeight, setHeaderHeight] = useState(0);
   const headerRef = useRef(null);
@@ -1218,6 +1227,7 @@ const MenuRecommendationSystem = () => {
                 removeFromCart={removeFromCart}
                 cart={cart}
                 menuItems={menuItems}
+                onOpenRollTheDice={handleOpenRollTheDice}  // Pass this new prop
               />
             </motion.div>
           )}
@@ -1450,6 +1460,21 @@ const MenuRecommendationSystem = () => {
         />
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isRollTheDiceOpen && (
+          <RollTheDice
+            isOpen={isRollTheDiceOpen}
+            onClose={() => setIsRollTheDiceOpen(false)}
+            theme={theme}
+            menuItems={menuItems}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+            cart={cart}
+          />
+        )}
+      </AnimatePresence>
+
       {(selectedItemFromConversation || selectedComboItem) && (
         <ItemModal
           item={selectedItemFromConversation || selectedComboItem}

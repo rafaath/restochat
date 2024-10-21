@@ -5,7 +5,7 @@ import Lottie from 'lottie-react';
 import animationData from './animation.json';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
 import ComboDetailsModal from './ComboDetailsModal';
-import RollTheDice from './RollTheDice';
+
 
 
 const LottieAnimation = ({ 
@@ -248,7 +248,7 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
 
 
 
-const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuItems }) => {
+const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuItems, onOpenRollTheDice }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [topCombos, setTopCombos] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -257,7 +257,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
   const [isModalOpen, setIsModalOpen] = useState(false);
   const carouselRef = useRef(null);
   const comboCarouselRef = useRef(null);
-  const [isRollTheDiceOpen, setIsRollTheDiceOpen] = useState(false);
+
 
   const getItemQuantity = useCallback((itemId) => {
     const cartItem = cart.find(item => item.item_id === itemId);
@@ -344,7 +344,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
         <motion.button
           whileHover={{ scale: 1.05, boxShadow: "0px 0px 8px rgba(0,0,0,0.2)" }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => setIsRollTheDiceOpen(true)}
+          onClick={onOpenRollTheDice}  // Use the prop here
           className={`px-6 py-3 rounded-full font-bold text-lg flex items-center space-x-2 ${
             theme === 'light' 
               ? 'bg-blue-500 text-white hover:bg-blue-600' 
@@ -504,15 +504,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
         combo={selectedCombo}
         theme={theme}
       />
-      <RollTheDice
-        isOpen={isRollTheDiceOpen}
-        onClose={() => setIsRollTheDiceOpen(false)}
-        theme={theme}
-        menuItems={menuItems}
-        addToCart={addToCart}
-        removeFromCart={removeFromCart}
-        cart={cart}
-      />
+      
         </div>
       );
     };
