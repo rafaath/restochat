@@ -248,7 +248,16 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
 
 
 
-const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuItems, onOpenRollTheDice,ComboDetailsModal }) => {
+const EmptyState = ({ 
+  theme, 
+  onItemClick, 
+  addToCart, 
+  removeFromCart, 
+  cart, 
+  menuItems, 
+  onOpenRollTheDice,
+  onComboClick
+}) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [topCombos, setTopCombos] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -257,6 +266,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
   const [isModalOpen, setIsModalOpen] = useState(false);
   const carouselRef = useRef(null);
   const comboCarouselRef = useRef(null);
+  
 
 
   const getItemQuantity = useCallback((itemId) => {
@@ -308,9 +318,9 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
     }
   }, [onItemClick]);
 
+
   const handleComboClick = (combo) => {
-    setSelectedCombo(combo);
-    setIsModalOpen(true);
+    onComboClick(combo);
   };
 
   return (
@@ -464,14 +474,14 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
                   exit={{ opacity: 0, scale: 0.9, x: -20 }}
                   transition={{ delay: 0.05 * index, duration: 0.3 }}
                 >
-                  <ComboCard
-                    combo={combo}
-                    onAddToCart={addToCart}
-                    onRemoveFromCart={removeFromCart}
-                    theme={theme}
-                    onItemClick={() => handleComboClick(combo)}
-                    cart={cart}
-                  />
+                            <ComboCard
+        combo={combo}
+        onAddToCart={addToCart}
+        onRemoveFromCart={removeFromCart}
+        theme={theme}
+        onItemClick={() => handleComboClick(combo)}
+        cart={cart}
+      />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -498,12 +508,7 @@ const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuI
             <br />
             <span className="italic text-xs">We're in beta. Answers may vary.</span>
           </p>
-          <ComboDetailsModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        combo={selectedCombo}
-        theme={theme}
-      />
+
       
         </div>
       );

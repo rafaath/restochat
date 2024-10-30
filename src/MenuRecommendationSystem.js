@@ -163,11 +163,22 @@ const MenuRecommendationSystem = () => {
 
   const [isRollTheDiceOpen, setIsRollTheDiceOpen] = useState(false);
 
+
   // ... existing functions and effects ...
 
   const handleOpenRollTheDice = useCallback(() => {
     setIsRollTheDiceOpen(true);
   }, []);
+
+
+  const [selectedCombo, setSelectedCombo] = useState(null);
+  const [isComboModalOpen, setIsComboModalOpen] = useState(false);
+
+  const handleComboClick = useCallback((combo) => {
+    setSelectedCombo(combo);
+    setIsComboModalOpen(true);
+  }, []);
+
 
   const [headerHeight, setHeaderHeight] = useState(0);
   const headerRef = useRef(null);
@@ -1272,8 +1283,7 @@ const MenuRecommendationSystem = () => {
                 cart={cart}
                 menuItems={menuItems}
                 onOpenRollTheDice={handleOpenRollTheDice}
-                ComboDetailsModal={ComboDetailsModal}
-                  // Pass this new prop
+                onComboClick={handleComboClick}
               />
             </motion.div>
           )}
@@ -1533,6 +1543,18 @@ const MenuRecommendationSystem = () => {
     cart={cart}
   />
 )}
+
+{selectedCombo && (
+            <ComboDetailsModal
+              isOpen={isComboModalOpen}
+              onClose={() => {
+                setIsComboModalOpen(false);
+                setSelectedCombo(null);
+              }}
+              combo={selectedCombo}
+              theme={theme}
+            />
+          )}
   
       {/* {isLoading && (
         <motion.div 
