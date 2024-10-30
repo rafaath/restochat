@@ -4,7 +4,7 @@ import { Star, ShoppingBag, Check, Package, Percent, Crown, Award, Gift, Plus, M
 import Lottie from 'lottie-react';
 import animationData from './animation.json';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
-import ComboDetailsModal from './ComboDetailsModal';
+
 
 
 
@@ -248,7 +248,7 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
 
 
 
-const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuItems, onOpenRollTheDice }) => {
+const EmptyState = ({ theme, onItemClick, addToCart, removeFromCart, cart, menuItems, onOpenRollTheDice,ComboDetailsModal }) => {
   const [topRatedItems, setTopRatedItems] = useState([]);
   const [topCombos, setTopCombos] = useState([]);
   const [scrollPosition, setScrollPosition] = useState(0);

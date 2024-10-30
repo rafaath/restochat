@@ -37,6 +37,7 @@ import { useUser } from '@clerk/clerk-react';
 import ChatInterface from './ChatInterface';
 import RollTheDice from './RollTheDice';
 import Footer from './footer';
+import ComboDetailsModal from './ComboDetailsModal';
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -1270,7 +1271,9 @@ const MenuRecommendationSystem = () => {
                 removeFromCart={removeFromCart}
                 cart={cart}
                 menuItems={menuItems}
-                onOpenRollTheDice={handleOpenRollTheDice}  // Pass this new prop
+                onOpenRollTheDice={handleOpenRollTheDice}
+                ComboDetailsModal={ComboDetailsModal}
+                  // Pass this new prop
               />
             </motion.div>
           )}
