@@ -905,62 +905,212 @@ const MenuRecommendationSystem = () => {
 
   const PromptButton = ({ emoji, text }) => {
     const isSelected = selectedPrompt === text;
-
-     // Adjust these values to control the animation scale
-     const minScale = 1;     // Minimum scale (when not selected or at the bottom of the animation)
-     const maxScale = 1;  // Maximum scale (when selected and at the peak of the animation)
- 
-     const buttonVariants = {
-       selected: {
-         scale: [minScale, maxScale, minScale],
-         transition: {
-           duration: 1.5,
-           repeat: Infinity,
-           repeatType: "reverse",
-           ease: "easeInOut"
-         }
-       },
-       notSelected: {
-         scale: minScale
-       }
-     };
-
-    const emojiVariants = {
+    const [isHovered, setIsHovered] = useState(false);
+    const buttonRef = useRef(null);
+  
+    useEffect(() => {
+      if (isSelected && buttonRef.current) {
+        buttonRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest',
+          inline: 'center'
+        });
+      }
+    }, [isSelected]);
+  
+    const buttonVariants = {
       selected: {
-        y: [-2, 2],
+        scale: [1, 1.01, 1],
         transition: {
-          duration: 1,
+          duration: 2,
           repeat: Infinity,
           repeatType: "reverse",
           ease: "easeInOut"
         }
       },
       notSelected: {
-        y: 0
+        scale: 1
       }
     };
-
+  
+    const emojiVariants = {
+      initial: { scale: 1, rotate: 0 },
+      hover: { 
+        scale: [1, 1.1, 1],
+        rotate: [0, -5, 5, 0],
+        transition: {
+          duration: 0.4,
+          ease: "easeInOut"
+        }
+      },
+      selected: {
+        scale: [1, 1.1, 1],
+        rotate: [-5, 5, -5, 0],
+        transition: {
+          duration: 1.5,
+          repeat: Infinity,
+          repeatType: "reverse",
+          ease: "easeInOut"
+        }
+      }
+    };
+  
+    const sparkleVariants = {
+      hidden: { opacity: 0, scale: 0 },
+      visible: { 
+        opacity: [0, 0.7, 0],
+        scale: [0.4, 1, 0.4],
+        transition: {
+          duration: 1.2,
+          repeat: Infinity,
+          repeatType: "reverse",
+          ease: "easeOut"
+        }
+      }
+    };
+  
     return (
-      <motion.button
-        layout
-        variants={buttonVariants}
+      <motion.div
+        ref={buttonRef}
+        className="relative group"
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        initial="notSelected"
         animate={isSelected ? "selected" : "notSelected"}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => handleSuggestivePrompt(text)}
-        className={`px-3 py-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 flex items-center space-x-1 text-sm flex-shrink-0 h-6 ${
-          theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
-        } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
       >
-        <motion.span 
-          className="text-sm"
-          variants={emojiVariants}
-          animate={isSelected ? "selected" : "notSelected"}
+        {/* Ambient glow effect */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ 
+            opacity: isSelected ? 0.6 : 0,
+            scale: isSelected ? 1 : 0.8,
+          }}
+          className={`
+            absolute inset-0 -m-0.5
+            rounded-full blur-md
+            ${theme === 'light' 
+              ? 'bg-gradient-to-r from-blue-200/30 via-purple-200/30 to-pink-200/30' 
+              : 'bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-pink-500/15'
+            }
+          `}
+        />
+  
+        {/* Subtle sparkles */}
+        {(isSelected || isHovered) && (
+          <>
+            <motion.div
+              variants={sparkleVariants}
+              initial="hidden"
+              animate="visible"
+              className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ${
+                theme === 'light' ? 'bg-yellow-300/70' : 'bg-yellow-200/70'
+              }`}
+            />
+            <motion.div
+              variants={sparkleVariants}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.2 }}
+              className={`absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full ${
+                theme === 'light' ? 'bg-blue-300/70' : 'bg-blue-200/70'
+              }`}
+            />
+          </>
+        )}
+  
+        <motion.button
+          layout
+          variants={buttonVariants}
+          whileHover={{ 
+            scale: 1.02,
+            y: -1,
+            transition: { duration: 0.2 }
+          }}
+          whileTap={{ 
+            scale: 0.98,
+            rotate: [-1, 0],
+            transition: { duration: 0.2 }
+          }}
+          onClick={() => {
+            handleSuggestivePrompt(text);
+            if (window.navigator.vibrate) {
+              window.navigator.vibrate(40);
+            }
+          }}
+          className={`
+            relative px-3 py-1.5 rounded-full 
+            shadow-sm
+            transition-all duration-300 
+            flex items-center space-x-1.5 
+            text-sm flex-shrink-0 
+            border
+            backdrop-blur-sm
+            ${theme === 'light' 
+              ? `
+                bg-gradient-to-r from-white/95 via-white/90 to-white/95
+                hover:from-blue-50/90 hover:via-white hover:to-blue-50/90
+                border-blue-100
+                text-gray-700
+                hover:text-blue-600
+                ${isSelected ? 'from-blue-50 via-purple-50 to-pink-50 text-blue-700 border-blue-200' : ''}
+              ` 
+              : `
+                bg-gradient-to-r from-gray-800/90 via-gray-900/80 to-gray-800/90
+                hover:from-blue-900/40 hover:via-gray-800 hover:to-blue-900/40
+                border-blue-500/20
+                text-gray-100
+                hover:text-blue-200
+                ${isSelected ? 'from-blue-900/30 via-purple-900/20 to-pink-900/30 text-blue-200 border-blue-400/30' : ''}
+              `
+            }
+            ${isSelected ? 'ring-1 ring-blue-400/40 ring-offset-1 ring-offset-transparent' : ''}
+            hover:shadow-md
+            hover:border-blue-300/40
+            active:shadow-inner
+          `}
         >
-          {emoji}
-        </motion.span>
-        <span className="truncate">{text}</span>
-      </motion.button>
+          {/* Subtle background pulse */}
+          {isSelected && (
+            <motion.div
+              className={`
+                absolute inset-0 
+                bg-gradient-to-r from-transparent via-current to-transparent
+                opacity-5
+              `}
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "linear"
+              }}
+            />
+          )}
+  
+          <motion.span 
+            variants={emojiVariants}
+            initial="initial"
+            animate={isSelected ? "selected" : isHovered ? "hover" : "initial"}
+            className="text-sm flex items-center justify-center w-5 h-5"
+          >
+            {emoji}
+          </motion.span>
+          
+          <span className="truncate font-medium pr-1 relative text-xs">
+            {text}
+            {isSelected && (
+              <motion.div
+                layoutId="underline"
+                className={`absolute -bottom-0.5 left-0 right-0 h-px rounded-full ${
+                  theme === 'light' ? 'bg-blue-400/70' : 'bg-blue-400/70'
+                }`}
+                transition={{ duration: 0.2 }}
+              />
+            )}
+          </span>
+        </motion.button>
+      </motion.div>
     );
   };
 
@@ -1076,7 +1226,24 @@ const MenuRecommendationSystem = () => {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
 
+  useEffect(() => {
+    const handleScroll = (e) => {
+      const container = promptsContainerRef.current;
+      if (container) {
+        // Add a subtle shadow when scrolling
+        const hasScroll = container.scrollLeft > 0;
+        container.style.boxShadow = hasScroll 
+          ? 'inset 10px 0 20px -10px rgba(0, 0, 0, 0.1)'
+          : 'none';
+      }
+    };
 
+    const container = promptsContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
 
 
@@ -1336,25 +1503,28 @@ const MenuRecommendationSystem = () => {
             >
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
               <LayoutGroup>
-                <motion.div 
-                  ref={promptsContainerRef}
-                  className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-3 px-4 no-scrollbar"
-                  layout
-                >
-                  {displayedPrompts.map((prompt, index) => (
-                    <motion.div
-                      key={prompt.text}
-                      layout
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.2, delay: index * 0.03 }}
-                    >
-                      <PromptButton emoji={prompt.emoji} text={prompt.text} />
-                    </motion.div>
-                  ))}
-                  <RefreshButton />
-                </motion.div>
+              <motion.div 
+      ref={promptsContainerRef}
+      className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-2 px-4 no-scrollbar scroll-smooth"
+      style={{
+        scrollBehavior: 'smooth',
+        WebkitOverflowScrolling: 'touch'
+      }}
+    >
+      {displayedPrompts.map((prompt, index) => (
+        <motion.div
+          key={prompt.text}
+          layout
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ duration: 0.2, delay: index * 0.03 }}
+        >
+          <PromptButton emoji={prompt.emoji} text={prompt.text} />
+        </motion.div>
+      ))}
+      <RefreshButton />
+    </motion.div>
               </LayoutGroup>
             </motion.div>
           )}
