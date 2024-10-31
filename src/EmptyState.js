@@ -169,25 +169,26 @@ const ComboCard = ({ combo, onAddToCart, onRemoveFromCart, theme, onItemClick, c
           </p>
         </div>
         <div className="mt-auto">
-          <div className="flex justify-between items-end mb-4">
-            <div className="flex items-baseline space-x-2">
-              <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
-                ₹{combo.discounted_cost.toFixed(2)}
-              </span>
-              {combo.has_discount === 'yes' && (
-                <span className={`text-sm line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
-                  ₹{combo.cost.toFixed(2)}
-                </span>
-              )}
-              {combo.has_discount === 'yes' && (
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-[0.65rem] font-semibold ${
-                theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-blue-900 text-blue-200'
-              }`}>
-                Save {((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0)}%
-              </span>
-            )}
-            </div>
-          </div>
+        <div className="flex flex-col justify-between items-start mb-4">
+  <span className={`text-3xl font-bold ${theme === 'light' ? 'text-green-600' : 'text-green-400'}`}>
+    ₹{combo.discounted_cost.toFixed(2)}
+  </span>
+  <div className='space-x-2 space-y-2'>
+    {combo.has_discount === 'yes' && (
+      <span className={`text-sm line-through ${theme === 'light' ? 'text-gray-400' : 'text-gray-500'}`}>
+        ₹{combo.cost.toFixed(2)}
+      </span>
+    )}
+    {combo.has_discount === 'yes' && (
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-[0.65rem] font-semibold ${
+        theme === 'light' ? 'bg-green-100 text-green-800' : 'bg-blue-900 text-blue-200'
+      }`}>
+        Save {((combo.cost - combo.discounted_cost) / combo.cost * 100).toFixed(0)}%
+      </span>
+    )}
+  </div>
+</div>
+
           
           <div className="mt-4">
             {quantity > 0 ? (

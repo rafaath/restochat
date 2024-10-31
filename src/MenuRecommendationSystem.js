@@ -978,7 +978,7 @@ const MenuRecommendationSystem = () => {
         initial="notSelected"
         animate={isSelected ? "selected" : "notSelected"}
       >
-        {/* Ambient glow effect */}
+        {/* Ambient highlight effect without blur */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ 
@@ -987,10 +987,10 @@ const MenuRecommendationSystem = () => {
           }}
           className={`
             absolute inset-0 -m-0.5
-            rounded-full blur-md
+            rounded-full
             ${theme === 'light' 
-              ? 'bg-gradient-to-r from-blue-200/30 via-purple-200/30 to-pink-200/30' 
-              : 'bg-gradient-to-r from-blue-500/15 via-purple-500/15 to-pink-500/15'
+              ? 'bg-gradient-to-r from-blue-200/20 via-purple-200/20 to-pink-200/20' 
+              : 'bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10'
             }
           `}
         />
@@ -1044,23 +1044,22 @@ const MenuRecommendationSystem = () => {
             flex items-center space-x-1.5 
             text-sm flex-shrink-0 
             border
-            backdrop-blur-sm
             ${theme === 'light' 
               ? `
-                bg-gradient-to-r from-white/95 via-white/90 to-white/95
-                hover:from-blue-50/90 hover:via-white hover:to-blue-50/90
+                bg-white
+                hover:bg-blue-50/90
                 border-blue-100
                 text-gray-700
                 hover:text-blue-600
-                ${isSelected ? 'from-blue-50 via-purple-50 to-pink-50 text-blue-700 border-blue-200' : ''}
+                ${isSelected ? 'bg-blue-50/90 text-blue-700 border-blue-200' : ''}
               ` 
               : `
-                bg-gradient-to-r from-gray-800/90 via-gray-900/80 to-gray-800/90
-                hover:from-blue-900/40 hover:via-gray-800 hover:to-blue-900/40
+                bg-gray-800
+                hover:bg-gray-750
                 border-blue-500/20
                 text-gray-100
                 hover:text-blue-200
-                ${isSelected ? 'from-blue-900/30 via-purple-900/20 to-pink-900/30 text-blue-200 border-blue-400/30' : ''}
+                ${isSelected ? 'bg-blue-900/30 text-blue-200 border-blue-400/30' : ''}
               `
             }
             ${isSelected ? 'ring-1 ring-blue-400/40 ring-offset-1 ring-offset-transparent' : ''}
@@ -1069,13 +1068,14 @@ const MenuRecommendationSystem = () => {
             active:shadow-inner
           `}
         >
-          {/* Subtle background pulse */}
+          {/* Subtle highlight effect */}
           {isSelected && (
             <motion.div
               className={`
                 absolute inset-0 
                 bg-gradient-to-r from-transparent via-current to-transparent
                 opacity-5
+                rounded-full
               `}
               initial={{ x: '-100%' }}
               animate={{ x: '100%' }}
