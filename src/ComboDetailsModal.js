@@ -19,42 +19,118 @@ import {
   Flame,
   TrendingUp,
   AlertCircle,
+  Crown,
 } from "lucide-react";
 
 // Helper Components
-const StatusTag = ({ type, theme }) => {
+const StatusTag = ({ type = "premium", theme = "light" }) => {
   const config = {
     premium: {
-      icon: Award,
-      text: "Premium Selection",
-      gradient:
+      icon: Diamond,
+      text: "Premium",
+      bg:
         theme === "light"
-          ? "from-amber-500/90 to-amber-600/90"
-          : "from-amber-400/90 to-amber-500/90",
+          ? "bg-gradient-to-r from-slate-50 to-white"
+          : "bg-gradient-to-r from-slate-900 to-slate-800",
+      glow: "bg-violet-500/10",
+      accent: "bg-violet-500",
+      border:
+        theme === "light" ? "border-violet-500/20" : "border-violet-400/20",
+      textColor: theme === "light" ? "text-violet-500" : "text-violet-400",
+      iconColor: theme === "light" ? "text-violet-600" : "text-violet-400",
     },
     vip: {
-      icon: Diamond,
-      text: "VIP Selection",
-      gradient:
+      icon: Award,
+      text: "VIP",
+      bg:
         theme === "light"
-          ? "from-purple-500/90 to-purple-600/90"
-          : "from-purple-400/90 to-purple-500/90",
+          ? "bg-gradient-to-r from-slate-50 to-white"
+          : "bg-gradient-to-r from-slate-900 to-slate-800",
+      glow: "bg-amber-500/10",
+      accent: "bg-amber-500",
+      border: theme === "light" ? "border-amber-500/20" : "border-amber-400/20",
+      textColor: theme === "light" ? "text-amber-500" : "text-amber-400",
+      iconColor: theme === "light" ? "text-amber-600" : "text-amber-400",
+    },
+    elite: {
+      icon: Crown,
+      text: "Elite",
+      bg:
+        theme === "light"
+          ? "bg-gradient-to-r from-slate-50 to-white"
+          : "bg-gradient-to-r from-slate-900 to-slate-800",
+      glow: "bg-sky-500/10",
+      accent: "bg-sky-500",
+      border: theme === "light" ? "border-sky-500/20" : "border-sky-400/20",
+      textColor: theme === "light" ? "text-sky-500" : "text-sky-400",
+      iconColor: theme === "light" ? "text-sky-600" : "text-sky-400",
     },
   };
 
-  const { icon: Icon, text, gradient } = config[type];
+  const {
+    icon: Icon,
+    text,
+    bg,
+    glow,
+    accent,
+    border,
+    textColor,
+    iconColor,
+  } = config[type];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.3 }}
-      className={`absolute flex items-center gap-1 px-3 py-2 rounded-full
-        bg-gradient-to-r ${gradient} backdrop-blur-sm shadow-lg`}
-    >
-      <Icon className="text-white" size={14} />
-      <span className="text-[0.6rem] font-semibold text-white">{text}</span>
-    </motion.div>
+    <div className="relative group">
+      {/* Glow effect */}
+      <div
+        className={`
+        absolute -inset-1 opacity-0 group-hover:opacity-100
+        rounded-lg blur-md transition-all duration-500
+        ${glow}
+      `}
+      />
+
+      {/* Main container */}
+      <div
+        className={`
+        relative inline-flex items-center gap-2
+        px-3 py-1.5
+        rounded-lg ${bg}
+        border ${border}
+        shadow-sm
+        transition-all duration-300
+        hover:shadow-lg
+        group-hover:border-opacity-50
+      `}
+      >
+        {/* Left accent line */}
+        <div
+          className={`
+          absolute left-0 top-[6px] bottom-[6px] w-[2px]
+          rounded-full ${accent} opacity-30
+          group-hover:opacity-60 transition-opacity duration-300
+        `}
+        />
+
+        <Icon
+          className={`
+            w-4 h-4 ${iconColor}
+            transition-all duration-300
+            group-hover:scale-110
+          `}
+          strokeWidth={2.5}
+        />
+
+        <span
+          className={`
+          text-sm font-medium ${textColor}
+          tracking-wide
+          transition-colors duration-300
+        `}
+        >
+          {text}
+        </span>
+      </div>
+    </div>
   );
 };
 
@@ -123,75 +199,106 @@ const NutritionBadge = ({ label, value, icon: Icon, theme }) => (
   </motion.div>
 );
 
+// Update just the ComboItemCard component with refined hover effects
 const ComboItemCard = ({ item, theme }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     whileHover={{ y: -2 }}
-    className={`group relative overflow-hidden rounded-xl transition-all
+    className={`group relative overflow-hidden rounded-xl transition-all duration-300
       ${
         theme === "light"
-          ? "bg-white hover:bg-gray-50"
-          : "bg-gray-800/50 hover:bg-gray-800"
+          ? "bg-white hover:bg-gray-50 hover:shadow-lg hover:ring-1 hover:ring-gray-200"
+          : "bg-gray-800/50 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 hover:ring-1 hover:ring-gray-700"
       }`}
   >
     <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-t-xl">
       <img
         src={item.image_link}
         alt={item.name_of_item}
-        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      {/* Subtle gradient overlay that's always present but intensifies on hover */}
+      <div
+        className={`absolute inset-0 transition-opacity duration-300
+        ${
+          theme === "light"
+            ? "bg-gradient-to-t from-gray-900/20 via-gray-900/5 to-transparent opacity-0 group-hover:opacity-100"
+            : "bg-gradient-to-t from-gray-900/40 via-gray-900/10 to-transparent opacity-50 group-hover:opacity-100"
+        }`}
+      />
     </div>
 
+    {/* Veg/Non-veg indicator with enhanced styling */}
     <div
-      className={`absolute top-3 right-3 w-6 h-6 rounded-full border-2 border-white 
-      ${item.veg_or_non_veg === "veg" ? "bg-green-500" : "bg-red-500"}`}
+      className={`absolute top-3 right-3 w-6 h-6 rounded-full border-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-105
+      ${
+        item.veg_or_non_veg === "veg"
+          ? "border-green-500 bg-green-50 dark:bg-green-500/20"
+          : "border-red-500 bg-red-50 dark:bg-red-500/20"
+      }`}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         {item.veg_or_non_veg === "veg" ? (
-          <Leaf size={12} className="text-white" />
+          <Leaf
+            size={12}
+            className={theme === "light" ? "text-green-600" : "text-green-400"}
+          />
         ) : (
-          <Utensils size={12} className="text-white" />
+          <Utensils
+            size={12}
+            className={theme === "light" ? "text-red-600" : "text-red-400"}
+          />
         )}
       </div>
     </div>
 
-    <div className="p-4">
+    {/* Content with refined spacing and hover effects */}
+    <div className="p-4 space-y-3 relative">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <h4
-            className={`font-medium ${
-              theme === "light" ? "text-gray-900" : "text-gray-100"
+            className={`font-medium text-base mb-1 transition-colors
+            ${
+              theme === "light"
+                ? "text-gray-900 group-hover:text-gray-700"
+                : "text-gray-100 group-hover:text-white"
             }`}
           >
             {item.name_of_item}
           </h4>
           <p
-            className={`text-sm mt-1 line-clamp-2 ${
-              theme === "light" ? "text-gray-600" : "text-gray-400"
+            className={`text-sm line-clamp-2 transition-colors
+            ${
+              theme === "light"
+                ? "text-gray-600 group-hover:text-gray-700"
+                : "text-gray-400 group-hover:text-gray-300"
             }`}
           >
             {item.description}
           </p>
         </div>
         <span
-          className={`text-lg font-semibold ${
-            theme === "light" ? "text-gray-900" : "text-gray-100"
+          className={`text-lg font-semibold flex-shrink-0 transition-colors
+          ${
+            theme === "light"
+              ? "text-gray-900 group-hover:text-gray-800"
+              : "text-gray-100 group-hover:text-white"
           }`}
         >
           ₹{item.cost}
         </span>
       </div>
 
+      {/* Tags with enhanced hover effects */}
       <div className="flex flex-wrap gap-2 mt-3">
         {item.rating && (
           <span
-            className={`flex items-center px-2 py-1 rounded-full text-xs font-medium
+            className={`flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-300
             ${
               theme === "light"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-yellow-900/20 text-yellow-200"
+                ? "bg-yellow-100 text-yellow-800 group-hover:bg-yellow-200 group-hover:text-yellow-900"
+                : "bg-yellow-900/20 text-yellow-200 group-hover:bg-yellow-900/30"
             }`}
           >
             <Star size={12} className="mr-1" fill="currentColor" />
@@ -201,11 +308,11 @@ const ComboItemCard = ({ item, theme }) => (
 
         {item.spiciness !== "not spicy" && (
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium
+            className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300
             ${
               theme === "light"
-                ? "bg-red-100 text-red-800"
-                : "bg-red-900/20 text-red-200"
+                ? "bg-red-100 text-red-800 group-hover:bg-red-200 group-hover:text-red-900"
+                : "bg-red-900/20 text-red-200 group-hover:bg-red-900/30"
             }`}
           >
             {item.spiciness}
@@ -213,11 +320,11 @@ const ComboItemCard = ({ item, theme }) => (
         )}
 
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium
+          className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300
           ${
             theme === "light"
-              ? "bg-purple-100 text-purple-800"
-              : "bg-purple-900/20 text-purple-200"
+              ? "bg-purple-100 text-purple-800 group-hover:bg-purple-200 group-hover:text-purple-900"
+              : "bg-purple-900/20 text-purple-200 group-hover:bg-purple-900/30"
           }`}
         >
           {item.meal_course_type}
@@ -438,16 +545,16 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                   {/* Hero Content */}
                   <div className="absolute bottom-0 left-0 right-0 p-8">
                     <div className="space-y-4">
-                      <h2 className="text-4xl font-bold text-white">
+                      <h2 className="text-3xl font-bold text-white">
                         {combo.combo_name}
                       </h2>
                       <div className="flex items-center gap-4">
-                        <span className="text-3xl font-bold text-white">
+                        <span className="text-2xl font-bold text-white">
                           ₹{combo.discounted_cost}
                         </span>
                         {discountPercentage > 0 && (
                           <>
-                            <span className="text-xl line-through text-white/60">
+                            <span className="text-sm line-through text-white/60">
                               ₹{combo.cost}
                             </span>
                             <div className="flex items-center gap-2 bg-green-500 px-4 py-1.5 rounded-full">
@@ -899,6 +1006,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                       </div>
 
                       {/* Detailed Nutrition Per Item */}
+                      {/* Update just the Detailed Nutrition Per Item section */}
                       <div className="space-y-6">
                         <h3
                           className={`text-2xl font-semibold ${
@@ -922,7 +1030,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                                 : "bg-gray-800/50 hover:bg-gray-800"
                             } transition-all duration-300`}
                           >
-                            <div className="flex items-center justify-between mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                               <h4
                                 className={`text-lg font-semibold ${
                                   theme === "light"
@@ -932,16 +1040,33 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               >
                                 {item.name_of_item}
                               </h4>
+                              {/* Enhanced dietary type badge */}
                               <div
-                                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                  item.veg_or_non_veg === "veg"
-                                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200"
-                                    : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-200"
-                                }`}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+          ${
+            item.veg_or_non_veg === "veg"
+              ? theme === "light"
+                ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20"
+                : "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30"
+              : theme === "light"
+              ? "bg-red-100 text-red-700 ring-1 ring-red-600/20"
+              : "bg-red-500/20 text-red-300 ring-1 ring-red-500/30"
+          }`}
                               >
-                                {item.veg_or_non_veg === "veg"
-                                  ? "Vegetarian"
-                                  : "Non-vegetarian"}
+                                {item.veg_or_non_veg === "veg" ? (
+                                  <>
+                                    <Leaf size={14} className="flex-shrink-0" />
+                                    <span>Vegetarian</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Utensils
+                                      size={14}
+                                      className="flex-shrink-0"
+                                    />
+                                    <span>Non-vegetarian</span>
+                                  </>
+                                )}
                               </div>
                             </div>
 
@@ -984,20 +1109,47 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               ))}
                             </div>
 
-                            {/* Health Tags */}
+                            {/* Health Tags with enhanced styling */}
                             <div className="flex flex-wrap gap-2 mt-4">
                               {item.health_concious_option === "yes" && (
-                                <span className="px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-200">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+            ${
+              theme === "light"
+                ? "bg-green-100 text-green-700 ring-1 ring-green-600/20"
+                : "bg-green-500/20 text-green-300 ring-1 ring-green-500/30"
+            }`}
+                                >
+                                  <Heart size={14} className="flex-shrink-0" />
                                   Health Conscious
                                 </span>
                               )}
                               {item.is_keto_friendly === "yes" && (
-                                <span className="px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-200">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+            ${
+              theme === "light"
+                ? "bg-purple-100 text-purple-700 ring-1 ring-purple-600/20"
+                : "bg-purple-500/20 text-purple-300 ring-1 ring-purple-500/30"
+            }`}
+                                >
+                                  <Flame size={14} className="flex-shrink-0" />
                                   Keto Friendly
                                 </span>
                               )}
                               {item.is_low_gi === "yes" && (
-                                <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+            ${
+              theme === "light"
+                ? "bg-blue-100 text-blue-700 ring-1 ring-blue-600/20"
+                : "bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/30"
+            }`}
+                                >
+                                  <TrendingUp
+                                    size={14}
+                                    className="flex-shrink-0"
+                                  />
                                   Low GI
                                 </span>
                               )}
@@ -1005,6 +1157,8 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                           </motion.div>
                         ))}
                       </div>
+
+                      {/* Rest of the component remains the same */}
 
                       {/* Allergen Information */}
                       <div
