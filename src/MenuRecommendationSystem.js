@@ -453,7 +453,7 @@ const MenuRecommendationSystem = () => {
             : 'text-gray-400 hover:text-white'
         }`}
       >
-        <Icon size={20} />
+        <Icon size={24} />
         {isActive && (
           <motion.div
             layoutId="activeTab"
