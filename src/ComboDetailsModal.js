@@ -151,7 +151,7 @@ const TabButton = ({ id, label, icon: Icon, isActive, onClick, theme }) => (
     <span className="truncate">{label}</span>
     {isActive && (
       <motion.div
-        layoutId="activeTab"
+        layoutId="combo-details-modal-tab-indicator"
         className={`absolute bottom-0 left-0 right-0 h-0.5
           ${theme === "light" ? "bg-blue-600" : "bg-blue-400"}`}
       />
