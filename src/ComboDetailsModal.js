@@ -39,9 +39,9 @@ const StatusTag = ({ type = "premium", theme = "light" }) => {
       textColor: theme === "light" ? "text-violet-500" : "text-violet-400",
       iconColor: theme === "light" ? "text-violet-600" : "text-violet-400",
     },
-    vip: {
+    elite: {
       icon: Award,
-      text: "VIP",
+      text: "Elite",
       bg:
         theme === "light"
           ? "bg-gradient-to-r from-slate-50 to-white"
@@ -52,9 +52,9 @@ const StatusTag = ({ type = "premium", theme = "light" }) => {
       textColor: theme === "light" ? "text-amber-500" : "text-amber-400",
       iconColor: theme === "light" ? "text-amber-600" : "text-amber-400",
     },
-    elite: {
+    vip: {
       icon: Crown,
-      text: "Elite",
+      text: "VIP",
       bg:
         theme === "light"
           ? "bg-gradient-to-r from-slate-50 to-white"
@@ -476,7 +476,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overscroll-none ${theme === "light" ? "bg-white" : "bg-gray-900"
+            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-10rem)] sm:max-h-[calc(100vh-10rem)] overscroll-none ${theme === "light" ? "bg-white" : "bg-gray-900"
               }`}
             onClick={(e) => e.stopPropagation()}
           >

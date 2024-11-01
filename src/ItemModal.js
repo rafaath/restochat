@@ -35,9 +35,8 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
       onClick={onClose}
     >
       <motion.div
-        className={`relative w-full max-w-3xl mx-auto overflow-hidden rounded-2xl shadow-2xl ${
-          theme === 'light' ? 'bg-white' : 'bg-gray-900'
-        }`}
+        className={`relative w-full max-w-3xl mx-auto overflow-hidden rounded-2xl shadow-2xl ${theme === 'light' ? 'bg-white' : 'bg-gray-900'
+          }`}
         variants={modalVariants}
         initial="hidden"
         animate="visible"
@@ -46,20 +45,19 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
       >
         <div className="relative h-80">
           {item.image_link ? (
-            <img 
-              src={item.image_link} 
-              alt={item.name_of_item} 
+            <img
+              src={item.image_link}
+              alt={item.name_of_item}
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className={`w-full h-full flex items-center justify-center ${
-              theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'
-            }`}>
+            <div className={`w-full h-full flex items-center justify-center ${theme === 'light' ? 'bg-gray-200' : 'bg-gray-700'
+              }`}>
               <ImageIcon size={64} className={theme === 'light' ? 'text-gray-400' : 'text-gray-500'} />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70" />
-          <button 
+          <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-300"
           >
@@ -96,11 +94,10 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
             <div>
               <h3 className={`font-semibold mb-2 text-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>Dietary Info</h3>
               <div className="flex flex-wrap gap-2">
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                  item.veg_or_non_veg === 'veg' 
-                    ? 'bg-green-100 text-green-800' 
+                <span className={`px-3 py-1 rounded-full text-sm ${item.veg_or_non_veg === 'veg'
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
-                }`}>
+                  }`}>
                   {item.veg_or_non_veg === 'veg' ? '🥬 Vegetarian' : '🍖 Non-vegetarian'}
                 </span>
                 {item.is_vegan === 'yes' && (
@@ -121,11 +118,11 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
               <p className="text-3xl font-bold text-blue-600">₹{item.cost.toFixed(2)}</p>
             </div>
             <div className='mt-4'>
-              <AnimatedAddToCartButton 
-                item={item} 
+              <AnimatedAddToCartButton
+                item={item}
                 addToCart={handleAddToCart}
                 removeFromCart={handleRemoveFromCart}
-                theme={theme} 
+                theme={theme}
                 quantity={getItemQuantity(item.item_id)}
                 size="large"
               />
