@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useAnimation, LayoutGroup } from 'framer-motio
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle,Moon, Sun, Settings,
+  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle, Moon, Sun, Settings,
 } from 'lucide-react';
 import {
   Dialog,
@@ -14,7 +14,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -36,8 +36,8 @@ import { getSimulatedResponse, useSimulatedApi } from './simulatedResponses.js';
 import { useUser } from '@clerk/clerk-react';
 import ChatInterface from './ChatInterface';
 import RollTheDice from './RollTheDice';
-import Footer from './footer';
 import ComboDetailsModal from './ComboDetailsModal';
+
 const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
@@ -59,11 +59,10 @@ const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsDialogOpen(true)}
-            className={`p-2 rounded-full shadow-md transition-colors ${
-              theme === 'light'
-                ? 'bg-red-500 text-white hover:bg-red-600'
-                : 'bg-red-600 text-white hover:bg-red-700'
-            }`}
+            className={`p-2 rounded-full shadow-md transition-colors ${theme === 'light'
+              ? 'bg-red-500 text-white hover:bg-red-600'
+              : 'bg-red-600 text-white hover:bg-red-700'
+              }`}
             aria-label="Clear chat"
           >
             <Trash2 size={20} />
@@ -286,7 +285,7 @@ const MenuRecommendationSystem = () => {
   };
 
 
-  
+
 
 
   const openStory = (index) => {
@@ -443,15 +442,14 @@ const MenuRecommendationSystem = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
-        className={`relative p-2 rounded-full transition-all duration-300 ${
-          isActive
-            ? theme === 'light'
-              ? 'text-blue-600'
-              : 'text-blue-400'
-            : theme === 'light'
+        className={`relative p-2 rounded-full transition-all duration-300 ${isActive
+          ? theme === 'light'
+            ? 'text-blue-600'
+            : 'text-blue-400'
+          : theme === 'light'
             ? 'text-gray-600 hover:text-gray-800'
             : 'text-gray-400 hover:text-white'
-        }`}
+          }`}
       >
         <Icon size={24} />
         {isActive && (
@@ -523,15 +521,18 @@ const MenuRecommendationSystem = () => {
   // }, [query, chatId, setChatId, setConversations, setActiveTab, setIsPromptsExpanded]);
 
 
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+
   const handleSearch = useCallback(async (e) => {
     e?.preventDefault();
     const searchQuery = query.trim();
-    if (!searchQuery) return;
+    if (!searchQuery || isWaitingForResponse) return;
 
-    
-   setActiveTab('chat'); // Switch to chat tab immediately
-   setConversations(prev => [...prev, { query: searchQuery, response: null, items: [] }]);
-   setIsLoading(true);
+    setActiveTab('chat');
+    setConversations(prev => [...prev, { query: searchQuery, response: null, items: [] }]);
+    setIsWaitingForResponse(true);
+    setIsLoading(true);
+
     const pollInterval = 10000; // 10 seconds
     const maxAttempts = 24; // 4 minutes total (24 * 10 seconds)
     let attempts = 0;
@@ -555,34 +556,36 @@ const MenuRecommendationSystem = () => {
           if (attempts >= maxAttempts) {
             throw new Error('Max attempts reached');
           }
-          setConversations(prev => 
-            prev.map((conv, index) => 
-              index === prev.length - 1 
+          setConversations(prev =>
+            prev.map((conv, index) =>
+              index === prev.length - 1
                 ? { ...conv, response: `Still processing... (${attempts * 10} seconds)` }
                 : conv
             )
           );
           setTimeout(pollForResponse, pollInterval);
         } else {
-          setConversations(prev => 
-            prev.map((conv, index) => 
-              index === prev.length - 1 
+          setConversations(prev =>
+            prev.map((conv, index) =>
+              index === prev.length - 1
                 ? { ...conv, response: data.response_text, items: data.returned_items || [] }
                 : conv
             )
           );
           setIsLoading(false);
+          setIsWaitingForResponse(false);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setConversations(prev => 
-          prev.map((conv, index) => 
-            index === prev.length - 1 
+        setConversations(prev =>
+          prev.map((conv, index) =>
+            index === prev.length - 1
               ? { ...conv, response: 'An error occurred while fetching the data. Please try again.' }
               : conv
           )
         );
         setIsLoading(false);
+        setIsWaitingForResponse(false);
       }
     };
 
@@ -595,7 +598,7 @@ const MenuRecommendationSystem = () => {
 
 
 
-  
+
 
   const handleSuggestivePrompt = useCallback((promptText) => {
     setQuery(promptText);
@@ -621,7 +624,7 @@ const MenuRecommendationSystem = () => {
         const existingComboIndex = prevCart.findIndex(
           item => item.isCombo && item.combo_id === newItem.combo_id
         );
-        
+
         if (existingComboIndex !== -1) {
           // Increment quantity of existing combo
           const updatedCart = [...prevCart];
@@ -637,7 +640,7 @@ const MenuRecommendationSystem = () => {
       } else {
         // Existing logic for regular items
         const existingItemIndex = prevCart.findIndex(item => item.item_id === newItem.item_id);
-        
+
         if (existingItemIndex !== -1) {
           const updatedCart = [...prevCart];
           updatedCart[existingItemIndex] = {
@@ -680,7 +683,7 @@ const MenuRecommendationSystem = () => {
       searchInputRef.current?.focus();
     }, 100);
   }, []);
-  
+
   const handleVoiceInput = useCallback(() => {
     if ('webkitSpeechRecognition' in window) {
       const recognition = new window.webkitSpeechRecognition();
@@ -714,11 +717,10 @@ const MenuRecommendationSystem = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`max-w-3/4 p-4 rounded-lg shadow-md ${
-        isUser 
-          ? 'bg-blue-500 text-white self-end' 
-          : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
-      }`}
+      className={`max-w-3/4 p-4 rounded-lg shadow-md ${isUser
+        ? 'bg-blue-500 text-white self-end'
+        : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
+        }`}
     >
       <p className="whitespace-pre-wrap">{content}</p>
     </motion.div>
@@ -728,20 +730,18 @@ const MenuRecommendationSystem = () => {
     const isFavorite = favorites.some(fav => fav.name_of_item === item.name_of_item);
 
     return (
-      <motion.div 
-        className={`rounded-lg shadow-lg overflow-hidden flex flex-col w-full h-96 cursor-pointer transform transition-all duration-300 hover:scale-105 ${
-          theme === 'light' ? 'bg-white' : 'bg-gray-800'
-        }`}
+      <motion.div
+        className={`rounded-lg shadow-lg overflow-hidden flex flex-col w-full h-96 cursor-pointer transform transition-all duration-300 hover:scale-105 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'
+          }`}
         onClick={() => setSelectedItem(item)}
         whileHover={{ y: -5 }}
       >
         <div className="h-48 overflow-hidden relative">
           <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />
-          <motion.button 
+          <motion.button
             onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}
-            className={`absolute top-2 right-2 p-2 rounded-full ${
-              isFavorite ? 'bg-yellow-400' : 'bg-white bg-opacity-70'
-            }`}
+            className={`absolute top-2 right-2 p-2 rounded-full ${isFavorite ? 'bg-yellow-400' : 'bg-white bg-opacity-70'
+              }`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
@@ -755,7 +755,7 @@ const MenuRecommendationSystem = () => {
           </div>
           <div className="mt-4 flex items-center justify-between">
             <p className="text-2xl font-bold text-blue-500">₹{item.cost.toFixed(2)}</p>
-            <motion.button 
+            <motion.button
               onClick={(e) => { e.stopPropagation(); addToCart(item); }}
               className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
               whileHover={{ scale: 1.05 }}
@@ -838,14 +838,13 @@ const MenuRecommendationSystem = () => {
   // );
 
   const MenuItemCard = ({ item }) => (
-    <motion.div 
-      className={`rounded-lg shadow-md p-4 flex flex-col h-full ${
-        theme === 'light' ? 'bg-white' : 'bg-gray-800'
-      }`}
+    <motion.div
+      className={`rounded-lg shadow-md p-4 flex flex-col h-full ${theme === 'light' ? 'bg-white' : 'bg-gray-800'
+        }`}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
     >
       <img src={item.image_link} alt={item.name_of_item} className="w-full h-40 object-cover rounded-lg mb-4" />
-      <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' :'text-white'}`}>{item.name_of_item}</h3>
+      <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
       <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-2 flex-grow`}>
         {item.description.length > 100 ? `${item.description.substring(0, 100)}...` : item.description}
       </p>
@@ -883,15 +882,15 @@ const MenuRecommendationSystem = () => {
 
   const handleRefreshPrompts = async () => {
     setIsRefreshing(true);
-    
+
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
     const newPrompts = selectRandomPrompts();
     setDisplayedPrompts(newPrompts);
-    
+
     setIsRefreshing(false);
-    
+
     // Scroll to the beginning after a short delay to allow for render
     setTimeout(() => {
       if (promptsContainerRef.current) {
@@ -907,7 +906,7 @@ const MenuRecommendationSystem = () => {
     const isSelected = selectedPrompt === text;
     const [isHovered, setIsHovered] = useState(false);
     const buttonRef = useRef(null);
-  
+
     useEffect(() => {
       if (isSelected && buttonRef.current) {
         buttonRef.current.scrollIntoView({
@@ -917,7 +916,7 @@ const MenuRecommendationSystem = () => {
         });
       }
     }, [isSelected]);
-  
+
     const buttonVariants = {
       selected: {
         scale: [1, 1.01, 1],
@@ -932,10 +931,10 @@ const MenuRecommendationSystem = () => {
         scale: 1
       }
     };
-  
+
     const emojiVariants = {
       initial: { scale: 1, rotate: 0 },
-      hover: { 
+      hover: {
         scale: [1, 1.1, 1],
         rotate: [0, -5, 5, 0],
         transition: {
@@ -954,10 +953,10 @@ const MenuRecommendationSystem = () => {
         }
       }
     };
-  
+
     const sparkleVariants = {
       hidden: { opacity: 0, scale: 0 },
-      visible: { 
+      visible: {
         opacity: [0, 0.7, 0],
         scale: [0.4, 1, 0.4],
         transition: {
@@ -968,7 +967,7 @@ const MenuRecommendationSystem = () => {
         }
       }
     };
-  
+
     return (
       <motion.div
         ref={buttonRef}
@@ -981,20 +980,20 @@ const MenuRecommendationSystem = () => {
         {/* Ambient highlight effect without blur */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ 
+          animate={{
             opacity: isSelected ? 0.6 : 0,
             scale: isSelected ? 1 : 0.8,
           }}
           className={`
             absolute inset-0 -m-0.5
             rounded-full
-            ${theme === 'light' 
-              ? 'bg-gradient-to-r from-blue-200/20 via-purple-200/20 to-pink-200/20' 
+            ${theme === 'light'
+              ? 'bg-gradient-to-r from-blue-200/20 via-purple-200/20 to-pink-200/20'
               : 'bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10'
             }
           `}
         />
-  
+
         {/* Subtle sparkles */}
         {(isSelected || isHovered) && (
           <>
@@ -1002,31 +1001,29 @@ const MenuRecommendationSystem = () => {
               variants={sparkleVariants}
               initial="hidden"
               animate="visible"
-              className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ${
-                theme === 'light' ? 'bg-yellow-300/70' : 'bg-yellow-200/70'
-              }`}
+              className={`absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full ${theme === 'light' ? 'bg-yellow-300/70' : 'bg-yellow-200/70'
+                }`}
             />
             <motion.div
               variants={sparkleVariants}
               initial="hidden"
               animate="visible"
               transition={{ delay: 0.2 }}
-              className={`absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full ${
-                theme === 'light' ? 'bg-blue-300/70' : 'bg-blue-200/70'
-              }`}
+              className={`absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full ${theme === 'light' ? 'bg-blue-300/70' : 'bg-blue-200/70'
+                }`}
             />
           </>
         )}
-  
+
         <motion.button
           layout
           variants={buttonVariants}
-          whileHover={{ 
+          whileHover={{
             scale: 1.02,
             y: -1,
             transition: { duration: 0.2 }
           }}
-          whileTap={{ 
+          whileTap={{
             scale: 0.98,
             rotate: [-1, 0],
             transition: { duration: 0.2 }
@@ -1044,7 +1041,7 @@ const MenuRecommendationSystem = () => {
             flex items-center space-x-1.5 
             text-sm flex-shrink-0 
             border
-            ${theme === 'light' 
+            ${theme === 'light'
               ? `
                 bg-white
                 hover:bg-blue-50/90
@@ -1052,7 +1049,7 @@ const MenuRecommendationSystem = () => {
                 text-gray-700
                 hover:text-blue-600
                 ${isSelected ? 'bg-blue-50/90 text-blue-700 border-blue-200' : ''}
-              ` 
+              `
               : `
                 bg-gray-800
                 hover:bg-gray-750
@@ -1087,8 +1084,8 @@ const MenuRecommendationSystem = () => {
               }}
             />
           )}
-  
-          <motion.span 
+
+          <motion.span
             variants={emojiVariants}
             initial="initial"
             animate={isSelected ? "selected" : isHovered ? "hover" : "initial"}
@@ -1096,15 +1093,14 @@ const MenuRecommendationSystem = () => {
           >
             {emoji}
           </motion.span>
-          
+
           <span className="truncate font-medium pr-1 relative text-xs">
             {text}
             {isSelected && (
               <motion.div
                 layoutId="underline"
-                className={`absolute -bottom-0.5 left-0 right-0 h-px rounded-full ${
-                  theme === 'light' ? 'bg-blue-400/70' : 'bg-blue-400/70'
-                }`}
+                className={`absolute -bottom-0.5 left-0 right-0 h-px rounded-full ${theme === 'light' ? 'bg-blue-400/70' : 'bg-blue-400/70'
+                  }`}
                 transition={{ duration: 0.2 }}
               />
             )}
@@ -1121,9 +1117,8 @@ const MenuRecommendationSystem = () => {
       whileTap={{ scale: 0.9 }}
       onClick={handleRefreshPrompts}
       disabled={isRefreshing}
-      className={`p-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 ${
-        theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
-      } ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`p-1 rounded-full shadow-sm hover:shadow-md transition-all duration-300 ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-white'
+        } ${isRefreshing ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <motion.div
         animate={isRefreshing ? { rotate: 360 } : { rotate: 0 }}
@@ -1187,21 +1182,20 @@ const MenuRecommendationSystem = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
-        className={`flex flex-col items-center justify-center space-y-1 transition-colors duration-300 w-20 relative ${
-          isActive
-            ? theme === 'light'
-              ? 'text-blue-600'
-              : 'text-blue-400'
-            : theme === 'light'
+        className={`flex flex-col items-center justify-center space-y-1 transition-colors duration-300 w-20 relative ${isActive
+          ? theme === 'light'
+            ? 'text-blue-600'
+            : 'text-blue-400'
+          : theme === 'light'
             ? 'text-gray-600 hover:text-gray-800'
             : 'text-gray-400 hover:text-white'
-        }`}
+          }`}
       >
-        <motion.div 
+        <motion.div
           className="relative"
-          animate={text === "Inspire" 
-            ? isPromptsExpanded 
-              ? { rotate: 180 } 
+          animate={text === "Inspire"
+            ? isPromptsExpanded
+              ? { rotate: 180 }
               : inspireControls
             : {}
           }
@@ -1232,7 +1226,7 @@ const MenuRecommendationSystem = () => {
       if (container) {
         // Add a subtle shadow when scrolling
         const hasScroll = container.scrollLeft > 0;
-        container.style.boxShadow = hasScroll 
+        container.style.boxShadow = hasScroll
           ? 'inset 10px 0 20px -10px rgba(0, 0, 0, 0.1)'
           : 'none';
       }
@@ -1253,21 +1247,20 @@ const MenuRecommendationSystem = () => {
     const isInspireButton = text === "Inspire";
     const buttonText = isInspireButton ? (isPromptsExpanded ? "Hide" : "Inspire") : text;
     const ButtonIcon = isInspireButton ? (isPromptsExpanded ? ChevronDown : ChevronUp) : Icon;
-  
+
     return (
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
-        className={`flex flex-col items-center justify-center space-y-1 transition-colors duration-300 w-20 relative ${
-          isActive
-            ? theme === 'light'
-              ? 'text-blue-600'
-              : 'text-blue-400'
-            : theme === 'light'
+        className={`flex flex-col items-center justify-center space-y-1 transition-colors duration-300 w-20 relative ${isActive
+          ? theme === 'light'
+            ? 'text-blue-600'
+            : 'text-blue-400'
+          : theme === 'light'
             ? 'text-gray-600 hover:text-gray-800'
             : 'text-gray-400 hover:text-white'
-        }`}
+          }`}
       >
         <div className="relative">
           <ButtonIcon size={20} />
@@ -1323,13 +1316,12 @@ const MenuRecommendationSystem = () => {
 
   const IconButton = React.useMemo(() => {
     return ({ icon: Icon, onClick, label }) => (
-      <motion.button 
-        onClick={onClick} 
-        className={`p-2 rounded-full transition-colors ${
-          theme === 'light' 
-            ? 'bg-gray-200 hover:bg-gray-300 text-gray-800' 
-            : 'bg-gray-700 hover:bg-gray-600 text-white'
-        }`}
+      <motion.button
+        onClick={onClick}
+        className={`p-2 rounded-full transition-colors ${theme === 'light'
+          ? 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+          : 'bg-gray-700 hover:bg-gray-600 text-white'
+          }`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         aria-label={label}
@@ -1356,48 +1348,46 @@ const MenuRecommendationSystem = () => {
 
 
   return (
-    <div className={`app-container h-screen flex flex-col overflow-hidden ${
-      theme === 'light' 
-        ? 'bg-gradient-to-br from-gray-100 to-gray-200' 
-        : 'bg-gradient-to-br from-gray-900 to-gray-800'
-    }`}>
+    <div className={`app-container h-screen flex flex-col overflow-hidden ${theme === 'light'
+      ? 'bg-gradient-to-br from-gray-100 to-gray-200'
+      : 'bg-gradient-to-br from-gray-900 to-gray-800'
+      }`}>
       <AnimatePresence>
         {showWelcome && (
           <WelcomeScreen onGetStarted={handleGetStarted} theme={theme} />
         )}
       </AnimatePresence>
-  
+
       {!showWelcome && (
         <>
-           <header 
-        className={`flex-shrink-0 z-50 transition-all duration-300 ${
-          theme === 'light' 
-            ? 'bg-white bg-opacity-90 text-gray-800' 
-            : 'bg-gray-900 bg-opacity-90 text-white'
-        } backdrop-blur-sm`}
-      >
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-lg font-bold">RestoChat</h1>
-              <div className="flex space-x-1">
-                <TabButton
-                  icon={Home}
-                  isActive={activeTab === 'home'}
-                  onClick={() => setActiveTab('home')}
-                />
-                <TabButton
-                  icon={MessageCircle}
-                  isActive={activeTab === 'chat'}
-                  onClick={() => setActiveTab('chat')}
-                />
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-            <span className='text-xs'>Welcome, {user.username || user.phoneNumbers[0].phoneNumber}</span>
-            {/* Add a sign out button */}
-            <button className='text-xs' onClick={() => window.Clerk.signOut()}>Sign Out</button>
-              {/* <IconButton 
+          <header
+            className={`flex-shrink-0 z-50 transition-all duration-300 ${theme === 'light'
+              ? 'bg-white bg-opacity-90 text-gray-800'
+              : 'bg-gray-900 bg-opacity-90 text-white'
+              } backdrop-blur-sm`}
+          >
+            <div className="max-w-4xl mx-auto px-4">
+              <div className="flex items-center justify-between h-14">
+                <div className="flex items-center space-x-4">
+                  <h1 className="text-lg font-bold">RestoChat</h1>
+                  <div className="flex space-x-1">
+                    <TabButton
+                      icon={Home}
+                      isActive={activeTab === 'home'}
+                      onClick={() => setActiveTab('home')}
+                    />
+                    <TabButton
+                      icon={MessageCircle}
+                      isActive={activeTab === 'chat'}
+                      onClick={() => setActiveTab('chat')}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className='text-xs'>Welcome, {user.username || user.phoneNumbers[0].phoneNumber}</span>
+                  {/* Add a sign out button */}
+                  <button className='text-xs' onClick={() => window.Clerk.signOut()}>Sign Out</button>
+                  {/* <IconButton 
                 icon={theme === 'light' ? Moon : Sun}
                 onClick={toggleTheme}
                 label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
@@ -1407,10 +1397,10 @@ const MenuRecommendationSystem = () => {
                 onClick={() => setIsSettingsOpen(true)}
                 label="Open settings"
               /> */}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </header>
+          </header>
           {/* <div className="flex justify-center mt-4 mb-2">
             <div className="flex space-x-2">
               <TabButton
@@ -1427,237 +1417,236 @@ const MenuRecommendationSystem = () => {
               />
             </div>
           </div> */}
-  
-  <main 
-        ref={mainContentRef}
-        className="flex-grow overflow-y-auto no-scrollbar"
-      >
-        <AnimatePresence mode="wait">
-          {activeTab === 'home' && (
-            <motion.div
-              key="home"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="h-full"
-            >
-              <EmptyState 
-                theme={theme} 
-                onItemClick={handleItemClick} 
-                addToCart={addToCart}
-                removeFromCart={removeFromCart}
-                cart={cart}
-                menuItems={menuItems}
-                onOpenRollTheDice={handleOpenRollTheDice}
-                onComboClick={handleComboClick}
-              />
-            </motion.div>
-          )}
-          {activeTab === 'chat' && (
-            <motion.div
-              key="chat"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="h-full overflow-y-auto p-4"
-            >
-              {conversations.length === 0 ? (
-                <EmptyChatState 
-                  theme={theme} 
-                  searchInputRef={searchInputRef} 
-                  onStartChatting={handleStartChatting}
-                />
-              ) : (
-                <ChatInterface 
-                  conversations={conversations}
-                  onClearChat={clearChat}
-                  theme={theme}
-                  openStory={openStory}
-                  setSelectedItemFromConversation={setSelectedItemFromConversation}
-                  isLoading={isLoading}
-                />
+
+          <main
+            ref={mainContentRef}
+            className="flex-grow overflow-y-auto no-scrollbar"
+          >
+            <AnimatePresence mode="wait">
+              {activeTab === 'home' && (
+                <motion.div
+                  key="home"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full"
+                >
+                  <EmptyState
+                    theme={theme}
+                    onItemClick={handleItemClick}
+                    addToCart={addToCart}
+                    removeFromCart={removeFromCart}
+                    cart={cart}
+                    menuItems={menuItems}
+                    onOpenRollTheDice={handleOpenRollTheDice}
+                    onComboClick={handleComboClick}
+                  />
+                </motion.div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <div ref={conversationEndRef} />
-      </main>
-  
-      <footer className={`flex-shrink-0 z-50 border-t ${
-        theme === 'light' 
-          ? 'bg-white/95 border-gray-200' 
-          : 'bg-gray-900/95 border-gray-800'
-      } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
-        <AnimatePresence>
-          {isPromptsExpanded && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-              className={`relative overflow-hidden ${
-                theme === 'light' ? 'bg-gray-50/90' : 'bg-gray-800/90'
-              } backdrop-blur-md`}
-            >
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-              <LayoutGroup>
-              <motion.div 
-      ref={promptsContainerRef}
-      className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-2 px-4 no-scrollbar scroll-smooth"
-      style={{
-        scrollBehavior: 'smooth',
-        WebkitOverflowScrolling: 'touch'
-      }}
-    >
-      {displayedPrompts.map((prompt, index) => (
-        <motion.div
-          key={prompt.text}
-          layout
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.2, delay: index * 0.03 }}
-        >
-          <PromptButton emoji={prompt.emoji} text={prompt.text} />
-        </motion.div>
-      ))}
-      <RefreshButton />
-    </motion.div>
-              </LayoutGroup>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="max-w-4xl mx-auto px-4 py-3 space-y-3">
-          <form onSubmit={handleSearch} className="relative">
-            <motion.div
-              initial={false}
-              animate={{
-                scale: query ? 1.02 : 1,
-                boxShadow: query 
-                  ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                  : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-              }}
-              transition={{ duration: 0.2 }}
-              className={`rounded-full ${
-                theme === 'light' 
-                  ? 'bg-gray-100 hover:bg-gray-50' 
-                  : 'bg-gray-800 hover:bg-gray-700'
-              }`}
-            >
-              <input
-                type="text"
-                ref={searchInputRef}
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                  if (e.target.value !== selectedPrompt) {
-                    setSelectedPrompt(null);
-                  }
-                }}
-                placeholder="What are you craving today?"
-                className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${
-                  theme === 'light' 
-                    ? 'bg-transparent text-gray-800 placeholder-gray-500' 
-                    : 'bg-transparent text-white placeholder-gray-400'
-                }`}
-              />
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={handleVoiceInput}
-                  className={`p-2 rounded-full transition-colors ${
-                    isListening 
-                      ? 'bg-red-500 text-white' 
-                      : theme === 'light' 
-                        ? 'bg-white text-gray-600 hover:bg-gray-50' 
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
+              {activeTab === 'chat' && (
+                <motion.div
+                  key="chat"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full overflow-y-auto p-4"
                 >
-                  <Mic size={18} />
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="submit"
-                  className="p-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors"
-                >
-                  <Send size={18} />
-                </motion.button>
-              </div>
-            </motion.div>
-          </form>
+                  {conversations.length === 0 ? (
+                    <EmptyChatState
+                      theme={theme}
+                      searchInputRef={searchInputRef}
+                      onStartChatting={handleStartChatting}
+                    />
+                  ) : (
+                    <ChatInterface
+                      conversations={conversations}
+                      onClearChat={clearChat}
+                      theme={theme}
+                      openStory={openStory}
+                      setSelectedItemFromConversation={setSelectedItemFromConversation}
+                      isLoading={isLoading}
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div ref={conversationEndRef} />
+          </main>
 
-          <nav className="flex justify-around items-center pt-1">
-            <NavButton 
-              icon={Menu} 
-              text="Menu" 
-              onClick={toggleMenu} 
-              isActive={isMenuOpen}
-            />
-<InspireNavButton
-  icon={isPromptsExpanded ? ChevronDown : ChevronUp}
-  text="Inspire"
-  onClick={() => setIsPromptsExpanded(!isPromptsExpanded)}
-  isActive={isPromptsExpanded}
-  theme={theme}
-  isPromptsExpanded={isPromptsExpanded}
-/>
-            <NavButton 
-              icon={ShoppingCart} 
-              text="Cart" 
-              onClick={toggleCart} 
-              isActive={isCartOpen}
-              badge={cartItemCount > 0 ? cartItemCount : null}
-            />
-          </nav>
-        </div>
-      </footer>
+          <footer className={`flex-shrink-0 z-50 border-t ${theme === 'light'
+            ? 'bg-white/95 border-gray-200'
+            : 'bg-gray-900/95 border-gray-800'
+            } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
+            <AnimatePresence>
+              {isPromptsExpanded && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                  className={`relative overflow-hidden ${theme === 'light' ? 'bg-gray-50/90' : 'bg-gray-800/90'
+                    } backdrop-blur-md`}
+                >
+                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+                  <LayoutGroup>
+                    <motion.div
+                      ref={promptsContainerRef}
+                      className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-2 px-4 no-scrollbar scroll-smooth"
+                      style={{
+                        scrollBehavior: 'smooth',
+                        WebkitOverflowScrolling: 'touch'
+                      }}
+                    >
+                      {displayedPrompts.map((prompt, index) => (
+                        <motion.div
+                          key={prompt.text}
+                          layout
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.2, delay: index * 0.03 }}
+                        >
+                          <PromptButton emoji={prompt.emoji} text={prompt.text} />
+                        </motion.div>
+                      ))}
+                      <RefreshButton />
+                    </motion.div>
+                  </LayoutGroup>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="max-w-4xl mx-auto px-4 py-3 space-y-3">
+              <form onSubmit={handleSearch} className="relative">
+                <motion.div
+                  initial={false}
+                  animate={{
+                    scale: query ? 1.02 : 1,
+                    boxShadow: query
+                      ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                  }}
+                  transition={{ duration: 0.2 }}
+                  className={`rounded-full ${theme === 'light'
+                      ? 'bg-gray-100 hover:bg-gray-50'
+                      : 'bg-gray-800 hover:bg-gray-700'
+                    } ${isWaitingForResponse ? 'opacity-50' : ''}`}
+                >
+                  <input
+                    type="text"
+                    ref={searchInputRef}
+                    value={query}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      if (e.target.value !== selectedPrompt) {
+                        setSelectedPrompt(null);
+                      }
+                    }}
+                    disabled={isWaitingForResponse}
+                    placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
+                    className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
+                        ? 'bg-transparent text-gray-800 placeholder-gray-500'
+                        : 'bg-transparent text-white placeholder-gray-400'
+                      } ${isWaitingForResponse ? 'cursor-not-allowed' : ''}`}
+                  />
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: isWaitingForResponse ? 1 : 1.05 }}
+                      whileTap={{ scale: isWaitingForResponse ? 1 : 0.95 }}
+                      type="button"
+                      onClick={handleVoiceInput}
+                      disabled={isWaitingForResponse}
+                      className={`p-2 rounded-full transition-colors ${isListening
+                          ? 'bg-red-500 text-white'
+                          : theme === 'light'
+                            ? 'bg-white text-gray-600 hover:bg-gray-50'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        } ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <Mic size={18} />
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: isWaitingForResponse ? 1 : 1.05 }}
+                      whileTap={{ scale: isWaitingForResponse ? 1 : 0.95 }}
+                      type="submit"
+                      disabled={isWaitingForResponse}
+                      className={`p-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                      {isWaitingForResponse ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </form>
+
+              <nav className="flex justify-around items-center pt-1">
+                <NavButton
+                  icon={Menu}
+                  text="Menu"
+                  onClick={toggleMenu}
+                  isActive={isMenuOpen}
+                />
+                <InspireNavButton
+                  icon={isPromptsExpanded ? ChevronDown : ChevronUp}
+                  text="Inspire"
+                  onClick={() => setIsPromptsExpanded(!isPromptsExpanded)}
+                  isActive={isPromptsExpanded}
+                  theme={theme}
+                  isPromptsExpanded={isPromptsExpanded}
+                />
+                <NavButton
+                  icon={ShoppingCart}
+                  text="Cart"
+                  onClick={toggleCart}
+                  isActive={isCartOpen}
+                  badge={cartItemCount > 0 ? cartItemCount : null}
+                />
+              </nav>
+            </div>
+          </footer>
         </>
       )}
-  
-  <AppleInspiredStoryView
-      isOpen={isStoryOpen}
-      onClose={closeStory}
-      conversations={conversations}
-      initialIndex={activeStoryIndex}
-      addToCart={addToCart}
-      removeFromCart={removeFromCart}
-      theme={theme}
-      onItemClick={handleComboItemClick}
-      cart={cart}
-    />
-  
-  <AnimatePresence>
-        {isMenuOpen && (
-        <IsolatedMenu
-        isOpen={isMenuOpen}
-        onClose={toggleMenu}
-        theme={theme}
-        menuItems={menuItems}
+
+      <AppleInspiredStoryView
+        isOpen={isStoryOpen}
+        onClose={closeStory}
+        conversations={conversations}
+        initialIndex={activeStoryIndex}
         addToCart={addToCart}
         removeFromCart={removeFromCart}
+        theme={theme}
+        onItemClick={handleComboItemClick}
         cart={cart}
-        onChatButtonClick={handleChatButtonClick}
       />
+
+      <AnimatePresence>
+        {isMenuOpen && (
+          <IsolatedMenu
+            isOpen={isMenuOpen}
+            onClose={toggleMenu}
+            theme={theme}
+            menuItems={menuItems}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+            cart={cart}
+            onChatButtonClick={handleChatButtonClick}
+          />
         )}
       </AnimatePresence>
 
-     <AnimatePresence>
+      <AnimatePresence>
         {isCartOpen && (
           <IsolatedCart
-          isOpen={isCartOpen}
-          onClose={toggleCart}
-          theme={theme}
-          cartItems={cart}
-          addToCart={addToCart}
-          removeFromCart={removeFromCart}
-          clearCart={clearCart}
-        />
+            isOpen={isCartOpen}
+            onClose={toggleCart}
+            theme={theme}
+            cartItems={cart}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+            clearCart={clearCart}
+          />
         )}
       </AnimatePresence>
 
@@ -1690,7 +1679,7 @@ const MenuRecommendationSystem = () => {
           cart={cart}
         />
       )}
-  
+
       {selectedItem && (
         <ItemModal
           item={selectedItem}
@@ -1703,29 +1692,29 @@ const MenuRecommendationSystem = () => {
         />
       )}
       {selectedItemFromConversation && (
-  <ItemModal
-    item={selectedItemFromConversation}
-    isOpen={!!selectedItemFromConversation}
-    onClose={() => setSelectedItemFromConversation(null)}
-    theme={theme}
-    addToCart={addToCart}
-    removeFromCart={removeFromCart}
-    cart={cart}
-  />
-)}
+        <ItemModal
+          item={selectedItemFromConversation}
+          isOpen={!!selectedItemFromConversation}
+          onClose={() => setSelectedItemFromConversation(null)}
+          theme={theme}
+          addToCart={addToCart}
+          removeFromCart={removeFromCart}
+          cart={cart}
+        />
+      )}
 
-{selectedCombo && (
-            <ComboDetailsModal
-              isOpen={isComboModalOpen}
-              onClose={() => {
-                setIsComboModalOpen(false);
-                setSelectedCombo(null);
-              }}
-              combo={selectedCombo}
-              theme={theme}
-            />
-          )}
-  
+      {selectedCombo && (
+        <ComboDetailsModal
+          isOpen={isComboModalOpen}
+          onClose={() => {
+            setIsComboModalOpen(false);
+            setSelectedCombo(null);
+          }}
+          combo={selectedCombo}
+          theme={theme}
+        />
+      )}
+
       {/* {isLoading && (
         <motion.div 
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
@@ -1742,7 +1731,7 @@ const MenuRecommendationSystem = () => {
           </motion.div>
         </motion.div>
       )} */}
-    <style jsx global>{`
+      <style jsx global>{`
         :root {
           --vh: 1vh;
           --footer-height: 0px;

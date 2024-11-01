@@ -95,8 +95,8 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
               <h3 className={`font-semibold mb-2 text-lg ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>Dietary Info</h3>
               <div className="flex flex-wrap gap-2">
                 <span className={`px-3 py-1 rounded-full text-sm ${item.veg_or_non_veg === 'veg'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
                   }`}>
                   {item.veg_or_non_veg === 'veg' ? '🥬 Vegetarian' : '🍖 Non-vegetarian'}
                 </span>

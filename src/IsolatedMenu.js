@@ -3,37 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, Plus, Minus, Star, Check, AlertCircle, Image as ImageIcon, Filter, Sparkles, Coffee, Pizza, Cake, Compass, ChevronRight, ChevronLeft, Loader, ShoppingBag, MessageCircle } from 'lucide-react';
 import AnimatedAddToCartButton from './AnimatedAddToCartButton';
 
-const HorizontalScroll = ({ items, renderItem }) => {
+// Memoize HorizontalScroll component
+const HorizontalScroll = React.memo(({ items, renderItem }) => {
   const scrollContainerRef = useRef(null);
-  const scrollPositionRef = useRef(0);
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer) {
-      const handleScroll = () => {
-        scrollPositionRef.current = scrollContainer.scrollLeft;
-      };
-
-      scrollContainer.addEventListener('scroll', handleScroll);
-
-      return () => {
-        scrollContainer.removeEventListener('scroll', handleScroll);
-      };
-    }
-  }, []);
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer) {
-      scrollContainer.scrollLeft = scrollPositionRef.current;
-    }
-  });
 
   return (
     <div
       ref={scrollContainerRef}
       className="flex overflow-x-auto space-x-4 px-2 py-4 no-scrollbar"
-      style={{ scrollBehavior: 'smooth', overflowY: 'hidden' }}
+      style={{
+        scrollBehavior: 'smooth',
+        overflowY: 'hidden',
+        willChange: 'transform'
+      }}
     >
       {items.map((item, index) => (
         <div key={item.item_id || index} className="flex-shrink-0">
@@ -42,9 +24,50 @@ const HorizontalScroll = ({ items, renderItem }) => {
       ))}
     </div>
   );
-};
+});
 
-const Notification = ({ show, theme }) => {
+// Separate content views into lazy-loaded components
+const ExploreView = React.lazy(() => Promise.resolve({
+  default: ({ categorizedItems, renderScrollItemCard }) => (
+    <div className="space-y-6">
+      {Object.entries(categorizedItems).map(([category, items]) => (
+        <div key={category} className="space-y-2">
+          <h2 className="text-xl font-semibold text-current">
+            {category}
+          </h2>
+          <HorizontalScroll items={items} renderItem={renderScrollItemCard} />
+        </div>
+      ))}
+    </div>
+  )
+}));
+
+const SearchView = React.lazy(() => Promise.resolve({
+  default: ({ searchTerm, setSearchTerm, searchFilteredItems, renderSearchItemCard }) => (
+    <div className="space-y-6">
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Search menu..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 pl-10 rounded-full bg-current"
+        />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+      </div>
+      <div className="space-y-4">
+        {searchFilteredItems.map(item => (
+          <div key={item.item_id} className="w-full">
+            {renderSearchItemCard(item)}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}));
+
+// Memoize Notification component
+const Notification = React.memo(({ show, theme }) => {
   const notificationVariants = {
     hidden: { opacity: 0, y: -50 },
     visible: { opacity: 1, y: 0 },
@@ -70,118 +93,23 @@ const Notification = ({ show, theme }) => {
       )}
     </AnimatePresence>
   );
-};
+});
 
-// const AnimatedAddToCartButton = ({ item, addToCart, theme, quantity }) => {
-//   const [isAdded, setIsAdded] = useState(false);
-//   const [showIncrement, setShowIncrement] = useState(quantity > 0);
-
-//   const handleAddToCart = useCallback((e) => {
-//     e.stopPropagation();
-//     setIsAdded(true);
-//     addToCart({ ...item, quantity: quantity + 1 });
-//     setTimeout(() => {
-//       setIsAdded(false);
-//       setShowIncrement(true);
-//     }, 1500);
-//   }, [addToCart, item, quantity]);
-
-//   const handleIncrement = useCallback((e) => {
-//     e.stopPropagation();
-//     addToCart({ ...item, quantity: quantity + 1 });
-//   }, [addToCart, item, quantity]);
-
-//   const handleDecrement = useCallback((e) => {
-//     e.stopPropagation();
-//     const newQuantity = Math.max(0, quantity - 1);
-//     addToCart({ ...item, quantity: newQuantity });
-//     if (newQuantity === 0) {
-//       setShowIncrement(false);
-//     }
-//   }, [addToCart, item, quantity]);
-
-//   useEffect(() => {
-//     if (quantity > 0 && !isAdded) {
-//       setShowIncrement(true);
-//     }
-//   }, [quantity, isAdded]);
-
-//   return (
-//     <motion.div className="relative w-28 h-8">
-//       <AnimatePresence initial={false}>
-//         {!showIncrement ? (
-//           <motion.button
-//             key="add-to-cart"
-//             initial={{ opacity: 0, scale: 0.5 }}
-//             animate={{ opacity: 1, scale: 1 }}
-//             exit={{ opacity: 0, scale: 0.5 }}
-//             onClick={handleAddToCart}
-//             className={`absolute inset-0 px-2 py-1 rounded-full text-xs font-medium flex items-center justify-center ${
-//               isAdded
-//                 ? 'bg-green-500 text-white'
-//                 : `bg-blue-600 text-white hover:bg-blue-700`
-//             } transition-colors duration-300`}
-//             whileHover={{ scale: 1.05 }}
-//             whileTap={{ scale: 0.95 }}
-//           >
-//             <AnimatePresence mode="wait">
-//               {isAdded ? (
-//                 <motion.div
-//                   key="check"
-//                   initial={{ opacity: 0, scale: 0.5 }}
-//                   animate={{ opacity: 1, scale: 1 }}
-//                   exit={{ opacity: 0, scale: 0.5 }}
-//                   className="flex items-center"
-//                 >
-//                   <Check size={14} className="mr-1" />
-//                   <span className="whitespace-nowrap">Added</span>
-//                 </motion.div>
-//               ) : (
-//                 <motion.div
-//                   key="add"
-//                   initial={{ opacity: 0, scale: 0.5 }}
-//                   animate={{ opacity: 1, scale: 1 }}
-//                   exit={{ opacity: 0, scale: 0.5 }}
-//                   className="flex items-center"
-//                 >
-//                   <ShoppingBag size={14} className="mr-1" />
-//                   <span className="whitespace-nowrap">Add to Cart</span>
-//                 </motion.div>
-//               )}
-//             </AnimatePresence>
-//           </motion.button>
-//         ) : (
-//           <motion.div
-//             key="increment-decrement"
-//             initial={{ opacity: 0, scale: 0.5 }}
-//             animate={{ opacity: 1, scale: 1 }}
-//             exit={{ opacity: 0, scale: 0.5 }}
-//             className="absolute inset-0 flex items-center justify-between bg-gray-200 rounded-full p-1"
-//           >
-//             <motion.button
-//               onClick={handleDecrement}
-//               className={`p-1 rounded-full ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-700 text-white'}`}
-//               whileHover={{ scale: 1.1 }}
-//               whileTap={{ scale: 0.9 }}
-//             >
-//               <Minus size={14} />
-//             </motion.button>
-//             <span className={`text-sm font-medium ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{quantity}</span>
-//             <motion.button
-//               onClick={handleIncrement}
-//               className={`p-1 rounded-full ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-700 text-white'}`}
-//               whileHover={{ scale: 1.1 }}
-//               whileTap={{ scale: 0.9 }}
-//             >
-//               <Plus size={14} />
-//             </motion.button>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-//     </motion.div>
-//   );
-// };
-
+// Memoize TabButton component
+const TabButton = React.memo(({ icon: Icon, text, isActive, onClick }) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={onClick}
+    className={`flex items-center space-x-2 px-4 py-2 rounded-full ${isActive
+      ? 'bg-blue-500 text-white'
+      : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+      }`}
+  >
+    <Icon size={20} />
+    <span>{text}</span>
+  </motion.button>
+));
 
 const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFromCart, cart, onChatButtonClick }) => {
   const [view, setView] = useState('explore');
@@ -195,6 +123,59 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
     highRated: false,
   });
 
+
+  // Optimized animation configuration
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.15 } }
+  };
+
+  const menuVariants = {
+    hidden: {
+      y: '100%',
+      transition: {
+        duration: 0.2,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    visible: {
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
+    exit: {
+      y: '100%',
+      transition: {
+        duration: 0.15,
+        ease: [0.4, 0, 1, 1]
+      }
+    }
+  };
+  // Pre-compute categorized items
+  const categorizedItems = useMemo(() => {
+    if (!menuItems) return {};
+    return menuItems.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {});
+  }, [menuItems]);
+
+  // Pre-filter items
+  const filteredItems = useMemo(() => {
+    if (!menuItems) return [];
+    return menuItems.filter(item => {
+      if (activeFilters.veg && item.veg_or_non_veg !== 'veg') return false;
+      if (activeFilters.nonVeg && item.veg_or_non_veg !== 'non-veg') return false;
+      if (activeFilters.highRated && (!item.rating || item.rating < 4.0)) return false;
+      return true;
+    });
+  }, [menuItems, activeFilters]);
+
   const [showNotification, setShowNotification] = useState(false);
   const getItemQuantity = useCallback((itemId) => {
     const cartItem = cart.find(item => item.item_id === itemId);
@@ -206,6 +187,35 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
     visible: { opacity: 1, y: 0, x: '-50%' },
     exit: { opacity: 0, y: -50, x: '-50%' },
   };
+
+
+  // Pre-process menu items on mount
+  useEffect(() => {
+    if (isOpen && menuItems) {
+      // Pre-calculate categorized items and cuisines
+      const categories = {};
+      const cuisineSet = new Set();
+
+      menuItems.forEach(item => {
+        // Build categories
+        if (!categories[item.category]) {
+          categories[item.category] = [];
+        }
+        categories[item.category].push(item);
+
+        // Build cuisine set
+        if (item.cuisine) {
+          cuisineSet.add(item.cuisine);
+        }
+      });
+    }
+  }, [isOpen, menuItems]);
+
+  // Optimize view switching
+  const handleViewChange = useCallback((newView) => {
+    setSearchTerm(''); // Reset search when changing views
+    setView(newView);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -222,16 +232,6 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
     }
   }, [isOpen, menuItems]);
 
-  const filteredItems = useMemo(() => {
-    if (!menuItems) return [];
-    return menuItems.filter(item => {
-      const matchesVeg = !activeFilters.veg || item.veg_or_non_veg === 'veg';
-      const matchesNonVeg = !activeFilters.nonVeg || item.veg_or_non_veg === 'non-veg';
-      const matchesHighRated = !activeFilters.highRated || (item.rating && item.rating >= 4.0);
-
-      return matchesVeg && matchesNonVeg && matchesHighRated;
-    });
-  }, [menuItems, activeFilters]);
 
   const searchFilteredItems = useMemo(() => {
     return filteredItems.filter(item =>
@@ -241,16 +241,6 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
       (item.cuisine && item.cuisine.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [filteredItems, searchTerm]);
-
-  const categorizedItems = useMemo(() => {
-    return filteredItems.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = [];
-      }
-      acc[item.category].push(item);
-      return acc;
-    }, {});
-  }, [filteredItems]);
 
   const cuisines = useMemo(() => {
     return [...new Set(filteredItems.map(item => item.cuisine).filter(Boolean))];
@@ -300,42 +290,105 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
 
 
   const renderSearchView = () => {
+    const hasSearchResults = searchTerm.length > 0 && searchFilteredItems.length > 0;
+    const noResults = searchTerm.length > 0 && searchFilteredItems.length === 0;
+    const recentSearches = ['Burger', 'Pizza', 'Pasta', 'Biryani']; // You can make this dynamic with localStorage
+
     return (
       <div className="space-y-6">
+        {/* Enhanced Search Bar */}
         <div className="relative">
-          <input
-            type="text"
-            placeholder="Search menu..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={`w-full p-2 pl-10 rounded-full ${theme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'
-              }`}
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <div className={`relative flex items-center transition-all duration-300 ${searchTerm ? 'shadow-lg' : 'shadow-md'}`}>
+            <Search className="absolute left-4 text-gray-400" size={20} />
+            <input
+              type="text"
+              placeholder="Search dishes, cuisines, or ingredients..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`w-full p-4 pl-12 rounded-2xl transition-all duration-300 ${theme === 'light'
+                ? 'bg-white text-gray-800 focus:bg-gray-50'
+                : 'bg-gray-800 text-white focus:bg-gray-700'
+                } outline-none focus:ring-2 focus:ring-blue-500`}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-4 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+                <X size={16} className="text-gray-500" />
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {cuisines.map(cuisine => (
-            <motion.button
-              key={cuisine}
-              className={`px-3 py-1 rounded-full text-sm font-medium ${searchTerm === cuisine
-                ? 'bg-blue-500 text-white'
-                : theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-700 text-white'
-                }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setSearchTerm(cuisine)}
-            >
-              {cuisine}
-            </motion.button>
-          ))}
-        </div>
-        <div className="space-y-4">
-          {searchFilteredItems.map(item => (
-            <div key={item.item_id} className="w-full">
-              {renderSearchItemCard(item, true)}
+
+        {/* Quick Filters - Show only when not searching */}
+        {!searchTerm && (
+          <div className="space-y-6">
+            {/* Popular Searches */}
+            <div>
+              <h3 className={`text-lg font-semibold mb-3 ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
+                Popular Searches
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['Chicken Biryani', 'Paneer Tikka', 'Pizza', 'Ice Cream', 'Burger'].map((term) => (
+                  <motion.button
+                    key={term}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSearchTerm(term)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${theme === 'light'
+                      ? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                      : 'bg-gray-800 text-white hover:bg-gray-700'
+                      }`}
+                  >
+                    <Search size={14} />
+                    {term}
+                  </motion.button>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
+
+          </div>
+        )}
+
+        {/* Search Results */}
+        {hasSearchResults && (
+          <div className="space-y-4">
+            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+              Found {searchFilteredItems.length} results for "{searchTerm}"
+            </p>
+            {searchFilteredItems.map(item => (
+              <motion.div
+                key={item.item_id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="w-full"
+              >
+                {renderSearchItemCard(item, true)}
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* No Results State */}
+        {noResults && (
+          <div className="text-center py-8 space-y-4">
+            <AlertCircle size={48} className="mx-auto text-gray-400" />
+            <h3 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+              No results found
+            </h3>
+            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+              Try adjusting your search or browse our categories
+            </p>
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-blue-500 font-medium hover:underline"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -659,110 +712,124 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
   );
 
   return (
-    <motion.div
-      className={`fixed inset-0 z-50 ${isOpen ? 'block' : 'hidden'}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isOpen ? 1 : 0 }}
-      exit={{ opacity: 0 }}
-    >
-      <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      <motion.div
-        className={`absolute inset-x-0 bottom-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-900'
-          } rounded-t-3xl overflow-hidden`}
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        style={{ height: 'calc(100% - 1rem)' }}
-      >
-        <div className="h-full flex flex-col">
-          {/* Header with tabs */}
-          <div className="sticky top-0 z-10 bg-inherit border-b border-gray-200 dark:border-gray-700">
-            <div className="px-4 pt-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-                  Menu
-                </h2>
-                <button onClick={onClose} className={theme === 'light' ? 'text-gray-600' : 'text-gray-300'}>
-                  <X size={24} />
-                </button>
+    <AnimatePresence mode="wait">
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={menuVariants}
+          style={{
+            willChange: 'transform',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
+          }}
+        >
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={onClose}
+            style={{
+              willChange: 'opacity',
+              backfaceVisibility: 'hidden'
+            }}
+          />
+          <motion.div
+            className={`absolute inset-x-0 bottom-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} rounded-t-3xl overflow-hidden`}
+            style={{
+              height: 'calc(100% - 1rem)',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
+              perspective: 1000,
+              WebkitPerspective: 1000
+            }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{
+              type: "tween",
+              duration: 0.2,
+              ease: [0.4, 0, 0.2, 1]
+            }}
+          >
+            <div className="h-full flex flex-col">
+              {/* Header with tabs */}
+              <div className="sticky top-0 z-10 bg-inherit border-b border-gray-200 dark:border-gray-700">
+                <div className="px-4 pt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+                      Menu
+                    </h2>
+                    <button onClick={onClose} className={theme === 'light' ? 'text-gray-600' : 'text-gray-300'}>
+                      <X size={24} />
+                    </button>
+                  </div>
+                  <MainFilters />
+                  <div className="flex space-x-4 pb-4">
+                    <TabButton
+                      icon={Compass}
+                      text="Explore"
+                      isActive={view === 'explore'}
+                      onClick={() => setView('explore')}
+                    />
+                    <TabButton
+                      icon={Search}
+                      text="Search"
+                      isActive={view === 'search'}
+                      onClick={() => setView('search')}
+                    />
+                    <TabButton
+                      icon={Sparkles}
+                      text="Discover"
+                      isActive={view === 'discover'}
+                      onClick={() => setView('discover')}
+                    />
+                  </div>
+                </div>
               </div>
-              <MainFilters />
-              <div className="flex space-x-4 pb-4">
-                <TabButton
-                  icon={Compass}
-                  text="Explore"
-                  isActive={view === 'explore'}
-                  onClick={() => setView('explore')}
-                />
-                <TabButton
-                  icon={Search}
-                  text="Search"
-                  isActive={view === 'search'}
-                  onClick={() => setView('search')}
-                />
-                <TabButton
-                  icon={Sparkles}
-                  text="Discover"
-                  isActive={view === 'discover'}
-                  onClick={() => setView('discover')}
-                />
+
+              {/* Content area with proper padding */}
+              <div className="flex-grow overflow-hidden">
+                <div className="h-full relative">
+                  {/* Explore View */}
+                  <div
+                    className={`absolute inset-0 overflow-y-auto transition-opacity duration-200 px-4 py-4 ${view === 'explore' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                      }`}
+                  >
+                    {renderExploreView()}
+                  </div>
+
+                  {/* Search View */}
+                  <div
+                    className={`absolute inset-0 overflow-y-auto transition-opacity duration-200 px-4 py-4 ${view === 'search' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                      }`}
+                  >
+                    {renderSearchView()}
+                  </div>
+
+                  {/* Discover View */}
+                  <div
+                    className={`absolute inset-0 overflow-y-auto transition-opacity duration-200 px-4 py-4 ${view === 'discover' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                      }`}
+                  >
+                    {renderDiscoverView()}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Content area with proper padding */}
-          <div className="flex-grow overflow-hidden">
-            <div className="h-full relative">
-              {/* Explore View */}
-              <div
-                className={`absolute inset-0 overflow-y-auto transition-opacity duration-200 px-4 py-4 ${view === 'explore' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                  }`}
-              >
-                {renderExploreView()}
-              </div>
-
-              {/* Search View */}
-              <div
-                className={`absolute inset-0 overflow-y-auto transition-opacity duration-200 px-4 py-4 ${view === 'search' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                  }`}
-              >
-                {renderSearchView()}
-              </div>
-
-              {/* Discover View */}
-              <div
-                className={`absolute inset-0 overflow-y-auto transition-opacity duration-200 px-4 py-4 ${view === 'discover' ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                  }`}
-              >
-                {renderDiscoverView()}
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {selectedItem && renderItemModal()}
-      </AnimatePresence>
-      <Notification show={showNotification} theme={theme} />
-    </motion.div>
+          <AnimatePresence>
+            {selectedItem && renderItemModal()}
+          </AnimatePresence>
+          <Notification show={showNotification} theme={theme} />
+        </motion.div>
+        // </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
-const TabButton = ({ icon: Icon, text, isActive, onClick }) => (
-  <motion.button
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    onClick={onClick}
-    className={`flex items-center space-x-2 px-4 py-2 rounded-full ${isActive
-      ? 'bg-blue-500 text-white'
-      : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-      }`}
-  >
-    <Icon size={20} />
-    <span>{text}</span>
-  </motion.button>
-);
 
-export default IsolatedMenu;
+export default React.memo(IsolatedMenu);
