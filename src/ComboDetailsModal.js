@@ -476,7 +476,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-10rem)] sm:max-h-[calc(100vh-10rem)] overscroll-none ${theme === "light" ? "bg-white" : "bg-gray-900"
+            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[80vh] ${theme === "light" ? "bg-white" : "bg-gray-900"
               }`}
             onClick={(e) => e.stopPropagation()}
           >
@@ -484,12 +484,12 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
               ref={contentRef}
               className="h-full overflow-y-auto overflow-x-hidden overscroll-none touch-pan-y will-change-scroll no-scrollbar"
               style={{
-                height: "calc(100vh - 4rem)",
+                maxHeight: "calc(90vh - 5rem)", // Adjusted height calculation
                 scrollPaddingTop: topSpacing,
                 overscrollBehavior: "none",
                 WebkitOverflowScrolling: "touch",
-                position: "relative", // Add this
-                isolation: "isolate",  // Add this
+                position: "relative",
+                isolation: "isolate",
               }}
             >
               {/* Hero Section */}
