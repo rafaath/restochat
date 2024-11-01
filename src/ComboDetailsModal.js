@@ -138,12 +138,11 @@ const TabButton = ({ id, label, icon: Icon, isActive, onClick, theme }) => (
   <button
     onClick={onClick}
     className={`relative flex items-center gap-1.5 px-4 py-3 text-sm font-medium transition-colors
-      ${
-        isActive
-          ? theme === "light"
-            ? "text-blue-600"
-            : "text-blue-400"
-          : theme === "light"
+      ${isActive
+        ? theme === "light"
+          ? "text-blue-600"
+          : "text-blue-400"
+        : theme === "light"
           ? "text-gray-600 hover:text-gray-900"
           : "text-gray-400 hover:text-gray-200"
       }`}
@@ -164,16 +163,14 @@ const NutritionBadge = ({ label, value, icon: Icon, theme }) => (
   <motion.div
     whileHover={{ y: -2, scale: 1.02 }}
     className={`flex items-center gap-3 p-4 rounded-xl transition-all
-      ${
-        theme === "light"
-          ? "bg-gradient-to-br from-blue-50 to-blue-100/50"
-          : "bg-gradient-to-br from-blue-900/20 to-blue-800/20"
+      ${theme === "light"
+        ? "bg-gradient-to-br from-blue-50 to-blue-100/50"
+        : "bg-gradient-to-br from-blue-900/20 to-blue-800/20"
       }`}
   >
     <div
-      className={`p-2 rounded-lg ${
-        theme === "light" ? "bg-blue-100" : "bg-blue-800/40"
-      }`}
+      className={`p-2 rounded-lg ${theme === "light" ? "bg-blue-100" : "bg-blue-800/40"
+        }`}
     >
       <Icon
         size={18}
@@ -182,16 +179,14 @@ const NutritionBadge = ({ label, value, icon: Icon, theme }) => (
     </div>
     <div>
       <p
-        className={`text-xs font-medium mb-0.5 ${
-          theme === "light" ? "text-blue-600" : "text-blue-300"
-        }`}
+        className={`text-xs font-medium mb-0.5 ${theme === "light" ? "text-blue-600" : "text-blue-300"
+          }`}
       >
         {label}
       </p>
       <p
-        className={`text-sm font-semibold ${
-          theme === "light" ? "text-blue-800" : "text-blue-100"
-        }`}
+        className={`text-sm font-semibold ${theme === "light" ? "text-blue-800" : "text-blue-100"
+          }`}
       >
         {value}
       </p>
@@ -206,10 +201,9 @@ const ComboItemCard = ({ item, theme }) => (
     animate={{ opacity: 1, y: 0 }}
     whileHover={{ y: -2 }}
     className={`group relative overflow-hidden rounded-xl transition-all duration-300
-      ${
-        theme === "light"
-          ? "bg-white hover:bg-gray-50 hover:shadow-lg hover:ring-1 hover:ring-gray-200"
-          : "bg-gray-800/50 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 hover:ring-1 hover:ring-gray-700"
+      ${theme === "light"
+        ? "bg-white hover:bg-gray-50 hover:shadow-lg hover:ring-1 hover:ring-gray-200"
+        : "bg-gray-800/50 hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-900/20 hover:ring-1 hover:ring-gray-700"
       }`}
   >
     <div className="aspect-w-16 aspect-h-9 overflow-hidden rounded-t-xl">
@@ -221,22 +215,20 @@ const ComboItemCard = ({ item, theme }) => (
       {/* Subtle gradient overlay that's always present but intensifies on hover */}
       <div
         className={`absolute inset-0 transition-opacity duration-300
-        ${
-          theme === "light"
+        ${theme === "light"
             ? "bg-gradient-to-t from-gray-900/20 via-gray-900/5 to-transparent opacity-0 group-hover:opacity-100"
             : "bg-gradient-to-t from-gray-900/40 via-gray-900/10 to-transparent opacity-50 group-hover:opacity-100"
-        }`}
+          }`}
       />
     </div>
 
     {/* Veg/Non-veg indicator with enhanced styling */}
     <div
       className={`absolute top-3 right-3 w-6 h-6 rounded-full border-2 backdrop-blur-sm transition-transform duration-300 group-hover:scale-105
-      ${
-        item.veg_or_non_veg === "veg"
+      ${item.veg_or_non_veg === "veg"
           ? "border-green-500 bg-green-50 dark:bg-green-500/20"
           : "border-red-500 bg-red-50 dark:bg-red-500/20"
-      }`}
+        }`}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         {item.veg_or_non_veg === "veg" ? (
@@ -259,32 +251,29 @@ const ComboItemCard = ({ item, theme }) => (
         <div className="min-w-0 flex-1">
           <h4
             className={`font-medium text-base mb-1 transition-colors
-            ${
-              theme === "light"
+            ${theme === "light"
                 ? "text-gray-900 group-hover:text-gray-700"
                 : "text-gray-100 group-hover:text-white"
-            }`}
+              }`}
           >
             {item.name_of_item}
           </h4>
           <p
             className={`text-sm line-clamp-2 transition-colors
-            ${
-              theme === "light"
+            ${theme === "light"
                 ? "text-gray-600 group-hover:text-gray-700"
                 : "text-gray-400 group-hover:text-gray-300"
-            }`}
+              }`}
           >
             {item.description}
           </p>
         </div>
         <span
           className={`text-lg font-semibold flex-shrink-0 transition-colors
-          ${
-            theme === "light"
+          ${theme === "light"
               ? "text-gray-900 group-hover:text-gray-800"
               : "text-gray-100 group-hover:text-white"
-          }`}
+            }`}
         >
           ₹{item.cost}
         </span>
@@ -295,11 +284,10 @@ const ComboItemCard = ({ item, theme }) => (
         {item.rating && (
           <span
             className={`flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-300
-            ${
-              theme === "light"
+            ${theme === "light"
                 ? "bg-yellow-100 text-yellow-800 group-hover:bg-yellow-200 group-hover:text-yellow-900"
                 : "bg-yellow-900/20 text-yellow-200 group-hover:bg-yellow-900/30"
-            }`}
+              }`}
           >
             <Star size={12} className="mr-1" fill="currentColor" />
             {item.rating}
@@ -309,11 +297,10 @@ const ComboItemCard = ({ item, theme }) => (
         {item.spiciness !== "not spicy" && (
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300
-            ${
-              theme === "light"
+            ${theme === "light"
                 ? "bg-red-100 text-red-800 group-hover:bg-red-200 group-hover:text-red-900"
                 : "bg-red-900/20 text-red-200 group-hover:bg-red-900/30"
-            }`}
+              }`}
           >
             {item.spiciness}
           </span>
@@ -321,11 +308,10 @@ const ComboItemCard = ({ item, theme }) => (
 
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300
-          ${
-            theme === "light"
+          ${theme === "light"
               ? "bg-purple-100 text-purple-800 group-hover:bg-purple-200 group-hover:text-purple-900"
               : "bg-purple-900/20 text-purple-200 group-hover:bg-purple-900/30"
-          }`}
+            }`}
         >
           {item.meal_course_type}
         </span>
@@ -341,15 +327,48 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
   const contentRef = useRef(null);
   const lastScrollTop = useRef(0);
   const scrollTimeout = useRef(null);
-
-  // Track scroll positions for each tab
   const scrollPositions = useRef({
     overview: 0,
     nutrition: 0,
     details: 0,
   });
 
-  // Reset scroll positions when modal is closed
+  // All hooks must be before any conditional returns
+  useEffect(() => {
+    const preventOverscroll = (e) => {
+      const element = contentRef.current;
+      if (!element) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = element;
+      const scrollingUp = e.touches[0].clientY > lastScrollTop.current;
+      const scrollingDown = e.touches[0].clientY < lastScrollTop.current;
+
+      // Prevent overscroll when at the top or bottom
+      if ((scrollingUp && scrollTop <= 0) ||
+        (scrollingDown && scrollTop + clientHeight >= scrollHeight)) {
+        e.preventDefault();
+      }
+
+      lastScrollTop.current = e.touches[0].clientY;
+    };
+
+    const handleTouchStart = (e) => {
+      lastScrollTop.current = e.touches[0].clientY;
+    };
+
+    const content = contentRef.current;
+    if (content) {
+      content.addEventListener('touchstart', handleTouchStart, { passive: true });
+      content.addEventListener('touchmove', preventOverscroll, { passive: false });
+
+      return () => {
+        content.removeEventListener('touchstart', handleTouchStart);
+        content.removeEventListener('touchmove', preventOverscroll);
+      };
+    }
+  }, []);
+
+  // Reset scroll positions effect
   useEffect(() => {
     if (!isOpen) {
       scrollPositions.current = {
@@ -364,7 +383,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
     }
   }, [isOpen]);
 
-  // Improved scroll detection with debouncing and hysteresis
+  // Scroll detection effect
   useEffect(() => {
     const handleScroll = () => {
       if (scrollTimeout.current) {
@@ -376,17 +395,13 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
         const threshold = 100;
         const hysteresis = 20;
 
-        // Save current scroll position for active tab
         scrollPositions.current[activeSection] = scrollTop;
 
-        // Update collapsed state
         if (!isScrolled && scrollTop > threshold + hysteresis) {
           setIsScrolled(true);
         } else if (isScrolled && scrollTop < threshold - hysteresis) {
           setIsScrolled(false);
         }
-
-        lastScrollTop.current = scrollTop;
       }, 10);
     };
 
@@ -403,24 +418,20 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
   }, [isScrolled, activeSection]);
 
   const handleSectionChange = (section) => {
-    // Save current scroll position before changing tabs
     if (contentRef.current) {
       scrollPositions.current[activeSection] = contentRef.current.scrollTop;
     }
 
     setActiveSection(section);
 
-    // Use requestAnimationFrame to ensure the new tab content is rendered
     requestAnimationFrame(() => {
       if (contentRef.current) {
         if (isScrolled) {
-          // If header is collapsed, ensure new tab starts with header collapsed
           contentRef.current.scrollTop = Math.max(
             120,
             scrollPositions.current[section]
           );
         } else {
-          // If header is expanded, maintain expanded state in new tab
           contentRef.current.scrollTop = Math.min(
             80,
             scrollPositions.current[section]
@@ -430,44 +441,19 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
     });
   };
 
-  // Early return after all hooks
+  // Single conditional return after all hooks
   if (!isOpen || !combo) return null;
 
-  const headerHeight = isScrolled ? 104 : 0; // 64px for compact header + 40px for navigation
-  const heroHeight = isScrolled ? 0 : 384; // 24rem
+  const headerHeight = isScrolled ? 104 : 0;
+  const heroHeight = isScrolled ? 0 : 384;
   const topSpacing = headerHeight;
-
+  const discountPercentage = combo.discount_pct || 0;
+  const heroImage = combo.combo_items[0]?.image_link;
   const tabs = [
     { id: "overview", label: "Overview", icon: Sparkles },
     { id: "nutrition", label: "Nutrition", icon: Flame },
     { id: "details", label: "Details", icon: Info },
   ];
-
-  useEffect(() => {
-    const preventPullToRefresh = (e) => {
-      e.preventDefault();
-    };
-
-    const content = contentRef.current;
-    if (content) {
-      content.addEventListener("touchstart", preventPullToRefresh, {
-        passive: false,
-      });
-      content.addEventListener("touchmove", preventPullToRefresh, {
-        passive: false,
-      });
-
-      return () => {
-        content.removeEventListener("touchstart", preventPullToRefresh);
-        content.removeEventListener("touchmove", preventPullToRefresh);
-      };
-    }
-  }, []);
-
-  if (!isOpen || !combo) return null;
-
-  const discountPercentage = combo.discount_pct || 0;
-  const heroImage = combo.combo_items[0]?.image_link;
 
   return (
     <AnimatePresence>
@@ -490,19 +476,20 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overscroll-none ${
-              theme === "light" ? "bg-white" : "bg-gray-900"
-            }`}
+            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overscroll-none ${theme === "light" ? "bg-white" : "bg-gray-900"
+              }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div
               ref={contentRef}
-              className="h-full overflow-y-auto overflow-x-hidden overscroll-none touch-pan-y"
+              className="h-full overflow-y-auto overflow-x-hidden overscroll-none touch-pan-y will-change-scroll no-scrollbar"
               style={{
                 height: "calc(100vh - 4rem)",
                 scrollPaddingTop: topSpacing,
                 overscrollBehavior: "none",
                 WebkitOverflowScrolling: "touch",
+                position: "relative", // Add this
+                isolation: "isolate",  // Add this
               }}
             >
               {/* Hero Section */}
@@ -544,10 +531,9 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                     <button
                       onClick={() => setIsLiked(!isLiked)}
                       className={`p-3 rounded-full backdrop-blur-sm transition-all
-                        ${
-                          isLiked
-                            ? "bg-red-500 text-white"
-                            : "bg-white/20 text-white hover:bg-white/30"
+                        ${isLiked
+                          ? "bg-red-500 text-white"
+                          : "bg-white/20 text-white hover:bg-white/30"
                         }`}
                     >
                       <Heart
@@ -597,9 +583,8 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
 
               {/* Sticky Header */}
               <motion.div
-                className={`sticky top-0 z-30 transform ${
-                  theme === "light" ? "bg-white" : "bg-gray-900"
-                }`}
+                className={`sticky top-0 z-30 transform ${theme === "light" ? "bg-white" : "bg-gray-900"
+                  }`}
                 animate={{
                   translateY: isScrolled ? 0 : -headerHeight,
                 }}
@@ -607,20 +592,18 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
               >
                 {/* Compact Header */}
                 <motion.div
-                  className={`border-b ${
-                    theme === "light" ? "border-gray-200" : "border-gray-700"
-                  }`}
+                  className={`border-b ${theme === "light" ? "border-gray-200" : "border-gray-700"
+                    }`}
                   animate={{ height: isScrolled ? "4.5rem" : 0 }}
                   style={{ overflow: "hidden" }}
                 >
                   <div className="relative h-full">
                     {/* Background with subtle gradient */}
                     <div
-                      className={`absolute inset-0 ${
-                        theme === "light"
-                          ? "bg-gradient-to-r from-white via-gray-50/50 to-white"
-                          : "bg-gradient-to-r from-gray-900 via-gray-800/50 to-gray-900"
-                      }`}
+                      className={`absolute inset-0 ${theme === "light"
+                        ? "bg-gradient-to-r from-white via-gray-50/50 to-white"
+                        : "bg-gradient-to-r from-gray-900 via-gray-800/50 to-gray-900"
+                        }`}
                     />
 
                     {/* Content */}
@@ -631,33 +614,31 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                         {combo.combo_items.some(
                           (item) => item.veg_or_non_veg === "veg"
                         ) && (
-                          <div
-                            className={`hidden sm:flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2
-            ${
-              theme === "light"
-                ? "border-green-500 bg-green-50"
-                : "border-green-400 bg-green-900/20"
-            }`}
-                          >
-                            <Leaf
-                              size={12}
-                              className={
-                                theme === "light"
-                                  ? "text-green-500"
-                                  : "text-green-400"
-                              }
-                            />
-                          </div>
-                        )}
+                            <div
+                              className={`hidden sm:flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2
+            ${theme === "light"
+                                  ? "border-green-500 bg-green-50"
+                                  : "border-green-400 bg-green-900/20"
+                                }`}
+                            >
+                              <Leaf
+                                size={12}
+                                className={
+                                  theme === "light"
+                                    ? "text-green-500"
+                                    : "text-green-400"
+                                }
+                              />
+                            </div>
+                          )}
 
                         {/* Title and Subtitle */}
                         <div className="min-w-0 flex-1">
                           <h3
-                            className={`text-base font-semibold truncate ${
-                              theme === "light"
-                                ? "text-gray-900"
-                                : "text-gray-100"
-                            }`}
+                            className={`text-base font-semibold truncate ${theme === "light"
+                              ? "text-gray-900"
+                              : "text-gray-100"
+                              }`}
                           >
                             {combo.combo_name}
                           </h3>
@@ -665,22 +646,20 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                             {/* Price info */}
                             <div className="flex items-baseline gap-2">
                               <span
-                                className={`text-sm font-bold ${
-                                  theme === "light"
-                                    ? "text-gray-900"
-                                    : "text-gray-100"
-                                }`}
+                                className={`text-sm font-bold ${theme === "light"
+                                  ? "text-gray-900"
+                                  : "text-gray-100"
+                                  }`}
                               >
                                 ₹{combo.discounted_cost}
                               </span>
                               {combo.discount_pct > 0 && (
                                 <>
                                   <span
-                                    className={`text-xs line-through ${
-                                      theme === "light"
-                                        ? "text-gray-500"
-                                        : "text-gray-400"
-                                    }`}
+                                    className={`text-xs line-through ${theme === "light"
+                                      ? "text-gray-500"
+                                      : "text-gray-400"
+                                      }`}
                                   >
                                     ₹{combo.cost}
                                   </span>
@@ -693,11 +672,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
 
                             {/* Divider */}
                             <span
-                              className={`hidden sm:inline-block h-4 w-px ${
-                                theme === "light"
-                                  ? "bg-gray-200"
-                                  : "bg-gray-700"
-                              }`}
+                              className={`hidden sm:inline-block h-4 w-px ${theme === "light"
+                                ? "bg-gray-200"
+                                : "bg-gray-700"
+                                }`}
                             />
 
                             {/* Additional info badges */}
@@ -705,11 +683,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               {combo.combo_type === "premium" && (
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
-                  ${
-                    theme === "light"
-                      ? "bg-amber-100 text-amber-800"
-                      : "bg-amber-900/20 text-amber-200"
-                  }`}
+                  ${theme === "light"
+                                      ? "bg-amber-100 text-amber-800"
+                                      : "bg-amber-900/20 text-amber-200"
+                                    }`}
                                 >
                                   <Award size={10} className="flex-shrink-0" />
                                   Premium
@@ -717,11 +694,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               )}
                               <span
                                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium
-                ${
-                  theme === "light"
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-blue-900/20 text-blue-200"
-                }`}
+                ${theme === "light"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-blue-900/20 text-blue-200"
+                                  }`}
                               >
                                 <Users size={10} className="flex-shrink-0" />
                                 2-3 People
@@ -741,20 +717,18 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                           transition={{ delay: 0.2 }}
                         >
                           <button
-                            className={`p-2 rounded-full transition-colors ${
-                              theme === "light"
-                                ? "hover:bg-gray-100 text-gray-600"
-                                : "hover:bg-gray-800 text-gray-300"
-                            }`}
+                            className={`p-2 rounded-full transition-colors ${theme === "light"
+                              ? "hover:bg-gray-100 text-gray-600"
+                              : "hover:bg-gray-800 text-gray-300"
+                              }`}
                           >
                             <Share2 size={18} />
                           </button>
                           <button
-                            className={`p-2 rounded-full transition-colors ${
-                              theme === "light"
-                                ? "hover:bg-gray-100 text-gray-600"
-                                : "hover:bg-gray-800 text-gray-300"
-                            }`}
+                            className={`p-2 rounded-full transition-colors ${theme === "light"
+                              ? "hover:bg-gray-100 text-gray-600"
+                              : "hover:bg-gray-800 text-gray-300"
+                              }`}
                           >
                             <BookmarkPlus size={18} />
                           </button>
@@ -763,13 +737,12 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                         {/* Primary actions */}
                         <button
                           onClick={() => setIsLiked(!isLiked)}
-                          className={`p-2 rounded-full transition-colors ${
-                            isLiked
-                              ? "bg-red-500 text-white"
-                              : theme === "light"
+                          className={`p-2 rounded-full transition-colors ${isLiked
+                            ? "bg-red-500 text-white"
+                            : theme === "light"
                               ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
                               : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          }`}
+                            }`}
                         >
                           <Heart
                             size={18}
@@ -778,11 +751,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                         </button>
                         <button
                           onClick={onClose}
-                          className={`p-2 rounded-full transition-colors ${
-                            theme === "light"
-                              ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          }`}
+                          className={`p-2 rounded-full transition-colors ${theme === "light"
+                            ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                            }`}
                         >
                           <X size={18} />
                         </button>
@@ -793,9 +765,8 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
 
                 {/* Navigation */}
                 <div
-                  className={`border-b ${
-                    theme === "light" ? "border-gray-200" : "border-gray-700"
-                  }`}
+                  className={`border-b ${theme === "light" ? "border-gray-200" : "border-gray-700"
+                    }`}
                 >
                   <div className="flex justify-between px-4 sm:px-6">
                     <div className="flex -mb-px space-x-2 sm:space-x-4">
@@ -865,11 +836,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                       {/* Combo Items Grid */}
                       <div className="space-y-4">
                         <h3
-                          className={`text-2xl font-semibold ${
-                            theme === "light"
-                              ? "text-gray-900"
-                              : "text-gray-100"
-                          }`}
+                          className={`text-2xl font-semibold ${theme === "light"
+                            ? "text-gray-900"
+                            : "text-gray-100"
+                            }`}
                         >
                           What's Included
                         </h3>
@@ -887,11 +857,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                       {/* Cuisines and Categories */}
                       <div className="space-y-4">
                         <h3
-                          className={`text-2xl font-semibold ${
-                            theme === "light"
-                              ? "text-gray-900"
-                              : "text-gray-100"
-                          }`}
+                          className={`text-2xl font-semibold ${theme === "light"
+                            ? "text-gray-900"
+                            : "text-gray-100"
+                            }`}
                         >
                           Cuisines & Categories
                         </h3>
@@ -906,11 +875,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               className={`px-4 py-2 rounded-full text-sm font-medium 
-        ${
-          theme === "light"
-            ? "bg-purple-100 text-purple-800"
-            : "bg-purple-900/20 text-purple-200"
-        }`}
+        ${theme === "light"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : "bg-purple-900/20 text-purple-200"
+                                }`}
                             >
                               {cuisine.charAt(0).toUpperCase() +
                                 cuisine.slice(1)}
@@ -928,11 +896,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               className={`px-4 py-2 rounded-full text-sm font-medium 
-        ${
-          theme === "light"
-            ? "bg-blue-100 text-blue-800"
-            : "bg-blue-900/20 text-blue-200"
-        }`}
+        ${theme === "light"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-blue-900/20 text-blue-200"
+                                }`}
                             >
                               {type.charAt(0).toUpperCase() + type.slice(1)}
                             </motion.span>
@@ -957,11 +924,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                         </div>
 
                         <h3
-                          className={`text-2xl font-semibold mb-6 relative z-10 ${
-                            theme === "light"
-                              ? "text-gray-900"
-                              : "text-gray-100"
-                          }`}
+                          className={`text-2xl font-semibold mb-6 relative z-10 ${theme === "light"
+                            ? "text-gray-900"
+                            : "text-gray-100"
+                            }`}
                         >
                           Nutrition Overview
                         </h3>
@@ -994,32 +960,29 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                             const level = items.includes("high")
                               ? "high"
                               : items.includes("medium")
-                              ? "medium"
-                              : "low";
+                                ? "medium"
+                                : "low";
                             return (
                               <div
                                 key={label}
-                                className={`p-4 rounded-xl ${
-                                  theme === "light" ? "bg-white" : "bg-gray-800"
-                                } backdrop-blur-sm`}
+                                className={`p-4 rounded-xl ${theme === "light" ? "bg-white" : "bg-gray-800"
+                                  } backdrop-blur-sm`}
                               >
                                 <p
-                                  className={`text-sm font-medium mb-1 ${
-                                    theme === "light"
-                                      ? "text-gray-600"
-                                      : "text-gray-400"
-                                  }`}
+                                  className={`text-sm font-medium mb-1 ${theme === "light"
+                                    ? "text-gray-600"
+                                    : "text-gray-400"
+                                    }`}
                                 >
                                   {label}
                                 </p>
                                 <p
-                                  className={`text-lg font-semibold capitalize ${
-                                    level === "high"
-                                      ? "text-red-600 dark:text-red-400"
-                                      : level === "medium"
+                                  className={`text-lg font-semibold capitalize ${level === "high"
+                                    ? "text-red-600 dark:text-red-400"
+                                    : level === "medium"
                                       ? "text-yellow-600 dark:text-yellow-400"
                                       : "text-green-600 dark:text-green-400"
-                                  }`}
+                                    }`}
                                 >
                                   {level}
                                 </p>
@@ -1033,11 +996,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                       {/* Update just the Detailed Nutrition Per Item section */}
                       <div className="space-y-6">
                         <h3
-                          className={`text-2xl font-semibold ${
-                            theme === "light"
-                              ? "text-gray-900"
-                              : "text-gray-100"
-                          }`}
+                          className={`text-2xl font-semibold ${theme === "light"
+                            ? "text-gray-900"
+                            : "text-gray-100"
+                            }`}
                         >
                           Detailed Nutrition Information
                         </h3>
@@ -1048,34 +1010,31 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             whileHover={{ y: -2 }}
-                            className={`p-6 rounded-xl ${
-                              theme === "light"
-                                ? "bg-gray-50 hover:bg-gray-100"
-                                : "bg-gray-800/50 hover:bg-gray-800"
-                            } transition-all duration-300`}
+                            className={`p-6 rounded-xl ${theme === "light"
+                              ? "bg-gray-50 hover:bg-gray-100"
+                              : "bg-gray-800/50 hover:bg-gray-800"
+                              } transition-all duration-300`}
                           >
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                               <h4
-                                className={`text-lg font-semibold ${
-                                  theme === "light"
-                                    ? "text-gray-900"
-                                    : "text-gray-100"
-                                }`}
+                                className={`text-lg font-semibold ${theme === "light"
+                                  ? "text-gray-900"
+                                  : "text-gray-100"
+                                  }`}
                               >
                                 {item.name_of_item}
                               </h4>
                               {/* Enhanced dietary type badge */}
                               <div
                                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-          ${
-            item.veg_or_non_veg === "veg"
-              ? theme === "light"
-                ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20"
-                : "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30"
-              : theme === "light"
-              ? "bg-red-100 text-red-700 ring-1 ring-red-600/20"
-              : "bg-red-500/20 text-red-300 ring-1 ring-red-500/30"
-          }`}
+          ${item.veg_or_non_veg === "veg"
+                                    ? theme === "light"
+                                      ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-600/20"
+                                      : "bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/30"
+                                    : theme === "light"
+                                      ? "bg-red-100 text-red-700 ring-1 ring-red-600/20"
+                                      : "bg-red-500/20 text-red-300 ring-1 ring-red-500/30"
+                                  }`}
                               >
                                 {item.veg_or_non_veg === "veg" ? (
                                   <>
@@ -1105,27 +1064,24 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               ].map(({ label, value }) => (
                                 <div
                                   key={label}
-                                  className={`p-3 rounded-lg ${
-                                    theme === "light"
-                                      ? "bg-white"
-                                      : "bg-gray-700"
-                                  }`}
+                                  className={`p-3 rounded-lg ${theme === "light"
+                                    ? "bg-white"
+                                    : "bg-gray-700"
+                                    }`}
                                 >
                                   <p
-                                    className={`text-xs font-medium ${
-                                      theme === "light"
-                                        ? "text-gray-500"
-                                        : "text-gray-400"
-                                    }`}
+                                    className={`text-xs font-medium ${theme === "light"
+                                      ? "text-gray-500"
+                                      : "text-gray-400"
+                                      }`}
                                   >
                                     {label}
                                   </p>
                                   <p
-                                    className={`text-sm font-semibold mt-1 capitalize ${
-                                      theme === "light"
-                                        ? "text-gray-900"
-                                        : "text-gray-100"
-                                    }`}
+                                    className={`text-sm font-semibold mt-1 capitalize ${theme === "light"
+                                      ? "text-gray-900"
+                                      : "text-gray-100"
+                                      }`}
                                   >
                                     {value || "N/A"}
                                   </p>
@@ -1138,11 +1094,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               {item.health_concious_option === "yes" && (
                                 <span
                                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-            ${
-              theme === "light"
-                ? "bg-green-100 text-green-700 ring-1 ring-green-600/20"
-                : "bg-green-500/20 text-green-300 ring-1 ring-green-500/30"
-            }`}
+            ${theme === "light"
+                                      ? "bg-green-100 text-green-700 ring-1 ring-green-600/20"
+                                      : "bg-green-500/20 text-green-300 ring-1 ring-green-500/30"
+                                    }`}
                                 >
                                   <Heart size={14} className="flex-shrink-0" />
                                   Health Conscious
@@ -1151,11 +1106,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               {item.is_keto_friendly === "yes" && (
                                 <span
                                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-            ${
-              theme === "light"
-                ? "bg-purple-100 text-purple-700 ring-1 ring-purple-600/20"
-                : "bg-purple-500/20 text-purple-300 ring-1 ring-purple-500/30"
-            }`}
+            ${theme === "light"
+                                      ? "bg-purple-100 text-purple-700 ring-1 ring-purple-600/20"
+                                      : "bg-purple-500/20 text-purple-300 ring-1 ring-purple-500/30"
+                                    }`}
                                 >
                                   <Flame size={14} className="flex-shrink-0" />
                                   Keto Friendly
@@ -1164,11 +1118,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               {item.is_low_gi === "yes" && (
                                 <span
                                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-            ${
-              theme === "light"
-                ? "bg-blue-100 text-blue-700 ring-1 ring-blue-600/20"
-                : "bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/30"
-            }`}
+            ${theme === "light"
+                                      ? "bg-blue-100 text-blue-700 ring-1 ring-blue-600/20"
+                                      : "bg-blue-500/20 text-blue-300 ring-1 ring-blue-500/30"
+                                    }`}
                                 >
                                   <TrendingUp
                                     size={14}
@@ -1186,9 +1139,8 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
 
                       {/* Allergen Information */}
                       <div
-                        className={`p-6 rounded-2xl ${
-                          theme === "light" ? "bg-amber-50" : "bg-amber-900/20"
-                        }`}
+                        className={`p-6 rounded-2xl ${theme === "light" ? "bg-amber-50" : "bg-amber-900/20"
+                          }`}
                       >
                         <div className="flex items-center gap-2 mb-4">
                           <AlertCircle
@@ -1199,11 +1151,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                             }
                           />
                           <h3
-                            className={`text-lg font-semibold ${
-                              theme === "light"
-                                ? "text-amber-800"
-                                : "text-amber-200"
-                            }`}
+                            className={`text-lg font-semibold ${theme === "light"
+                              ? "text-amber-800"
+                              : "text-amber-200"
+                              }`}
                           >
                             Allergen Information
                           </h3>
@@ -1218,20 +1169,18 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                                   className="flex items-start gap-2"
                                 >
                                   <span
-                                    className={`text-sm ${
-                                      theme === "light"
-                                        ? "text-amber-800"
-                                        : "text-amber-200"
-                                    }`}
+                                    className={`text-sm ${theme === "light"
+                                      ? "text-amber-800"
+                                      : "text-amber-200"
+                                      }`}
                                   >
                                     {item.name_of_item}:
                                   </span>
                                   <span
-                                    className={`text-sm font-medium ${
-                                      theme === "light"
-                                        ? "text-amber-900"
-                                        : "text-amber-100"
-                                    }`}
+                                    className={`text-sm font-medium ${theme === "light"
+                                      ? "text-amber-900"
+                                      : "text-amber-100"
+                                      }`}
                                   >
                                     Contains {item.allergens_present}
                                   </span>
@@ -1253,18 +1202,16 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                     >
                       {/* Dietary Preferences */}
                       <div
-                        className={`p-6 rounded-2xl ${
-                          theme === "light"
-                            ? "bg-gradient-to-br from-gray-50 to-gray-100/50"
-                            : "bg-gradient-to-br from-gray-800/50 to-gray-700/50"
-                        }`}
+                        className={`p-6 rounded-2xl ${theme === "light"
+                          ? "bg-gradient-to-br from-gray-50 to-gray-100/50"
+                          : "bg-gradient-to-br from-gray-800/50 to-gray-700/50"
+                          }`}
                       >
                         <h3
-                          className={`text-2xl font-semibold mb-6 ${
-                            theme === "light"
-                              ? "text-gray-900"
-                              : "text-gray-100"
-                          }`}
+                          className={`text-2xl font-semibold mb-6 ${theme === "light"
+                            ? "text-gray-900"
+                            : "text-gray-100"
+                            }`}
                         >
                           Dietary Information
                         </h3>
@@ -1309,29 +1256,26 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                           ].map(({ label, value }) => (
                             <div
                               key={label}
-                              className={`p-4 rounded-xl ${
-                                theme === "light" ? "bg-white" : "bg-gray-800"
-                              }`}
+                              className={`p-4 rounded-xl ${theme === "light" ? "bg-white" : "bg-gray-800"
+                                }`}
                             >
                               <p
-                                className={`text-sm font-medium ${
-                                  theme === "light"
-                                    ? "text-gray-600"
-                                    : "text-gray-400"
-                                }`}
+                                className={`text-sm font-medium ${theme === "light"
+                                  ? "text-gray-600"
+                                  : "text-gray-400"
+                                  }`}
                               >
                                 {label}
                               </p>
                               <p
-                                className={`text-lg font-semibold mt-1 ${
-                                  value
-                                    ? theme === "light"
-                                      ? "text-green-600"
-                                      : "text-green-400"
-                                    : theme === "light"
+                                className={`text-lg font-semibold mt-1 ${value
+                                  ? theme === "light"
+                                    ? "text-green-600"
+                                    : "text-green-400"
+                                  : theme === "light"
                                     ? "text-gray-400"
                                     : "text-gray-500"
-                                }`}
+                                  }`}
                               >
                                 {value ? "Yes" : "No"}
                               </p>
@@ -1343,11 +1287,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                       {/* Preparation Details */}
                       <div className="space-y-6">
                         <h3
-                          className={`text-2xl font-semibold ${
-                            theme === "light"
-                              ? "text-gray-900"
-                              : "text-gray-100"
-                          }`}
+                          className={`text-2xl font-semibold ${theme === "light"
+                            ? "text-gray-900"
+                            : "text-gray-100"
+                            }`}
                         >
                           Preparation Details
                         </h3>
@@ -1356,19 +1299,17 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                           <motion.div
                             whileHover={{ y: -2 }}
-                            className={`p-6 rounded-xl ${
-                              theme === "light"
-                                ? "bg-gradient-to-br from-blue-50 to-blue-100/50"
-                                : "bg-gradient-to-br from-blue-900/20 to-blue-800/20"
-                            }`}
+                            className={`p-6 rounded-xl ${theme === "light"
+                              ? "bg-gradient-to-br from-blue-50 to-blue-100/50"
+                              : "bg-gradient-to-br from-blue-900/20 to-blue-800/20"
+                              }`}
                           >
                             <div className="flex items-center gap-3 mb-4">
                               <div
-                                className={`p-2 rounded-lg ${
-                                  theme === "light"
-                                    ? "bg-blue-100"
-                                    : "bg-blue-800/40"
-                                }`}
+                                className={`p-2 rounded-lg ${theme === "light"
+                                  ? "bg-blue-100"
+                                  : "bg-blue-800/40"
+                                  }`}
                               >
                                 <Clock
                                   size={24}
@@ -1381,20 +1322,18 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               </div>
                               <div>
                                 <h4
-                                  className={`font-medium ${
-                                    theme === "light"
-                                      ? "text-blue-900"
-                                      : "text-blue-100"
-                                  }`}
+                                  className={`font-medium ${theme === "light"
+                                    ? "text-blue-900"
+                                    : "text-blue-100"
+                                    }`}
                                 >
                                   Total Preparation Time
                                 </h4>
                                 <p
-                                  className={`text-sm ${
-                                    theme === "light"
-                                      ? "text-blue-700"
-                                      : "text-blue-300"
-                                  }`}
+                                  className={`text-sm ${theme === "light"
+                                    ? "text-blue-700"
+                                    : "text-blue-300"
+                                    }`}
                                 >
                                   Includes cooking & plating
                                 </p>
@@ -1402,11 +1341,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                             </div>
                             <div className="flex items-baseline gap-2">
                               <span
-                                className={`text-3xl font-bold ${
-                                  theme === "light"
-                                    ? "text-blue-700"
-                                    : "text-blue-300"
-                                }`}
+                                className={`text-3xl font-bold ${theme === "light"
+                                  ? "text-blue-700"
+                                  : "text-blue-300"
+                                  }`}
                               >
                                 {Math.max(
                                   ...combo.combo_items.map(
@@ -1416,11 +1354,10 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                                 )}
                               </span>
                               <span
-                                className={`text-lg ${
-                                  theme === "light"
-                                    ? "text-blue-600"
-                                    : "text-blue-400"
-                                }`}
+                                className={`text-lg ${theme === "light"
+                                  ? "text-blue-600"
+                                  : "text-blue-400"
+                                  }`}
                               >
                                 minutes
                               </span>
@@ -1429,19 +1366,17 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
 
                           <motion.div
                             whileHover={{ y: -2 }}
-                            className={`p-6 rounded-xl ${
-                              theme === "light"
-                                ? "bg-gradient-to-br from-purple-50 to-purple-100/50"
-                                : "bg-gradient-to-br from-purple-900/20 to-purple-800/20"
-                            }`}
+                            className={`p-6 rounded-xl ${theme === "light"
+                              ? "bg-gradient-to-br from-purple-50 to-purple-100/50"
+                              : "bg-gradient-to-br from-purple-900/20 to-purple-800/20"
+                              }`}
                           >
                             <div className="flex items-center gap-3 mb-4">
                               <div
-                                className={`p-2 rounded-lg ${
-                                  theme === "light"
-                                    ? "bg-purple-100"
-                                    : "bg-purple-800/40"
-                                }`}
+                                className={`p-2 rounded-lg ${theme === "light"
+                                  ? "bg-purple-100"
+                                  : "bg-purple-800/40"
+                                  }`}
                               >
                                 <Users
                                   size={24}
@@ -1454,20 +1389,18 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                               </div>
                               <div>
                                 <h4
-                                  className={`font-medium ${
-                                    theme === "light"
-                                      ? "text-purple-900"
-                                      : "text-purple-100"
-                                  }`}
+                                  className={`font-medium ${theme === "light"
+                                    ? "text-purple-900"
+                                    : "text-purple-100"
+                                    }`}
                                 >
                                   Recommended Serving
                                 </h4>
                                 <p
-                                  className={`text-sm ${
-                                    theme === "light"
-                                      ? "text-purple-700"
-                                      : "text-purple-300"
-                                  }`}
+                                  className={`text-sm ${theme === "light"
+                                    ? "text-purple-700"
+                                    : "text-purple-300"
+                                    }`}
                                 >
                                   Perfect portion size
                                 </p>
@@ -1475,20 +1408,18 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                             </div>
                             <div className="flex items-baseline gap-2">
                               <span
-                                className={`text-3xl font-bold ${
-                                  theme === "light"
-                                    ? "text-purple-700"
-                                    : "text-purple-300"
-                                }`}
+                                className={`text-3xl font-bold ${theme === "light"
+                                  ? "text-purple-700"
+                                  : "text-purple-300"
+                                  }`}
                               >
                                 2-3
                               </span>
                               <span
-                                className={`text-lg ${
-                                  theme === "light"
-                                    ? "text-purple-600"
-                                    : "text-purple-400"
-                                }`}
+                                className={`text-lg ${theme === "light"
+                                  ? "text-purple-600"
+                                  : "text-purple-400"
+                                  }`}
                               >
                                 people
                               </span>
@@ -1499,21 +1430,19 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                         {/* Meal Course Flow */}
                         <div className="mt-8">
                           <h4
-                            className={`text-xl font-semibold mb-6 ${
-                              theme === "light"
-                                ? "text-gray-900"
-                                : "text-gray-100"
-                            }`}
+                            className={`text-xl font-semibold mb-6 ${theme === "light"
+                              ? "text-gray-900"
+                              : "text-gray-100"
+                              }`}
                           >
                             Recommended Serving Order
                           </h4>
                           <div className="relative">
                             <div
-                              className={`absolute left-6 top-0 bottom-0 w-0.5 ${
-                                theme === "light"
-                                  ? "bg-gray-200"
-                                  : "bg-gray-700"
-                              }`}
+                              className={`absolute left-6 top-0 bottom-0 w-0.5 ${theme === "light"
+                                ? "bg-gray-200"
+                                : "bg-gray-700"
+                                }`}
                             />
                             {combo.combo_items.map((item, index) => (
                               <motion.div
@@ -1524,64 +1453,57 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                                 className="relative flex items-start gap-6 pb-8"
                               >
                                 <div
-                                  className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center ${
-                                    theme === "light"
-                                      ? "bg-white shadow-md"
-                                      : "bg-gray-800"
-                                  }`}
+                                  className={`relative z-10 w-12 h-12 rounded-full flex items-center justify-center ${theme === "light"
+                                    ? "bg-white shadow-md"
+                                    : "bg-gray-800"
+                                    }`}
                                 >
                                   <span
-                                    className={`text-lg font-semibold ${
-                                      theme === "light"
-                                        ? "text-gray-900"
-                                        : "text-gray-100"
-                                    }`}
+                                    className={`text-lg font-semibold ${theme === "light"
+                                      ? "text-gray-900"
+                                      : "text-gray-100"
+                                      }`}
                                   >
                                     {index + 1}
                                   </span>
                                 </div>
                                 <div
-                                  className={`flex-1 p-6 rounded-xl ${
-                                    theme === "light"
-                                      ? "bg-gray-50"
-                                      : "bg-gray-800/50"
-                                  }`}
+                                  className={`flex-1 p-6 rounded-xl ${theme === "light"
+                                    ? "bg-gray-50"
+                                    : "bg-gray-800/50"
+                                    }`}
                                 >
                                   <h5
-                                    className={`text-lg font-medium mb-2 ${
-                                      theme === "light"
-                                        ? "text-gray-900"
-                                        : "text-gray-100"
-                                    }`}
+                                    className={`text-lg font-medium mb-2 ${theme === "light"
+                                      ? "text-gray-900"
+                                      : "text-gray-100"
+                                      }`}
                                   >
                                     {item.name_of_item}
                                   </h5>
                                   <p
-                                    className={`text-sm ${
-                                      theme === "light"
-                                        ? "text-gray-600"
-                                        : "text-gray-400"
-                                    }`}
+                                    className={`text-sm ${theme === "light"
+                                      ? "text-gray-600"
+                                      : "text-gray-400"
+                                      }`}
                                   >
                                     {item.meal_course_type}
                                   </p>
                                   <div className="flex flex-wrap gap-2 mt-3">
                                     <span
-                                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                        theme === "light"
-                                          ? "bg-blue-100 text-blue-800"
-                                          : "bg-blue-900/20 text-blue-200"
-                                      }`}
+                                      className={`px-3 py-1 rounded-full text-xs font-medium ${theme === "light"
+                                        ? "bg-blue-100 text-blue-800"
+                                        : "bg-blue-900/20 text-blue-200"
+                                        }`}
                                     >
                                       {item.cuisine}
                                     </span>
                                     {item.spiciness !== "not spicy" && (
                                       <span
-                                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                          theme === "light"
-                                            ? "bg-red-100 text-red-800"
-                                            : "bg-red-900/20 text-red-200"
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium ${theme === "light"
+                                          ? "bg-red-100 text-red-800"
+                                          : "bg-red-900/20 text-red-200"
+                                          }`}
                                       >
                                         {item.spiciness}
                                       </span>
