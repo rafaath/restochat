@@ -443,6 +443,27 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
     { id: "details", label: "Details", icon: Info },
   ];
 
+  useEffect(() => {
+    const preventPullToRefresh = (e) => {
+      e.preventDefault();
+    };
+
+    const content = contentRef.current;
+    if (content) {
+      content.addEventListener("touchstart", preventPullToRefresh, {
+        passive: false,
+      });
+      content.addEventListener("touchmove", preventPullToRefresh, {
+        passive: false,
+      });
+
+      return () => {
+        content.removeEventListener("touchstart", preventPullToRefresh);
+        content.removeEventListener("touchmove", preventPullToRefresh);
+      };
+    }
+  }, []);
+
   if (!isOpen || !combo) return null;
 
   const discountPercentage = combo.discount_pct || 0;
@@ -455,7 +476,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" // Added padding here
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overscroll-none"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -469,22 +490,24 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] ${
+            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overscroll-none ${
               theme === "light" ? "bg-white" : "bg-gray-900"
-            }`} // Added my-4/6 spacing and adjusted max-height
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
             <div
               ref={contentRef}
-              className="h-full overflow-y-auto overflow-x-hidden no-scrollbar"
+              className="h-full overflow-y-auto overflow-x-hidden overscroll-none touch-pan-y"
               style={{
-                height: "calc(100vh - 4rem)", // Adjusted for consistent spacing
+                height: "calc(100vh - 4rem)",
                 scrollPaddingTop: topSpacing,
+                overscrollBehavior: "none",
+                WebkitOverflowScrolling: "touch",
               }}
             >
               {/* Hero Section */}
               <motion.div
-                className="relative"
+                className="relative touch-none"
                 animate={{
                   height: heroHeight,
                   marginBottom: isScrolled ? 0 : 0,
