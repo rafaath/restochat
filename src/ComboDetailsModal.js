@@ -455,7 +455,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6" // Added padding here
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -469,15 +469,16 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", duration: 0.5 }}
-            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden m-4 max-h-[90vh] no-scrollbar
-              ${theme === "light" ? "bg-white" : "bg-gray-900"}`}
+            className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden my-4 sm:my-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] ${
+              theme === "light" ? "bg-white" : "bg-gray-900"
+            }`} // Added my-4/6 spacing and adjusted max-height
             onClick={(e) => e.stopPropagation()}
           >
             <div
               ref={contentRef}
               className="h-full overflow-y-auto overflow-x-hidden no-scrollbar"
               style={{
-                height: "calc(90vh)",
+                height: "calc(100vh - 4rem)", // Adjusted for consistent spacing
                 scrollPaddingTop: topSpacing,
               }}
             >
@@ -811,7 +812,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                     >
                       {/* Quick Stats */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <NutritionBadge
+                        {/* <NutritionBadge
                           label="Best Selling"
                           value={`${
                             combo.combo_items[0]?.number_of_people_rated ||
@@ -819,7 +820,7 @@ const ComboDetailsModal = ({ isOpen, onClose, combo, theme = "light" }) => {
                           }+ orders`}
                           icon={TrendingUp}
                           theme={theme}
-                        />
+                        /> */}
                         <NutritionBadge
                           label="Preparation Time"
                           value={`${Math.max(
