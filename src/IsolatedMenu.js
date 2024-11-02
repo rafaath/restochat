@@ -124,58 +124,6 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
   });
 
 
-  // Optimized animation configuration
-  const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.15 } }
-  };
-
-  const menuVariants = {
-    hidden: {
-      y: '100%',
-      transition: {
-        duration: 0.2,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    },
-    visible: {
-      y: 0,
-      transition: {
-        duration: 0.2,
-        ease: [0.4, 0, 0.2, 1]
-      }
-    },
-    exit: {
-      y: '100%',
-      transition: {
-        duration: 0.15,
-        ease: [0.4, 0, 1, 1]
-      }
-    }
-  };
-  // Pre-compute categorized items
-  const categorizedItems = useMemo(() => {
-    if (!menuItems) return {};
-    return menuItems.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = [];
-      }
-      acc[item.category].push(item);
-      return acc;
-    }, {});
-  }, [menuItems]);
-
-  // Pre-filter items
-  const filteredItems = useMemo(() => {
-    if (!menuItems) return [];
-    return menuItems.filter(item => {
-      if (activeFilters.veg && item.veg_or_non_veg !== 'veg') return false;
-      if (activeFilters.nonVeg && item.veg_or_non_veg !== 'non-veg') return false;
-      if (activeFilters.highRated && (!item.rating || item.rating < 4.0)) return false;
-      return true;
-    });
-  }, [menuItems, activeFilters]);
-
   const [showNotification, setShowNotification] = useState(false);
   const getItemQuantity = useCallback((itemId) => {
     const cartItem = cart.find(item => item.item_id === itemId);
@@ -188,6 +136,27 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
     exit: { opacity: 0, y: -50, x: '-50%' },
   };
 
+  const menuVariants = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+      transition: { duration: 0.2 }
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "tween",
+        duration: 0.3,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      y: 20,
+      transition: { duration: 0.2 }
+    }
+  };
 
   // Pre-process menu items on mount
   useEffect(() => {
@@ -232,6 +201,16 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
     }
   }, [isOpen, menuItems]);
 
+  const filteredItems = useMemo(() => {
+    if (!menuItems) return [];
+    return menuItems.filter(item => {
+      const matchesVeg = !activeFilters.veg || item.veg_or_non_veg === 'veg';
+      const matchesNonVeg = !activeFilters.nonVeg || item.veg_or_non_veg === 'non-veg';
+      const matchesHighRated = !activeFilters.highRated || (item.rating && item.rating >= 4.0);
+
+      return matchesVeg && matchesNonVeg && matchesHighRated;
+    });
+  }, [menuItems, activeFilters]);
 
   const searchFilteredItems = useMemo(() => {
     return filteredItems.filter(item =>
@@ -241,6 +220,16 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
       (item.cuisine && item.cuisine.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [filteredItems, searchTerm]);
+
+  const categorizedItems = useMemo(() => {
+    return filteredItems.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {});
+  }, [filteredItems]);
 
   const cuisines = useMemo(() => {
     return [...new Set(filteredItems.map(item => item.cuisine).filter(Boolean))];
@@ -290,105 +279,42 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
 
 
   const renderSearchView = () => {
-    const hasSearchResults = searchTerm.length > 0 && searchFilteredItems.length > 0;
-    const noResults = searchTerm.length > 0 && searchFilteredItems.length === 0;
-    const recentSearches = ['Burger', 'Pizza', 'Pasta', 'Biryani']; // You can make this dynamic with localStorage
-
     return (
       <div className="space-y-6">
-        {/* Enhanced Search Bar */}
         <div className="relative">
-          <div className={`relative flex items-center transition-all duration-300 ${searchTerm ? 'shadow-lg' : 'shadow-md'}`}>
-            <Search className="absolute left-4 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search dishes, cuisines, or ingredients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full p-4 pl-12 rounded-2xl transition-all duration-300 ${theme === 'light'
-                ? 'bg-white text-gray-800 focus:bg-gray-50'
-                : 'bg-gray-800 text-white focus:bg-gray-700'
-                } outline-none focus:ring-2 focus:ring-blue-500`}
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-4 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-              >
-                <X size={16} className="text-gray-500" />
-              </button>
-            )}
-          </div>
+          <input
+            type="text"
+            placeholder="Search menu..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={`w-full p-2 pl-10 rounded-full ${theme === 'light' ? 'bg-gray-100 text-gray-800' : 'bg-gray-800 text-white'
+              }`}
+          />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
-
-        {/* Quick Filters - Show only when not searching */}
-        {!searchTerm && (
-          <div className="space-y-6">
-            {/* Popular Searches */}
-            <div>
-              <h3 className={`text-lg font-semibold mb-3 ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>
-                Popular Searches
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {['Chicken Biryani', 'Paneer Tikka', 'Pizza', 'Ice Cream', 'Burger'].map((term) => (
-                  <motion.button
-                    key={term}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSearchTerm(term)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${theme === 'light'
-                      ? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                      : 'bg-gray-800 text-white hover:bg-gray-700'
-                      }`}
-                  >
-                    <Search size={14} />
-                    {term}
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        )}
-
-        {/* Search Results */}
-        {hasSearchResults && (
-          <div className="space-y-4">
-            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-              Found {searchFilteredItems.length} results for "{searchTerm}"
-            </p>
-            {searchFilteredItems.map(item => (
-              <motion.div
-                key={item.item_id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="w-full"
-              >
-                {renderSearchItemCard(item, true)}
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* No Results State */}
-        {noResults && (
-          <div className="text-center py-8 space-y-4">
-            <AlertCircle size={48} className="mx-auto text-gray-400" />
-            <h3 className={`text-lg font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
-              No results found
-            </h3>
-            <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
-              Try adjusting your search or browse our categories
-            </p>
-            <button
-              onClick={() => setSearchTerm('')}
-              className="text-blue-500 font-medium hover:underline"
+        <div className="flex flex-wrap gap-2">
+          {cuisines.map(cuisine => (
+            <motion.button
+              key={cuisine}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${searchTerm === cuisine
+                ? 'bg-blue-500 text-white'
+                : theme === 'light' ? 'bg-gray-200 text-gray-800' : 'bg-gray-700 text-white'
+                }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setSearchTerm(cuisine)}
             >
-              Clear search
-            </button>
-          </div>
-        )}
+              {cuisine}
+            </motion.button>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {searchFilteredItems.map(item => (
+            <div key={item.item_id} className="w-full">
+              {renderSearchItemCard(item, true)}
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
@@ -712,7 +638,7 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
   );
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {isOpen && (
         <motion.div
           className="fixed inset-0 z-50"
@@ -720,37 +646,27 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
           animate="visible"
           exit="exit"
           variants={menuVariants}
-          style={{
-            willChange: 'transform',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden'
-          }}
         >
           <div
-            className="absolute inset-0 bg-black/50"
+            className="absolute inset-0 bg-black bg-opacity-50"
             onClick={onClose}
-            style={{
-              willChange: 'opacity',
-              backfaceVisibility: 'hidden'
-            }}
+            style={{ willChange: 'opacity' }}
           />
           <motion.div
-            className={`absolute inset-x-0 bottom-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-900'} rounded-t-3xl overflow-hidden`}
+            className={`absolute inset-x-0 bottom-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-900'
+              } rounded-t-3xl overflow-hidden`}
             style={{
               height: 'calc(100% - 1rem)',
               willChange: 'transform',
-              transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden',
-              perspective: 1000,
-              WebkitPerspective: 1000
+              backfaceVisibility: 'hidden'
             }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{
               type: "tween",
-              duration: 0.2,
-              ease: [0.4, 0, 0.2, 1]
+              duration: 0.3,
+              ease: "easeOut"
             }}
           >
             <div className="h-full flex flex-col">
@@ -831,5 +747,19 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
   );
 };
 
+// const TabButton = ({ icon: Icon, text, isActive, onClick }) => (
+//   <motion.button
+//     whileHover={{ scale: 1.05 }}
+//     whileTap={{ scale: 0.95 }}
+//     onClick={onClick}
+//     className={`flex items-center space-x-2 px-4 py-2 rounded-full ${isActive
+//       ? 'bg-blue-500 text-white'
+//       : 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+//       }`}
+//   >
+//     <Icon size={20} />
+//     <span>{text}</span>
+//   </motion.button>
+// );
 
 export default React.memo(IsolatedMenu);

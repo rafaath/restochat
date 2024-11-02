@@ -1388,15 +1388,15 @@ const MenuRecommendationSystem = () => {
                   {/* Add a sign out button */}
                   <button className='text-xs' onClick={() => window.Clerk.signOut()}>Sign Out</button>
                   {/* <IconButton 
-                icon={theme === 'light' ? Moon : Sun}
-                onClick={toggleTheme}
-                label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-              />
-              <IconButton 
-                icon={Settings}
-                onClick={() => setIsSettingsOpen(true)}
-                label="Open settings"
-              /> */}
+                      icon={theme === 'light' ? Moon : Sun}
+                      onClick={toggleTheme}
+                      label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                    />
+                    <IconButton 
+                      icon={Settings}
+                      onClick={() => setIsSettingsOpen(true)}
+                      label="Open settings"
+                    /> */}
                 </div>
               </div>
             </div>
@@ -1530,8 +1530,8 @@ const MenuRecommendationSystem = () => {
                   }}
                   transition={{ duration: 0.2 }}
                   className={`rounded-full ${theme === 'light'
-                      ? 'bg-gray-100 hover:bg-gray-50'
-                      : 'bg-gray-800 hover:bg-gray-700'
+                    ? 'bg-gray-100 hover:bg-gray-50'
+                    : 'bg-gray-800 hover:bg-gray-700'
                     } ${isWaitingForResponse ? 'opacity-50' : ''}`}
                 >
                   <input
@@ -1547,8 +1547,8 @@ const MenuRecommendationSystem = () => {
                     disabled={isWaitingForResponse}
                     placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
                     className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
-                        ? 'bg-transparent text-gray-800 placeholder-gray-500'
-                        : 'bg-transparent text-white placeholder-gray-400'
+                      ? 'bg-transparent text-gray-800 placeholder-gray-500'
+                      : 'bg-transparent text-white placeholder-gray-400'
                       } ${isWaitingForResponse ? 'cursor-not-allowed' : ''}`}
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
@@ -1559,10 +1559,10 @@ const MenuRecommendationSystem = () => {
                       onClick={handleVoiceInput}
                       disabled={isWaitingForResponse}
                       className={`p-2 rounded-full transition-colors ${isListening
-                          ? 'bg-red-500 text-white'
-                          : theme === 'light'
-                            ? 'bg-white text-gray-600 hover:bg-gray-50'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        ? 'bg-red-500 text-white'
+                        : theme === 'light'
+                          ? 'bg-white text-gray-600 hover:bg-gray-50'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         } ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <Mic size={18} />
