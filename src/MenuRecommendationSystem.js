@@ -5,6 +5,8 @@ import {
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
   ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle, Moon, Sun, Settings,
 } from 'lucide-react';
+import axios from 'axios';
+import { useAuth } from '@clerk/clerk-react';
 import {
   Dialog,
   DialogContent,
@@ -157,7 +159,7 @@ const MenuRecommendationSystem = () => {
 
   const [selectedItemFromConversation, setSelectedItemFromConversation] = useState(null);
 
-
+  const { getToken } = useAuth();
   const mainContentRef = useRef(null);
 
   const [isRollTheDiceOpen, setIsRollTheDiceOpen] = useState(false);
@@ -528,6 +530,8 @@ const MenuRecommendationSystem = () => {
     const searchQuery = query.trim();
     if (!searchQuery || isWaitingForResponse) return;
 
+
+
     setActiveTab('chat');
     setConversations(prev => [...prev, { query: searchQuery, response: null, items: [] }]);
     setIsWaitingForResponse(true);
@@ -539,13 +543,21 @@ const MenuRecommendationSystem = () => {
 
     const pollForResponse = async () => {
       try {
-        let url = `https://menubot-backend.onrender.com/chat/?query=${encodeURIComponent(searchQuery)}&search_engine=vector`;
+        let url = `/chat/?query=${encodeURIComponent(searchQuery)}&search_engine=vector`;
         if (chatId) {
           url += `&chat_id=${chatId}`;
         }
 
-        const response = await fetch(url);
-        const data = await response.json();
+        const token = await getToken();
+
+        const response = await axios.get(url, {
+          baseURL: 'https://nomnom.cialabs.org',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log("nig", response);
+        const data = response.data;
 
         if (!chatId && data.chat_id) {
           setChatId(data.chat_id);
@@ -594,7 +606,15 @@ const MenuRecommendationSystem = () => {
     setQuery('');
     setSelectedPrompt(null);
     setIsPromptsExpanded(false);
-  }, [query, chatId, setChatId, setConversations, setIsLoading, setIsPromptsExpanded]);
+  }, [
+    query,
+    chatId,
+    setChatId,
+    setConversations,
+    setIsLoading,
+    setIsPromptsExpanded,
+  ]);
+
 
 
 
