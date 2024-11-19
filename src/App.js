@@ -4,7 +4,7 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import MenuRecommendationSystem from './MenuRecommendationSystem'; // Import your main component
 
 // const clerkPubKey = process.env.REACT_APP_CLERK_PUBLISHABLE_KEY;
-const clerkPubKey = "pk_test_ZGVjaWRpbmctcGlyYW5oYS03NS5jbGVyay5hY2NvdW50cy5kZXYk";
+const clerkPubKey = "pk_test_YWRhcHRpbmctamFja2FsLTQ4LmNsZXJrLmFjY291bnRzLmRldiQ";
 if (!clerkPubKey) {
   throw new Error("Missing Clerk Publishable Key");
 }
@@ -14,21 +14,21 @@ function App() {
     <BrowserRouter>
       <ClerkProvider publishableKey={clerkPubKey}>
         <Routes>
-          <Route 
-            path="/sign-up/*" 
+          <Route
+            path="/sign-up/*"
             element={
               <div style={styles.centeredWrapper}>
                 <SignUp routing="path" path="/sign-up" />
               </div>
-            } 
+            }
           />
-          <Route 
-            path="/sign-in/*" 
+          <Route
+            path="/sign-in/*"
             element={
               <div style={styles.centeredWrapper}>
                 <SignIn routing="path" path="/sign-in" />
               </div>
-            } 
+            }
           />
           <Route
             path="/"
