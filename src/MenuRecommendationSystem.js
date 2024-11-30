@@ -1859,11 +1859,36 @@ const MenuRecommendationSystem = () => {
               ) : searchResults.length > 0 ? (
                 renderSearchResults()
               ) : (
-                <div className={`p-8 text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'
-                  }`}>
-                  <div className="mb-2">No items found for "{query}"</div>
-                  <div className="text-sm">
-                    Try searching for dishes, ingredients, or cuisines
+                <div className={`p-8 text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <div className="max-w-sm mx-auto">
+                    <div className="mb-4">
+                      <Search size={48} className="mx-auto mb-4 opacity-40" />
+                      <div className="mb-2 text-lg font-semibold">No items found for "{query}"</div>
+                      <p className="text-sm mb-6 opacity-75">
+                        But don't worry! Our AI assistant can help you find exactly what you're looking for.
+                      </p>
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        handleSearch();  // This will trigger the AI chat
+                        setIsSearchFocused(false);  // Close the search overlay
+                      }}
+                      className={`flex items-center justify-center space-x-2 w-full px-6 py-3 rounded-full shadow-md ${theme === 'light'
+                          ? 'bg-blue-500 text-white hover:bg-blue-600'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                        } transition-colors duration-200`}
+                    >
+                      <MessageCircle size={18} />
+                      <span>Ask AI Assistant</span>
+                    </motion.button>
+
+                    <div className={`mt-4 text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'
+                      }`}>
+                      Try asking about ingredients, taste, or dietary preferences!
+                    </div>
                   </div>
                 </div>
               )}
