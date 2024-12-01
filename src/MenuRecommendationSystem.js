@@ -127,6 +127,42 @@ const MenuRecommendationSystem = () => {
   const [activeTab, setActiveTab] = useState('home');
 
 
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      setIsKeyboardVisible(true);
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      document.body.style.overflow = 'hidden';
+      mainContentRef.current.style.overflow = 'hidden';
+    };
+
+    const handleBlur = () => {
+      setIsKeyboardVisible(false);
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.overflow = '';
+      mainContentRef.current.style.overflow = 'auto';
+      window.scrollTo(0, 0);
+    };
+
+    const input = searchInputRef.current;
+    if (input) {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    }
+
+    return () => {
+      if (input) {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      }
+    };
+  }, []);
+
   // ... (existing code)
 
   // const handleItemClick = (item) => {
@@ -1502,17 +1538,17 @@ const MenuRecommendationSystem = () => {
 
           // Unt's className
           <footer
-            className={`fixed bottom-0 left-0 right-0 z-[9999] border-t ${theme === 'light'
-              ? 'bg-white/95 border-gray-200'
-              : 'bg-gray-900/95 border-gray-800'
+            ref={footerRef}
+            className={`fixed bottom-0 left-0 right-0 z-[99999] border-t ${theme === 'light'
+                ? 'bg-white/95 border-gray-200'
+                : 'bg-gray-900/95 border-gray-800'
               } backdrop-blur-lg transition-all duration-300 shadow-lg`}
             style={{
-              paddingBottom: 'env(safe-area-inset-bottom)',
               position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              transform: 'translateZ(0)' // Force GPU acceleration
+              bottom: '0',
+              width: '100%',
+              willChange: 'transform',
+              transform: 'translateZ(0)'
             }}
           >
             <AnimatePresence>
@@ -1580,12 +1616,19 @@ const MenuRecommendationSystem = () => {
                         setSelectedPrompt(null);
                       }
                     }}
+                    onFocus={(e) => {
+                      e.target.scrollIntoView({ behavior: 'smooth' });
+                    }}
                     disabled={isWaitingForResponse}
                     placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
                     className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
-                      ? 'bg-transparent text-gray-800 placeholder-gray-500'
-                      : 'bg-transparent text-white placeholder-gray-400'
+                        ? 'bg-transparent text-gray-800 placeholder-gray-500'
+                        : 'bg-transparent text-white placeholder-gray-400'
                       } ${isWaitingForResponse ? 'cursor-not-allowed' : ''}`}
+                    style={{
+                      position: isKeyboardVisible ? 'relative' : 'static',
+                      zIndex: isKeyboardVisible ? 1000 : 'auto'
+                    }}
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
                     <motion.button
@@ -1770,34 +1813,43 @@ const MenuRecommendationSystem = () => {
       <style jsx global>{`
   :root {
     --vh: 1vh;
+    touch-action: none;
   }
 
   html, body {
-    overflow: hidden;
     position: fixed;
     width: 100%;
-    height: 100%;
+    max-height: -webkit-fill-available;
+    overflow: hidden;
   }
 
   .app-container {
-    height: 100%;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     overflow: hidden;
+    height: 100vh;
+    height: -webkit-fill-available;
   }
 
   main {
-    height: 100%;
-    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior: none;
   }
 
-  input, textarea {
-    font-size: 16px; /* Prevents iOS zoom */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 `}</style>
     </div>
