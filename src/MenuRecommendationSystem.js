@@ -1305,10 +1305,47 @@ const MenuRecommendationSystem = () => {
 
   const footerRef = useRef(null);
 
+  const appContainerRef = useRef(null);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  // Add keyboard detection logic
+  useEffect(() => {
+    const handleFocus = () => {
+      setKeyboardOpen(true);
+      // Delay scrolling to input to ensure keyboard is fully shown
+      setTimeout(() => {
+        searchInputRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
+
+    const handleBlur = () => {
+      setKeyboardOpen(false);
+      // Reset scroll position when keyboard closes
+      window.scrollTo(0, 0);
+    };
+
+    const input = searchInputRef.current;
+    if (input) {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    }
+
+    return () => {
+      if (input) {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      }
+    };
+  }, []);
+
+  // Update the resize handler to account for keyboard
   useEffect(() => {
     const setAppHeight = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+      // Only update height when keyboard is closed
+      if (!keyboardOpen) {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+      }
     };
 
     const handleResize = () => {
@@ -1329,7 +1366,7 @@ const MenuRecommendationSystem = () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
     };
-  }, []);
+  }, [keyboardOpen]);
 
 
 
@@ -1368,10 +1405,12 @@ const MenuRecommendationSystem = () => {
 
 
   return (
-    <div className={`app-container h-screen flex flex-col overflow-hidden ${theme === 'light'
-      ? 'bg-gradient-to-br from-gray-100 to-gray-200'
-      : 'bg-gradient-to-br from-gray-900 to-gray-800'
-      }`}>
+    <div
+      className={`app-container h-screen flex flex-col ${theme === 'light'
+        ? 'bg-gradient-to-br from-gray-100 to-gray-200'
+        : 'bg-gradient-to-br from-gray-900 to-gray-800'
+        }`}
+    >
       <AnimatePresence>
         {showWelcome && (
           <WelcomeScreen onGetStarted={handleGetStarted} theme={theme} />
@@ -1381,7 +1420,7 @@ const MenuRecommendationSystem = () => {
       {!showWelcome && (
         <>
           <header
-            className={`flex-shrink-0 z-50 transition-all duration-300 ${theme === 'light'
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${theme === 'light'
               ? 'bg-white bg-opacity-90 text-gray-800'
               : 'bg-gray-900 bg-opacity-90 text-white'
               } backdrop-blur-sm`}
@@ -1438,9 +1477,16 @@ const MenuRecommendationSystem = () => {
             </div>
           </div> */}
 
+
           <main
             ref={mainContentRef}
-            className="flex-grow overflow-y-auto no-scrollbar"
+            className={`
+    flex-1 
+    overflow-y-auto 
+    mt-14 
+    pb-[calc(var(--footer-height)+env(safe-area-inset-bottom,0px)+1.5rem)] 
+    ${activeTab === 'chat' && conversations.length === 0 ? 'flex items-center justify-center' : ''}
+  `}
           >
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
@@ -1450,7 +1496,7 @@ const MenuRecommendationSystem = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="h-full"
+                  className="min-h-full"
                 >
                   <EmptyState
                     theme={theme}
@@ -1471,14 +1517,16 @@ const MenuRecommendationSystem = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="h-full overflow-y-auto p-4"
+                  className={`h-full ${conversations.length === 0 ? 'flex items-center justify-center' : 'p-4'}`}
                 >
                   {conversations.length === 0 ? (
-                    <EmptyChatState
-                      theme={theme}
-                      searchInputRef={searchInputRef}
-                      onStartChatting={handleStartChatting}
-                    />
+                    <div className="w-full max-w-lg mx-auto px-4">
+                      <EmptyChatState
+                        theme={theme}
+                        searchInputRef={searchInputRef}
+                        onStartChatting={handleStartChatting}
+                      />
+                    </div>
                   ) : (
                     <ChatInterface
                       conversations={conversations}
@@ -1492,13 +1540,15 @@ const MenuRecommendationSystem = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-            <div ref={conversationEndRef} />
           </main>
 
-          <footer className={`flex-shrink-0 z-50 border-t ${theme === 'light'
-            ? 'bg-white/95 border-gray-200'
-            : 'bg-gray-900/95 border-gray-800'
-            } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
+          <footer
+            ref={footerRef}
+            className={`fixed bottom-0 left-0 right-0 z-50 border-t ${theme === 'light'
+              ? 'bg-white/95 border-gray-200'
+              : 'bg-gray-900/95 border-gray-800'
+              } backdrop-blur-lg transition-all duration-300 shadow-lg`}
+          >
             <AnimatePresence>
               {isPromptsExpanded && (
                 <motion.div
@@ -1752,38 +1802,41 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
-        :root {
-          --vh: 1vh;
-          --footer-height: 0px;
-        }
+  :root {
+    --vh: 1vh;
+    --footer-height: 0px;
+  }
 
-        .app-container {
-          height: calc(var(--vh, 1vh) * 100);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
+  .app-container {
+    height: 100vh; /* fallback */
+    height: calc(var(--vh, 1vh) * 100);
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+  }
 
-        main {
-          flex-grow: 1;
-          overflow-y: auto;
-          height: calc(100% - var(--footer-height));
-        }
+  /* Ensure proper iOS behavior */
+  @supports (-webkit-touch-callout: none) {
+    .app-container {
+      height: -webkit-fill-available;
+    }
+  }
 
-        .footer-container {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 50;
-        }
+  main {
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    height: 100%;
+  }
 
-        @supports (padding: max(0px)) {
-          .footer-container {
-            padding-bottom: max(env(safe-area-inset-bottom), 20px);
-          }
-        }
-      `}</style>
+  /* Prevent Safari elastic scrolling */
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+`}</style>
     </div>
   );
 };
