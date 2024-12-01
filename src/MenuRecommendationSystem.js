@@ -1072,35 +1072,26 @@ const MenuRecommendationSystem = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      // Only run this on mobile devices
+      // Only apply this fix on mobile devices
       if (window.innerWidth <= 768) {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
+        const visualViewport = window.visualViewport;
+        if (visualViewport) {
+          const bottomBarHeight = window.innerHeight - visualViewport.height;
+          document.documentElement.style.setProperty(
+            '--viewport-bottom',
+            `${bottomBarHeight}px`
+          );
+        }
       }
     };
 
-    // Initial calculation
-    handleResize();
-
-    // Add event listeners for both resize and focusin/focusout
-    window.addEventListener('resize', handleResize);
-    document.addEventListener('focusin', (e) => {
-      if (e.target.tagName === 'INPUT') {
-        // Small delay to ensure keyboard is fully shown
-        setTimeout(handleResize, 100);
-      }
-    });
-    document.addEventListener('focusout', (e) => {
-      if (e.target.tagName === 'INPUT') {
-        // Small delay to ensure keyboard is fully hidden
-        setTimeout(handleResize, 100);
-      }
-    });
+    // Listen to the visualViewport resize event
+    window.visualViewport?.addEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('scroll', handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('focusin', handleResize);
-      document.removeEventListener('focusout', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('scroll', handleResize);
     };
   }, []);
 
@@ -1250,10 +1241,10 @@ const MenuRecommendationSystem = () => {
             <div ref={conversationEndRef} />
           </main>
 
-          <footer className={`fixed bottom-0 left-0 right-0 z-50 border-t ${theme === 'light'
-              ? 'bg-white/95 border-gray-200'
-              : 'bg-gray-900/95 border-gray-800'
-            } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
+          <footer className={`sticky bottom-0 z-50 border-t ${theme === 'light'
+            ? 'bg-white/95 border-gray-200'
+            : 'bg-gray-900/95 border-gray-800'} 
+  backdrop-blur-lg transition-all duration-300 shadow-lg`}>
             <AnimatePresence>
               {isPromptsExpanded && (
                 <motion.div
@@ -1507,38 +1498,37 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
-        :root {
-          --vh: 1vh;
-          --footer-height: 0px;
-        }
+  :root {
+    --viewport-bottom: 0px;
+  }
 
-        .app-container {
-          height: calc(var(--vh, 1vh) * 100);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
+  .app-container {
+    min-height: calc(100vh - var(--viewport-bottom));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
 
-        main {
-          flex-grow: 1;
-          overflow-y: auto;
-          height: calc(100% - var(--footer-height));
-        }
+  main {
+    flex: 1 1 auto;
+    overflow-y: auto;
+  }
 
-        .footer-container {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 50;
-        }
+  footer {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background: inherit;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
 
-        @supports (padding: max(0px)) {
-          .footer-container {
-            padding-bottom: max(env(safe-area-inset-bottom), 20px);
-          }
-        }
-      `}</style>
+  @supports (padding: env(safe-area-inset-bottom)) {
+    footer {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+`}</style>
     </div>
   );
 };
