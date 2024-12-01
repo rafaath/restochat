@@ -1441,7 +1441,11 @@ const MenuRecommendationSystem = () => {
           <main
             ref={mainContentRef}
             className="flex-grow overflow-y-auto no-scrollbar touch-action-pan-y"
-            style={{ touchAction: 'pan-y' }}
+            style={{
+              touchAction: 'pan-y',
+              paddingBottom: 'calc(160px + env(safe-area-inset-bottom))', // Adjust 160px based on your footer height
+              WebkitOverflowScrolling: 'touch'
+            }}
           >
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
@@ -1498,11 +1502,18 @@ const MenuRecommendationSystem = () => {
 
           // Unt's className
           <footer
-            className={`fixed bottom-0 left-0 right-0 z-50 border-t ${theme === 'light'
-                ? 'bg-white/95 border-gray-200'
-                : 'bg-gray-900/95 border-gray-800'
+            className={`fixed bottom-0 left-0 right-0 z-[9999] border-t ${theme === 'light'
+              ? 'bg-white/95 border-gray-200'
+              : 'bg-gray-900/95 border-gray-800'
               } backdrop-blur-lg transition-all duration-300 shadow-lg`}
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            style={{
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              transform: 'translateZ(0)' // Force GPU acceleration
+            }}
           >
             <AnimatePresence>
               {isPromptsExpanded && (
@@ -1759,41 +1770,34 @@ const MenuRecommendationSystem = () => {
       <style jsx global>{`
   :root {
     --vh: 1vh;
-    --footer-height: 0px;
-    --keyboard-height: 0px;
+  }
+
+  html, body {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
   }
 
   .app-container {
-    height: calc(var(--vh, 1vh) * 100);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    height: 100%;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    overflow: hidden;
   }
 
   main {
-    flex-grow: 1;
+    height: 100%;
     overflow-y: auto;
-    height: calc(100% - var(--footer-height) - var(--keyboard-height));
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .footer-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    background-color: inherit;
-  }
-
-  @supports (padding: max(0px)) {
-    .footer-container {
-      padding-bottom: max(env(safe-area-inset-bottom), 20px);
-    }
+  input, textarea {
+    font-size: 16px; /* Prevents iOS zoom */
   }
 `}</style>
     </div>
