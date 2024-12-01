@@ -336,7 +336,84 @@ const MenuRecommendationSystem = () => {
     }
   }, [activeStoryIndex, isStoryOpen]);
 
-
+  const StoryContent = ({ conversation }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+      className="h-full overflow-y-auto px-4 py-8"
+      ref={storyContentRef}
+    >
+      <div className="max-w-2xl mx-auto">
+        <h2 className="text-2xl font-bold mb-4 text-white">{conversation.query}</h2>
+        <ReactMarkdown
+          components={{
+            p: ({ node, ...props }) => <p className="mb-4 text-gray-200" {...props} />,
+            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mb-4 text-white" {...props} />,
+            h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mb-3 text-white" {...props} />,
+            h3: ({ node, ...props }) => <h3 className="text-xl font-bold mb-2 text-white" {...props} />,
+            ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-4 text-gray-200" {...props} />,
+            ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-4 text-gray-200" {...props} />,
+            li: ({ node, ...props }) => <li className="mb-2 text-gray-200" {...props} />,
+            code: ({ node, inline, className, children, ...props }) => {
+              const match = /language-(\w+)/.exec(className || '');
+              return !inline && match ? (
+                <SyntaxHighlighter
+                  style={tomorrow}
+                  language={match[1]}
+                  PreTag="div"
+                  className="rounded-md overflow-hidden my-4"
+                  {...props}
+                >
+                  {String(children).replace(/\n$/, '')}
+                </SyntaxHighlighter>
+              ) : (
+                <code className="bg-gray-800 rounded px-1 py-0.5 text-gray-200" {...props}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+        >
+          {conversation.response}
+        </ReactMarkdown>
+        {conversation.items.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-xl font-bold mb-4 text-white">Recommended Items</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {conversation.items.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-gray-800 rounded-lg overflow-hidden shadow-lg"
+                >
+                  <img src={item.image_link} alt={item.name_of_item} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h4 className="text-lg font-semibold mb-2 text-white">{item.name_of_item}</h4>
+                    <p className="text-sm text-gray-300 mb-4">{item.description}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xl font-bold text-blue-400">₹{item.cost.toFixed(2)}</span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => addToCart(item)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
+                      >
+                        Add to Cart
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
 
   const EmptyChatState = React.memo(({ theme, searchInputRef, onStartChatting }) => (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
@@ -1228,89 +1305,10 @@ const MenuRecommendationSystem = () => {
 
   const footerRef = useRef(null);
 
-  const appContainerRef = useRef(null);
-  const [keyboardOpen, setKeyboardOpen] = useState(false);
-
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      const newHeight = window.innerHeight;
-      if (newHeight < viewportHeight) {
-        setIsKeyboardOpen(true);
-        // Lock the viewport
-        document.documentElement.style.height = `${newHeight}px`;
-        document.body.style.height = `${newHeight}px`;
-      } else {
-        setIsKeyboardOpen(false);
-        // Reset viewport
-        document.documentElement.style.height = '100%';
-        document.body.style.height = '100%';
-      }
-      setViewportHeight(newHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.visualViewport?.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.visualViewport?.removeEventListener('resize', handleResize);
-    };
-  }, [viewportHeight]);
-
-  useEffect(() => {
-    const updateFooterHeight = () => {
-      if (footerRef.current) {
-        const height = footerRef.current.offsetHeight;
-        document.documentElement.style.setProperty('--footer-height', `${height}px`);
-      }
-    };
-
-    updateFooterHeight();
-    window.addEventListener('resize', updateFooterHeight);
-    return () => window.removeEventListener('resize', updateFooterHeight);
-  }, []);
-
-  // Add keyboard detection logic
-  useEffect(() => {
-    const handleFocus = () => {
-      setKeyboardOpen(true);
-      // Delay scrolling to input to ensure keyboard is fully shown
-      setTimeout(() => {
-        searchInputRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    };
-
-    const handleBlur = () => {
-      setKeyboardOpen(false);
-      // Reset scroll position when keyboard closes
-      window.scrollTo(0, 0);
-    };
-
-    const input = searchInputRef.current;
-    if (input) {
-      input.addEventListener('focus', handleFocus);
-      input.addEventListener('blur', handleBlur);
-    }
-
-    return () => {
-      if (input) {
-        input.removeEventListener('focus', handleFocus);
-        input.removeEventListener('blur', handleBlur);
-      }
-    };
-  }, []);
-
-  // Update the resize handler to account for keyboard
   useEffect(() => {
     const setAppHeight = () => {
-      // Only update height when keyboard is closed
-      if (!keyboardOpen) {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-      }
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
     };
 
     const handleResize = () => {
@@ -1321,17 +1319,45 @@ const MenuRecommendationSystem = () => {
       }
     };
 
+    const handleFocus = () => {
+      // Add a small delay to ensure keyboard is fully shown
+      setTimeout(() => {
+        const visualViewport = window.visualViewport;
+        if (visualViewport) {
+          const keyboardHeight = window.innerHeight - visualViewport.height;
+          document.documentElement.style.setProperty('--keyboard-height', `${keyboardHeight}px`);
+        }
+        window.scrollTo(0, 0);
+      }, 100);
+    };
+
+    const handleBlur = () => {
+      document.documentElement.style.setProperty('--keyboard-height', '0px');
+      window.scrollTo(0, 0);
+    };
+
     setAppHeight();
     handleResize();
 
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
 
+    // Add event listeners for input focus/blur
+    const input = searchInputRef.current;
+    if (input) {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
+      if (input) {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      }
     };
-  }, [keyboardOpen]);
+  }, []);
 
 
 
@@ -1370,12 +1396,10 @@ const MenuRecommendationSystem = () => {
 
 
   return (
-    <div
-      className="fixed inset-0 flex flex-col"
-      style={{
-        height: isKeyboardOpen ? `${viewportHeight}px` : '100%',
-      }}
-    >
+    <div className={`app-container h-screen flex flex-col overflow-hidden ${theme === 'light'
+      ? 'bg-gradient-to-br from-gray-100 to-gray-200'
+      : 'bg-gradient-to-br from-gray-900 to-gray-800'
+      }`}>
       <AnimatePresence>
         {showWelcome && (
           <WelcomeScreen onGetStarted={handleGetStarted} theme={theme} />
@@ -1384,7 +1408,12 @@ const MenuRecommendationSystem = () => {
 
       {!showWelcome && (
         <>
-          <header className="flex-none">
+          <header
+            className={`flex-shrink-0 z-50 transition-all duration-300 ${theme === 'light'
+              ? 'bg-white bg-opacity-90 text-gray-800'
+              : 'bg-gray-900 bg-opacity-90 text-white'
+              } backdrop-blur-sm`}
+          >
             <div className="max-w-4xl mx-auto px-4">
               <div className="flex items-center justify-between h-14">
                 <div className="flex items-center space-x-4">
@@ -1437,13 +1466,10 @@ const MenuRecommendationSystem = () => {
             </div>
           </div> */}
 
-
           <main
             ref={mainContentRef}
-            className="flex-1 overflow-y-auto"
-            style={{
-              paddingBottom: isKeyboardOpen ? '140px' : undefined // Adjust based on your footer height
-            }}
+            className="flex-grow overflow-y-auto no-scrollbar touch-action-pan-y"
+            style={{ touchAction: 'pan-y' }}
           >
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
@@ -1453,7 +1479,7 @@ const MenuRecommendationSystem = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className="min-h-full"
+                  className="h-full"
                 >
                   <EmptyState
                     theme={theme}
@@ -1474,16 +1500,14 @@ const MenuRecommendationSystem = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
-                  className={`h-full ${conversations.length === 0 ? 'flex items-center justify-center' : 'p-4'}`}
+                  className="h-full overflow-y-auto p-4"
                 >
                   {conversations.length === 0 ? (
-                    <div className="w-full max-w-lg mx-auto px-4">
-                      <EmptyChatState
-                        theme={theme}
-                        searchInputRef={searchInputRef}
-                        onStartChatting={handleStartChatting}
-                      />
-                    </div>
+                    <EmptyChatState
+                      theme={theme}
+                      searchInputRef={searchInputRef}
+                      onStartChatting={handleStartChatting}
+                    />
                   ) : (
                     <ChatInterface
                       conversations={conversations}
@@ -1497,16 +1521,13 @@ const MenuRecommendationSystem = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+            <div ref={conversationEndRef} />
           </main>
 
-          <footer
-            ref={footerRef}
-            className={`fixed bottom-0 left-0 right-0 z-50 border-t bg-opacity-95 backdrop-blur-lg ${isKeyboardOpen ? 'transform translate-y-0 transition-transform' : ''
-              }`}
-            style={{
-              bottom: isKeyboardOpen ? 0 : undefined
-            }}
-          >
+          <footer className={`flex-shrink-0 z-50 border-t ${theme === 'light'
+            ? 'bg-white/95 border-gray-200'
+            : 'bg-gray-900/95 border-gray-800'
+            } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
             <AnimatePresence>
               {isPromptsExpanded && (
                 <motion.div
@@ -1760,44 +1781,45 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
+  :root {
+    --vh: 1vh;
+    --footer-height: 0px;
+    --keyboard-height: 0px;
+  }
 
-      html {
-  overflow: hidden;
-  height: 100%;
-  position: fixed;
-  width: 100%;
-  -webkit-overflow-scrolling: touch;
-}
+  .app-container {
+    height: calc(var(--vh, 1vh) * 100);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
 
-body {
-  overflow: hidden;
-  height: 100%;
-  position: fixed;
-  width: 100%;
-  -webkit-overflow-scrolling: touch;
-}
+  main {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: calc(100% - var(--footer-height) - var(--keyboard-height));
+  }
 
-.keyboard-open {
-  position: absolute !important;
-}
-    html, body {
-      overflow: hidden;
-      position: fixed;
-      width: 100%;
-      height: 100%;
+  .footer-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background-color: inherit;
+  }
+
+  @supports (padding: max(0px)) {
+    .footer-container {
+      padding-bottom: max(env(safe-area-inset-bottom), 20px);
     }
-
-    .app-container {
-      height: 100%;
-      position: fixed;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    main {
-      -webkit-overflow-scrolling: touch;
-    }
-  `}</style>
+  }
+`}</style>
     </div>
   );
 };
