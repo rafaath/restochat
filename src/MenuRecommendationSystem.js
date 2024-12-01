@@ -1476,81 +1476,70 @@ const MenuRecommendationSystem = () => {
 
           <main
             ref={mainContentRef}
-            className="flex-grow overflow-y-auto no-scrollbar touch-action-pan-y"
-            style={{
-              touchAction: 'pan-y',
-              paddingBottom: 'calc(160px + env(safe-area-inset-bottom))', // Adjust 160px based on your footer height
-              WebkitOverflowScrolling: 'touch'
-            }}
+            className="flex-grow overflow-y-auto no-scrollbar"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+
           >
-            <AnimatePresence mode="wait">
-              {activeTab === 'home' && (
-                <motion.div
-                  key="home"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full"
-                >
-                  <EmptyState
-                    theme={theme}
-                    onItemClick={handleItemClick}
-                    addToCart={addToCart}
-                    removeFromCart={removeFromCart}
-                    cart={cart}
-                    menuItems={menuItems}
-                    onOpenRollTheDice={handleOpenRollTheDice}
-                    onComboClick={handleComboClick}
-                  />
-                </motion.div>
-              )}
-              {activeTab === 'chat' && (
-                <motion.div
-                  key="chat"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full overflow-y-auto p-4"
-                >
-                  {conversations.length === 0 ? (
-                    <EmptyChatState
+            <div className="pb-[200px]">
+              <AnimatePresence mode="wait">
+                {activeTab === 'home' && (
+                  <motion.div
+                    key="home"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full"
+                  >
+                    <EmptyState
                       theme={theme}
-                      searchInputRef={searchInputRef}
-                      onStartChatting={handleStartChatting}
+                      onItemClick={handleItemClick}
+                      addToCart={addToCart}
+                      removeFromCart={removeFromCart}
+                      cart={cart}
+                      menuItems={menuItems}
+                      onOpenRollTheDice={handleOpenRollTheDice}
+                      onComboClick={handleComboClick}
                     />
-                  ) : (
-                    <ChatInterface
-                      conversations={conversations}
-                      onClearChat={clearChat}
-                      theme={theme}
-                      openStory={openStory}
-                      setSelectedItemFromConversation={setSelectedItemFromConversation}
-                      isLoading={isLoading}
-                    />
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <div ref={conversationEndRef} />
+                  </motion.div>
+                )}
+                {activeTab === 'chat' && (
+                  <motion.div
+                    key="chat"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-full overflow-y-auto p-4"
+                  >
+                    {conversations.length === 0 ? (
+                      <EmptyChatState
+                        theme={theme}
+                        searchInputRef={searchInputRef}
+                        onStartChatting={handleStartChatting}
+                      />
+                    ) : (
+                      <ChatInterface
+                        conversations={conversations}
+                        onClearChat={clearChat}
+                        theme={theme}
+                        openStory={openStory}
+                        setSelectedItemFromConversation={setSelectedItemFromConversation}
+                        isLoading={isLoading}
+                      />
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div ref={conversationEndRef} />
+            </div>
           </main>
 
           // Unt's className
-          <footer
-            ref={footerRef}
-            className={`fixed bottom-0 left-0 right-0 z-[99999] border-t ${theme === 'light'
-                ? 'bg-white/95 border-gray-200'
-                : 'bg-gray-900/95 border-gray-800'
-              } backdrop-blur-lg transition-all duration-300 shadow-lg`}
-            style={{
-              position: 'fixed',
-              bottom: '0',
-              width: '100%',
-              willChange: 'transform',
-              transform: 'translateZ(0)'
-            }}
-          >
+          <div className={`border-t ${theme === 'light'
+              ? 'bg-white/95 border-gray-200'
+              : 'bg-gray-900/95 border-gray-800'
+            } backdrop-blur-lg shadow-lg`}>
             <AnimatePresence>
               {isPromptsExpanded && (
                 <motion.div
@@ -1622,8 +1611,8 @@ const MenuRecommendationSystem = () => {
                     disabled={isWaitingForResponse}
                     placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
                     className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
-                        ? 'bg-transparent text-gray-800 placeholder-gray-500'
-                        : 'bg-transparent text-white placeholder-gray-400'
+                      ? 'bg-transparent text-gray-800 placeholder-gray-500'
+                      : 'bg-transparent text-white placeholder-gray-400'
                       } ${isWaitingForResponse ? 'cursor-not-allowed' : ''}`}
                     style={{
                       position: isKeyboardVisible ? 'relative' : 'static',
@@ -1684,7 +1673,7 @@ const MenuRecommendationSystem = () => {
                 />
               </nav>
             </div>
-          </footer>
+          </div>
         </>
       )}
 
@@ -1811,36 +1800,16 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
-  :root {
-    --vh: 1vh;
-    touch-action: none;
-  }
-
-  html, body {
-    position: fixed;
-    width: 100%;
-    max-height: -webkit-fill-available;
-    overflow: hidden;
-  }
-
   .app-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
-    height: -webkit-fill-available;
+    overflow: hidden;
   }
 
   main {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: none;
-  }
-
-  input, textarea, select {
-    font-size: 16px !important;
+    flex: 1;
+    overflow-y: auto;
   }
 
   .no-scrollbar {
