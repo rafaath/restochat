@@ -689,12 +689,12 @@ const IsolatedMenu = ({ isOpen, onClose, theme, menuItems, addToCart, removeFrom
                       isActive={view === 'explore'}
                       onClick={() => setView('explore')}
                     />
-                    {/* <TabButton
+                    <TabButton
                       icon={Search}
                       text="Search"
                       isActive={view === 'search'}
                       onClick={() => setView('search')}
-                    /> */}
+                    />
                     <TabButton
                       icon={Sparkles}
                       text="Discover"

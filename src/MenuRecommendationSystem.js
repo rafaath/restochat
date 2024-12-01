@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useAnimation, LayoutGroup } from 'framer-motio
 import {
   Loader, ShoppingCart, Mic, Send, X, Plus, Minus, Sparkles,
   Coffee, Pizza, Cake, Menu, Search, Star, ChevronDown, ChevronUp,
-  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle, Moon, Sun, Settings, ChefHatIcon
+  ArrowRight, ArrowLeft, Trash2, AlertCircle, RefreshCw, Home, MessageCircle, Moon, Sun, Settings,
 } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '@clerk/clerk-react';
@@ -102,23 +102,6 @@ const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
 
 
 const MenuRecommendationSystem = () => {
-
-  // Add these states at the top with your other states
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-
-  // Add this effect to handle viewport changes
-  useEffect(() => {
-    const handleResize = () => {
-      const newViewportHeight = window.innerHeight;
-      // If the height decreases significantly, keyboard is likely open
-      setIsKeyboardOpen(newViewportHeight < viewportHeight * 0.8);
-      setViewportHeight(newViewportHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [viewportHeight]);
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -142,150 +125,6 @@ const MenuRecommendationSystem = () => {
 
   const [selectedComboItem, setSelectedComboItem] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
-
-
-
-  const [headerHeight, setHeaderHeight] = useState(0);
-  const headerRef = useRef(null);
-  useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
-    }
-  }, []);
-
-
-
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
-
-  const SEARCH_CONFIG = {
-    hideHeaderDuringSearch: false,  // Controls header visibility
-    maxSearchResults: 8,           // Maximum number of search results to show
-    searchDebounceMs: 300,        // Debounce time for search in milliseconds
-    showCategoriesInSuggestions: true,  // Whether to show category suggestions
-    overlayOpacity: 0.6,          // Opacity of the backdrop overlay (0-1)
-  };
-
-  // Add this function near your other search-related functions
-  const handleSearchFocus = () => {
-    setIsSearchFocused(true);
-    // Scroll to top when search is focused on mobile
-    if (window.innerWidth <= 768) {
-      window.scrollTo(0, 0);
-    }
-    if (query.trim()) {
-      handleSearchInputChange({ target: { value: query } });
-    }
-  };
-
-  const handleSearchBlur = () => {
-    // Only blur if not submitting the form
-    setTimeout(() => {
-      if (!isWaitingForResponse) {
-        setIsSearchFocused(false);
-        setSearchResults([]);
-      }
-    }, 200);
-  };
-
-  const handleSearchInputChange = (e) => {
-    const value = e.target.value;
-    setQuery(value);
-
-    if (value.trim()) {
-      // Store the search term
-      const searchTerm = value.toLowerCase();
-
-      // Comprehensive search across multiple fields
-      const filtered = menuItems.filter(item => {
-        return (
-          (item.name_of_item && item.name_of_item.toLowerCase().includes(searchTerm)) ||
-          (item.description && item.description.toLowerCase().includes(searchTerm)) ||
-          (item.ingredients && item.ingredients.toLowerCase().includes(searchTerm)) ||
-          (item.cuisine && item.cuisine.toLowerCase().includes(searchTerm)) ||
-          (item.category && item.category.toLowerCase().includes(searchTerm)) ||
-          (item.meal_course_type && item.meal_course_type.toLowerCase().includes(searchTerm)) ||
-          (item.veg_or_non_veg && item.veg_or_non_veg.toLowerCase().includes(searchTerm))
-        );
-      });
-
-      // Sort results by relevance
-      const sortedResults = filtered.sort((a, b) => {
-        const aNameMatch = a.name_of_item?.toLowerCase().includes(searchTerm) ? 1 : 0;
-        const bNameMatch = b.name_of_item?.toLowerCase().includes(searchTerm) ? 1 : 0;
-        return bNameMatch - aNameMatch || b.rating - a.rating;
-      });
-
-      setSearchResults(sortedResults.slice(0, SEARCH_CONFIG.maxSearchResults));
-    }
-
-    if (value !== selectedPrompt) {
-      setSelectedPrompt(null);
-    }
-  };
-
-  // Update the search results UI to be more informative
-  const renderSearchResults = () => (
-    <div className="max-h-[60vh] overflow-y-auto">
-      {searchResults.map((item) => (
-        <div
-          key={item.item_id}
-          className={`p-4 flex items-center space-x-3 cursor-pointer ${theme === 'light'
-            ? 'hover:bg-gray-50 border-b border-gray-100'
-            : 'hover:bg-gray-700 border-b border-gray-700'
-            }`}
-          onClick={() => {
-            setSelectedItem(item);
-            setIsSearchFocused(false);
-          }}
-        >
-          <div className="w-16 h-16 flex-shrink-0">
-            <img
-              src={item.image_link}
-              alt={item.name_of_item}
-              className="w-full h-full rounded-md object-cover"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h4 className={`font-medium ${theme === 'light' ? 'text-gray-800' : 'text-white'} truncate`}>
-                {item.name_of_item}
-              </h4>
-              <span className={`ml-2 ${theme === 'light' ? 'text-blue-600' : 'text-blue-400'} font-semibold`}>
-                ₹{item.cost}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2 mt-1">
-              {item.rating && (
-                <div className={`flex items-center ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
-                  <Star size={14} className="text-yellow-400" />
-                  <span className="ml-1 text-sm">{item.rating.toFixed(1)}</span>
-                </div>
-              )}
-              <span className={`text-sm px-2 py-0.5 rounded-full ${item.veg_or_non_veg === 'veg'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-                }`}>
-                {item.veg_or_non_veg === 'veg' ? 'Veg' : 'Non-Veg'}
-              </span>
-              {item.cuisine && (
-                <span className={`text-sm ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-                  {item.cuisine}
-                </span>
-              )}
-            </div>
-            <p className={`text-sm mt-1 truncate ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'
-              }`}>
-              {item.description}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
-
-
 
   // ... (existing code)
 
@@ -342,7 +181,13 @@ const MenuRecommendationSystem = () => {
   }, []);
 
 
-
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef(null);
+  useEffect(() => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+  }, []);
 
   const [displayedPrompts, setDisplayedPrompts] = useState([]);
 
@@ -887,16 +732,159 @@ const MenuRecommendationSystem = () => {
     );
   }, [searchTerm, menuItems]);
 
-  const handleItemClick = (item) => {
-    setSelectedItem(item);
-    setIsSearchFocused(false); // Just hide the search overlay
-    // Don't clear the search results or query
-  };
+  const ConversationBubble = ({ isUser, content }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className={`max-w-3/4 p-4 rounded-lg shadow-md ${isUser
+        ? 'bg-blue-500 text-white self-end'
+        : `${theme === 'light' ? 'bg-white' : 'bg-gray-800'} ${theme === 'light' ? 'text-gray-800' : 'text-white'} self-start`
+        }`}
+    >
+      <p className="whitespace-pre-wrap">{content}</p>
+    </motion.div>
+  );
 
-  // Update the modal close handler
-  const handleModalClose = () => {
-    setSelectedItem(null);
-    // Don't clear search results or query
+  const ItemCard = ({ item }) => {
+    const isFavorite = favorites.some(fav => fav.name_of_item === item.name_of_item);
+
+    return (
+      <motion.div
+        className={`rounded-lg shadow-lg overflow-hidden flex flex-col w-full h-96 cursor-pointer transform transition-all duration-300 hover:scale-105 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'
+          }`}
+        onClick={() => setSelectedItem(item)}
+        whileHover={{ y: -5 }}
+      >
+        <div className="h-48 overflow-hidden relative">
+          <img src={item.image_link} alt={item.name_of_item} className="w-full h-full object-cover" />
+          <motion.button
+            onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}
+            className={`absolute top-2 right-2 p-2 rounded-full ${isFavorite ? 'bg-yellow-400' : 'bg-white bg-opacity-70'
+              }`}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <Star size={16} className={isFavorite ? 'text-white' : 'text-gray-600'} />
+          </motion.button>
+        </div>
+        <div className="p-4 flex-grow flex flex-col justify-between">
+          <div>
+            <h3 className={`font-bold text-lg mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
+            <p className={`text-sm line-clamp-3 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>{item.description}</p>
+          </div>
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-2xl font-bold text-blue-500">₹{item.cost.toFixed(2)}</p>
+            <motion.button
+              onClick={(e) => { e.stopPropagation(); addToCart(item); }}
+              className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Add to Cart
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+  const ItemCircle = ({ item, onClick }) => (
+    <div className="flex flex-col items-center">
+      <motion.div
+        className="w-16 h-16 rounded-full overflow-hidden"
+        whileHover={{ scale: 1.1 }}
+      >
+        <img
+          src={item.image_link}
+          alt={item.name_of_item}
+          className="w-full h-full object-cover rounded-full border-2 border-blue-500 cursor-pointer"
+          onClick={onClick}
+        />
+      </motion.div>
+      <p className={`text-xs mt-1 text-center w-16 truncate ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+        {item.name_of_item}
+      </p>
+    </div>
+  );
+
+  // const ItemModal = ({ item, isOpen, onClose }) => (
+  //   <Dialog open={isOpen} onOpenChange={onClose}>
+  //     <DialogContent className={`max-w-[90%] sm:max-w-[425px] mx-auto p-0 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}>
+  //       <div className="relative">
+  //         <img
+  //           src={item.image_link}
+  //           alt={item.name_of_item}
+  //           className="w-full h-64 object-cover"
+  //         />
+  //         <button 
+  //           onClick={onClose}
+  //           className="absolute top-2 right-2 p-2 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all"
+  //         >
+  //           <X size={20} />
+  //         </button>
+  //       </div>
+  //       <div className="p-6">
+  //         <h3 className={`text-2xl font-bold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>
+  //           {item.name_of_item}
+  //         </h3>
+  //         <div className="flex items-center mb-4">
+  //           <Star className="text-yellow-400 mr-1" size={16} />
+  //           <span className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+  //             4.5 (120 reviews)
+  //           </span>
+  //         </div>
+  //         <p className={`mb-4 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>
+  //           {item.description}
+  //         </p>
+  //         <div className="flex justify-between items-center mb-6">
+  //           <p className="text-2xl font-bold text-blue-600">
+  //             ₹{item.cost.toFixed(2)}
+  //           </p>
+  //         </div>
+  //         <motion.button
+  //           onClick={() => {
+  //             addToCart(item);
+  //             onClose();
+  //           }}
+  //           className="w-full bg-blue-500 text-white py-3 rounded-full text-lg font-semibold hover:bg-blue-600 transition-colors"
+  //           whileHover={{ scale: 1.05 }}
+  //           whileTap={{ scale: 0.95 }}
+  //         >
+  //           Add to Cart
+  //         </motion.button>
+  //       </div>
+  //     </DialogContent>
+  //   </Dialog>
+  // );
+
+  const MenuItemCard = ({ item }) => (
+    <motion.div
+      className={`rounded-lg shadow-md p-4 flex flex-col h-full ${theme === 'light' ? 'bg-white' : 'bg-gray-800'
+        }`}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+    >
+      <img src={item.image_link} alt={item.name_of_item} className="w-full h-40 object-cover rounded-lg mb-4" />
+      <h3 className={`text-lg font-semibold mb-2 ${theme === 'light' ? 'text-gray-800' : 'text-white'}`}>{item.name_of_item}</h3>
+      <p className={`text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'} mb-2 flex-grow`}>
+        {item.description.length > 100 ? `${item.description.substring(0, 100)}...` : item.description}
+      </p>
+      <div className="flex justify-between items-center mt-auto">
+        <p className="text-xl font-bold text-blue-600">₹{item.cost.toFixed(2)}</p>
+        <motion.button
+          onClick={() => addToCart(item)}
+          className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Add to Cart
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+
+  const handleItemClick = (item) => {
+    setSelectedItemFromConversation(item);
+    setIsModalOpen(true);
   };
 
   // const [displayedPrompts, setDisplayedPrompts] = useState([]);
@@ -1393,16 +1381,10 @@ const MenuRecommendationSystem = () => {
       {!showWelcome && (
         <>
           <header
-            ref={headerRef}
-            className={`flex-shrink-0 transition-all duration-300 ${theme === 'light'
+            className={`flex-shrink-0 z-50 transition-all duration-300 ${theme === 'light'
               ? 'bg-white bg-opacity-90 text-gray-800'
               : 'bg-gray-900 bg-opacity-90 text-white'
-              } backdrop-blur-sm ${
-              // Lower z-index when hideHeaderDuringSearch is true and search is focused
-              SEARCH_CONFIG.hideHeaderDuringSearch && isSearchFocused
-                ? 'z-30'
-                : 'z-50'
-              }`}
+              } backdrop-blur-sm`}
           >
             <div className="max-w-4xl mx-auto px-4">
               <div className="flex items-center justify-between h-14">
@@ -1513,14 +1495,10 @@ const MenuRecommendationSystem = () => {
             <div ref={conversationEndRef} />
           </main>
 
-          <footer
-            ref={footerRef}
-            className={`flex-shrink-0 z-50 border-t transition-all duration-300 ${theme === 'light'
-                ? 'bg-white/95 border-gray-200'
-                : 'bg-gray-900/95 border-gray-800'
-              } backdrop-blur-lg ${isKeyboardOpen ? 'fixed bottom-0 left-0 right-0' : ''
-              }`}
-          >
+          <footer className={`flex-shrink-0 z-50 border-t ${theme === 'light'
+            ? 'bg-white/95 border-gray-200'
+            : 'bg-gray-900/95 border-gray-800'
+            } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
             <AnimatePresence>
               {isPromptsExpanded && (
                 <motion.div
@@ -1580,9 +1558,12 @@ const MenuRecommendationSystem = () => {
                     type="text"
                     ref={searchInputRef}
                     value={query}
-                    onChange={handleSearchInputChange}
-                    onFocus={handleSearchFocus}
-                    onBlur={handleSearchBlur}
+                    onChange={(e) => {
+                      setQuery(e.target.value);
+                      if (e.target.value !== selectedPrompt) {
+                        setSelectedPrompt(null);
+                      }
+                    }}
                     disabled={isWaitingForResponse}
                     placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
                     className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
@@ -1614,7 +1595,7 @@ const MenuRecommendationSystem = () => {
                       className={`p-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                     >
-                      {isWaitingForResponse ? <Loader size={18} className="animate-spin" /> : <ChefHatIcon size={18} />}
+                      {isWaitingForResponse ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
                     </motion.button>
                   </div>
                 </motion.div>
@@ -1723,7 +1704,7 @@ const MenuRecommendationSystem = () => {
         <ItemModal
           item={selectedItem}
           isOpen={!!selectedItem}
-          onClose={handleModalClose}
+          onClose={() => setSelectedItem(null)}
           theme={theme}
           addToCart={addToCart}
           removeFromCart={removeFromCart}
@@ -1776,28 +1757,18 @@ const MenuRecommendationSystem = () => {
           --footer-height: 0px;
         }
 
-         html, body {
-    overscroll-behavior: none;
-  }
         .app-container {
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
+          height: calc(var(--vh, 1vh) * 100);
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
 
-  main {
-    flex-grow: 1;
-    overflow-y: auto;
-    height: calc(100% - var(--footer-height));
-    -webkit-overflow-scrolling: touch;
-  }
+        main {
+          flex-grow: 1;
+          overflow-y: auto;
+          height: calc(100% - var(--footer-height));
+        }
 
         .footer-container {
           position: fixed;
@@ -1807,148 +1778,12 @@ const MenuRecommendationSystem = () => {
           z-index: 50;
         }
 
-         .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  @supports (padding: env(safe-area-inset-bottom)) {
-    .footer-container {
-      padding-bottom: env(safe-area-inset-bottom);
-    }
+        @supports (padding: max(0px)) {
+          .footer-container {
+            padding-bottom: max(env(safe-area-inset-bottom), 20px);
+          }
         }
       `}</style>
-      <AnimatePresence>
-        {isSearchFocused && !isWaitingForResponse && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className={`fixed z-40 backdrop-blur-sm`}
-              style={{
-                top: SEARCH_CONFIG.hideHeaderDuringSearch ? 0 : `${headerHeight}px`,
-                left: 0,
-                right: 0,
-                bottom: isKeyboardOpen ? 0 : 'var(--footer-height)',
-                backgroundColor: `rgba(0, 0, 0, ${SEARCH_CONFIG.overlayOpacity})`
-              }}
-              onClick={() => setIsSearchFocused(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`fixed left-0 right-0 z-50 overflow-hidden ${theme === 'light' ? 'bg-white' : 'bg-gray-800'
-                } mx-auto`}
-              style={{
-                top: SEARCH_CONFIG.hideHeaderDuringSearch ? 0 : `${headerHeight}px`,
-                maxHeight: isKeyboardOpen
-                  ? `${viewportHeight - (isKeyboardOpen ? 60 : 120)}px`
-                  : '70vh',
-                overflowY: 'auto'
-              }}
-            >
-              <div className={`sticky top-0 z-[51] p-4 border-b ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'
-                }`}>
-                <div className="text-sm font-medium mb-2">
-                  {query.trim() === '' ? 'Suggested searches' : 'Search results'}
-                </div>
-              </div>
-
-              <div className="p-4">
-                {query.trim() === '' ? (
-                  <div className="p-4">
-                    <h3 className={`text-sm font-medium mb-2 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'
-                      }`}>
-                      Suggested searches
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {['Vegetarian', 'Spicy', 'Desserts', 'Healthy', 'Popular', 'Quick Bites'].map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          onClick={() => {
-                            setQuery(suggestion);
-                            searchInputRef.current?.focus();
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-sm ${theme === 'light'
-                            ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                            : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                            } transition-colors duration-150`}
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mt-4">
-                      <h3 className={`text-sm font-medium mb-2 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'
-                        }`}>
-                        Popular categories
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {['Breakfast', 'Main Course', 'Snacks', 'Beverages'].map((category) => (
-                          <button
-                            key={category}
-                            onClick={() => {
-                              setQuery(category);
-                              searchInputRef.current?.focus();
-                            }}
-                            className={`flex items-center space-x-2 p-2 rounded-lg ${theme === 'light'
-                              ? 'bg-gray-50 hover:bg-gray-100 text-gray-700'
-                              : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                              }`}
-                          >
-                            <span>{category}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : searchResults.length > 0 ? (
-                  renderSearchResults()
-                ) : (
-                  <div className={`p-8 text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-                    <div className="max-w-sm mx-auto">
-                      <div className="mb-4">
-                        <Search size={48} className="mx-auto mb-4 opacity-40" />
-                        <div className="mb-2 text-lg font-semibold">No items found for "{query}"</div>
-                        <p className="text-sm mb-6 opacity-75">
-                          But don't worry! Our AI assistant can help you find exactly what you're looking for.
-                        </p>
-                      </div>
-
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          handleSearch();  // This will trigger the AI chat
-                          setIsSearchFocused(false);  // Close the search overlay
-                        }}
-                        className={`flex items-center justify-center space-x-2 w-full px-6 py-3 rounded-full shadow-md ${theme === 'light'
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                          } transition-colors duration-200`}
-                      >
-                        <MessageCircle size={18} />
-                        <span>Ask AI Assistant</span>
-                      </motion.button>
-
-                      <div className={`mt-4 text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'
-                        }`}>
-                        Try asking about ingredients, taste, or dietary preferences!
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
