@@ -130,36 +130,30 @@ const MenuRecommendationSystem = () => {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   useEffect(() => {
+    if (!searchInputRef.current) return;
+
+    const input = searchInputRef.current;
+    let originalHeight;
+
     const handleFocus = () => {
-      setIsKeyboardVisible(true);
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
+      originalHeight = document.documentElement.style.height;
+      document.documentElement.style.height = '100%';
       document.body.style.height = '100%';
-      document.body.style.overflow = 'hidden';
-      mainContentRef.current.style.overflow = 'hidden';
+      setTimeout(() => input.scrollIntoView({ block: 'center' }), 100);
     };
 
     const handleBlur = () => {
-      setIsKeyboardVisible(false);
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.height = '';
-      document.body.style.overflow = '';
-      mainContentRef.current.style.overflow = 'auto';
+      document.documentElement.style.height = originalHeight;
+      document.body.style.height = originalHeight;
       window.scrollTo(0, 0);
     };
 
-    const input = searchInputRef.current;
-    if (input) {
-      input.addEventListener('focus', handleFocus);
-      input.addEventListener('blur', handleBlur);
-    }
+    input.addEventListener('focus', handleFocus);
+    input.addEventListener('blur', handleBlur);
 
     return () => {
-      if (input) {
-        input.removeEventListener('focus', handleFocus);
-        input.removeEventListener('blur', handleBlur);
-      }
+      input.removeEventListener('focus', handleFocus);
+      input.removeEventListener('blur', handleBlur);
     };
   }, []);
 
@@ -1474,205 +1468,207 @@ const MenuRecommendationSystem = () => {
             </div>
           </div> */}
 
-          <main
-            ref={mainContentRef}
-            className="flex-grow overflow-y-auto no-scrollbar"
-            style={{ WebkitOverflowScrolling: 'touch' }}
+          <div className="relative h-screen overflow-hidden"> {/* Parent container */}
+            <main
+              ref={mainContentRef}
+              className="h-[calc(100%-140px)] overflow-y-auto no-scrollbar"
+            >
+              <div className="pb-[200px]">
+                <AnimatePresence mode="wait">
+                  {activeTab === 'home' && (
+                    <motion.div
+                      key="home"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="h-full"
+                    >
+                      <EmptyState
+                        theme={theme}
+                        onItemClick={handleItemClick}
+                        addToCart={addToCart}
+                        removeFromCart={removeFromCart}
+                        cart={cart}
+                        menuItems={menuItems}
+                        onOpenRollTheDice={handleOpenRollTheDice}
+                        onComboClick={handleComboClick}
+                      />
+                    </motion.div>
+                  )}
+                  {activeTab === 'chat' && (
+                    <motion.div
+                      key="chat"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="h-full overflow-y-auto p-4"
+                    >
+                      {conversations.length === 0 ? (
+                        <EmptyChatState
+                          theme={theme}
+                          searchInputRef={searchInputRef}
+                          onStartChatting={handleStartChatting}
+                        />
+                      ) : (
+                        <ChatInterface
+                          conversations={conversations}
+                          onClearChat={clearChat}
+                          theme={theme}
+                          openStory={openStory}
+                          setSelectedItemFromConversation={setSelectedItemFromConversation}
+                          isLoading={isLoading}
+                        />
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div ref={conversationEndRef} />
+              </div>
+            </main>
 
-          >
-            <div className="pb-[200px]">
-              <AnimatePresence mode="wait">
-                {activeTab === 'home' && (
+          // Unt's className
+            <footer
+              className={`absolute bottom-0 left-0 right-0 border-t ${theme === 'light'
+                  ? 'bg-white/95 border-gray-200'
+                  : 'bg-gray-900/95 border-gray-800'
+                } backdrop-blur-lg shadow-lg`}
+            >
+              <AnimatePresence>
+                {isPromptsExpanded && (
                   <motion.div
-                    key="home"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="h-full"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                    className={`relative overflow-hidden ${theme === 'light' ? 'bg-gray-50/90' : 'bg-gray-800/90'
+                      } backdrop-blur-md`}
                   >
-                    <EmptyState
-                      theme={theme}
-                      onItemClick={handleItemClick}
-                      addToCart={addToCart}
-                      removeFromCart={removeFromCart}
-                      cart={cart}
-                      menuItems={menuItems}
-                      onOpenRollTheDice={handleOpenRollTheDice}
-                      onComboClick={handleComboClick}
-                    />
-                  </motion.div>
-                )}
-                {activeTab === 'chat' && (
-                  <motion.div
-                    key="chat"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="h-full overflow-y-auto p-4"
-                  >
-                    {conversations.length === 0 ? (
-                      <EmptyChatState
-                        theme={theme}
-                        searchInputRef={searchInputRef}
-                        onStartChatting={handleStartChatting}
-                      />
-                    ) : (
-                      <ChatInterface
-                        conversations={conversations}
-                        onClearChat={clearChat}
-                        theme={theme}
-                        openStory={openStory}
-                        setSelectedItemFromConversation={setSelectedItemFromConversation}
-                        isLoading={isLoading}
-                      />
-                    )}
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
+                    <LayoutGroup>
+                      <motion.div
+                        ref={promptsContainerRef}
+                        className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-2 px-4 no-scrollbar scroll-smooth"
+                        style={{
+                          scrollBehavior: 'smooth',
+                          WebkitOverflowScrolling: 'touch'
+                        }}
+                      >
+                        {displayedPrompts.map((prompt, index) => (
+                          <motion.div
+                            key={prompt.text}
+                            layout
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.2, delay: index * 0.03 }}
+                          >
+                            <PromptButton emoji={prompt.emoji} text={prompt.text} />
+                          </motion.div>
+                        ))}
+                        <RefreshButton />
+                      </motion.div>
+                    </LayoutGroup>
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div ref={conversationEndRef} />
-            </div>
-          </main>
 
-          // Unt's className
-          <div className={`border-t ${theme === 'light'
-              ? 'bg-white/95 border-gray-200'
-              : 'bg-gray-900/95 border-gray-800'
-            } backdrop-blur-lg shadow-lg`}>
-            <AnimatePresence>
-              {isPromptsExpanded && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                  className={`relative overflow-hidden ${theme === 'light' ? 'bg-gray-50/90' : 'bg-gray-800/90'
-                    } backdrop-blur-md`}
-                >
-                  <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
-                  <LayoutGroup>
-                    <motion.div
-                      ref={promptsContainerRef}
-                      className="flex items-center gap-2 overflow-x-auto overflow-y-hidden py-2 px-4 no-scrollbar scroll-smooth"
-                      style={{
-                        scrollBehavior: 'smooth',
-                        WebkitOverflowScrolling: 'touch'
+              <div className="max-w-4xl mx-auto px-4 py-3 space-y-3">
+                <form onSubmit={handleSearch} className="relative">
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      scale: query ? 1.02 : 1,
+                      boxShadow: query
+                        ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+                        : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+                    }}
+                    transition={{ duration: 0.2 }}
+                    className={`rounded-full ${theme === 'light'
+                      ? 'bg-gray-100 hover:bg-gray-50'
+                      : 'bg-gray-800 hover:bg-gray-700'
+                      } ${isWaitingForResponse ? 'opacity-50' : ''}`}
+                  >
+                    <input
+                      type="text"
+                      ref={searchInputRef}
+                      value={query}
+                      onChange={(e) => {
+                        setQuery(e.target.value);
+                        if (e.target.value !== selectedPrompt) {
+                          setSelectedPrompt(null);
+                        }
                       }}
-                    >
-                      {displayedPrompts.map((prompt, index) => (
-                        <motion.div
-                          key={prompt.text}
-                          layout
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.2, delay: index * 0.03 }}
-                        >
-                          <PromptButton emoji={prompt.emoji} text={prompt.text} />
-                        </motion.div>
-                      ))}
-                      <RefreshButton />
-                    </motion.div>
-                  </LayoutGroup>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      onFocus={(e) => {
+                        e.target.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      disabled={isWaitingForResponse}
+                      placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
+                      className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
+                        ? 'bg-transparent text-gray-800 placeholder-gray-500'
+                        : 'bg-transparent text-white placeholder-gray-400'
+                        } ${isWaitingForResponse ? 'cursor-not-allowed' : ''}`}
+                      style={{
+                        position: isKeyboardVisible ? 'relative' : 'static',
+                        zIndex: isKeyboardVisible ? 1000 : 'auto'
+                      }}
+                    />
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                      <motion.button
+                        whileHover={{ scale: isWaitingForResponse ? 1 : 1.05 }}
+                        whileTap={{ scale: isWaitingForResponse ? 1 : 0.95 }}
+                        type="button"
+                        onClick={handleVoiceInput}
+                        disabled={isWaitingForResponse}
+                        className={`p-2 rounded-full transition-colors ${isListening
+                          ? 'bg-red-500 text-white'
+                          : theme === 'light'
+                            ? 'bg-white text-gray-600 hover:bg-gray-50'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          } ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <Mic size={18} />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: isWaitingForResponse ? 1 : 1.05 }}
+                        whileTap={{ scale: isWaitingForResponse ? 1 : 0.95 }}
+                        type="submit"
+                        disabled={isWaitingForResponse}
+                        className={`p-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                      >
+                        {isWaitingForResponse ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </form>
 
-            <div className="max-w-4xl mx-auto px-4 py-3 space-y-3">
-              <form onSubmit={handleSearch} className="relative">
-                <motion.div
-                  initial={false}
-                  animate={{
-                    scale: query ? 1.02 : 1,
-                    boxShadow: query
-                      ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-                      : '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className={`rounded-full ${theme === 'light'
-                    ? 'bg-gray-100 hover:bg-gray-50'
-                    : 'bg-gray-800 hover:bg-gray-700'
-                    } ${isWaitingForResponse ? 'opacity-50' : ''}`}
-                >
-                  <input
-                    type="text"
-                    ref={searchInputRef}
-                    value={query}
-                    onChange={(e) => {
-                      setQuery(e.target.value);
-                      if (e.target.value !== selectedPrompt) {
-                        setSelectedPrompt(null);
-                      }
-                    }}
-                    onFocus={(e) => {
-                      e.target.scrollIntoView({ behavior: 'smooth' });
-                    }}
-                    disabled={isWaitingForResponse}
-                    placeholder={isWaitingForResponse ? "Waiting for response..." : "What are you craving today?"}
-                    className={`w-full p-3.5 pr-24 border-none rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-300 text-sm ${theme === 'light'
-                      ? 'bg-transparent text-gray-800 placeholder-gray-500'
-                      : 'bg-transparent text-white placeholder-gray-400'
-                      } ${isWaitingForResponse ? 'cursor-not-allowed' : ''}`}
-                    style={{
-                      position: isKeyboardVisible ? 'relative' : 'static',
-                      zIndex: isKeyboardVisible ? 1000 : 'auto'
-                    }}
+                <nav className="flex justify-around items-center pt-1">
+                  <NavButton
+                    icon={Menu}
+                    text="Menu"
+                    onClick={toggleMenu}
+                    isActive={isMenuOpen}
                   />
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                    <motion.button
-                      whileHover={{ scale: isWaitingForResponse ? 1 : 1.05 }}
-                      whileTap={{ scale: isWaitingForResponse ? 1 : 0.95 }}
-                      type="button"
-                      onClick={handleVoiceInput}
-                      disabled={isWaitingForResponse}
-                      className={`p-2 rounded-full transition-colors ${isListening
-                        ? 'bg-red-500 text-white'
-                        : theme === 'light'
-                          ? 'bg-white text-gray-600 hover:bg-gray-50'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        } ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <Mic size={18} />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: isWaitingForResponse ? 1 : 1.05 }}
-                      whileTap={{ scale: isWaitingForResponse ? 1 : 0.95 }}
-                      type="submit"
-                      disabled={isWaitingForResponse}
-                      className={`p-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors ${isWaitingForResponse ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
-                    >
-                      {isWaitingForResponse ? <Loader size={18} className="animate-spin" /> : <Send size={18} />}
-                    </motion.button>
-                  </div>
-                </motion.div>
-              </form>
-
-              <nav className="flex justify-around items-center pt-1">
-                <NavButton
-                  icon={Menu}
-                  text="Menu"
-                  onClick={toggleMenu}
-                  isActive={isMenuOpen}
-                />
-                <InspireNavButton
-                  icon={isPromptsExpanded ? ChevronDown : ChevronUp}
-                  text="Inspire"
-                  onClick={() => setIsPromptsExpanded(!isPromptsExpanded)}
-                  isActive={isPromptsExpanded}
-                  theme={theme}
-                  isPromptsExpanded={isPromptsExpanded}
-                />
-                <NavButton
-                  icon={ShoppingCart}
-                  text="Cart"
-                  onClick={toggleCart}
-                  isActive={isCartOpen}
-                  badge={cartItemCount > 0 ? cartItemCount : null}
-                />
-              </nav>
-            </div>
+                  <InspireNavButton
+                    icon={isPromptsExpanded ? ChevronDown : ChevronUp}
+                    text="Inspire"
+                    onClick={() => setIsPromptsExpanded(!isPromptsExpanded)}
+                    isActive={isPromptsExpanded}
+                    theme={theme}
+                    isPromptsExpanded={isPromptsExpanded}
+                  />
+                  <NavButton
+                    icon={ShoppingCart}
+                    text="Cart"
+                    onClick={toggleCart}
+                    isActive={isCartOpen}
+                    badge={cartItemCount > 0 ? cartItemCount : null}
+                  />
+                </nav>
+              </div>
+            </footer>
           </div>
         </>
       )}
