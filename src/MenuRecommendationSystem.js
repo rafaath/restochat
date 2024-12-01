@@ -1236,17 +1236,28 @@ const MenuRecommendationSystem = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      // If the height becomes smaller, keyboard is likely open
-      if (window.innerHeight < viewportHeight) {
+      const newHeight = window.innerHeight;
+      if (newHeight < viewportHeight) {
         setIsKeyboardOpen(true);
+        // Lock the viewport
+        document.documentElement.style.height = `${newHeight}px`;
+        document.body.style.height = `${newHeight}px`;
       } else {
         setIsKeyboardOpen(false);
+        // Reset viewport
+        document.documentElement.style.height = '100%';
+        document.body.style.height = '100%';
       }
-      setViewportHeight(window.innerHeight);
+      setViewportHeight(newHeight);
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.visualViewport?.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.visualViewport?.removeEventListener('resize', handleResize);
+    };
   }, [viewportHeight]);
 
   useEffect(() => {
@@ -1360,10 +1371,7 @@ const MenuRecommendationSystem = () => {
 
   return (
     <div
-      className={`fixed inset-0 flex flex-col ${theme === 'light'
-          ? 'bg-gradient-to-br from-gray-100 to-gray-200'
-          : 'bg-gradient-to-br from-gray-900 to-gray-800'
-        }`}
+      className="fixed inset-0 flex flex-col"
       style={{
         height: isKeyboardOpen ? `${viewportHeight}px` : '100%',
       }}
@@ -1376,7 +1384,7 @@ const MenuRecommendationSystem = () => {
 
       {!showWelcome && (
         <>
-          <header className="sticky top-0 z-50 transition-all duration-300 bg-opacity-90 backdrop-blur-sm">
+          <header className="flex-none">
             <div className="max-w-4xl mx-auto px-4">
               <div className="flex items-center justify-between h-14">
                 <div className="flex items-center space-x-4">
@@ -1432,9 +1440,9 @@ const MenuRecommendationSystem = () => {
 
           <main
             ref={mainContentRef}
-            className="flex-1 overflow-y-auto relative"
+            className="flex-1 overflow-y-auto"
             style={{
-              height: isKeyboardOpen ? `${viewportHeight - 120}px` : 'auto', // Adjust 120 based on your header+footer height
+              paddingBottom: isKeyboardOpen ? '140px' : undefined // Adjust based on your footer height
             }}
           >
             <AnimatePresence mode="wait">
@@ -1493,7 +1501,11 @@ const MenuRecommendationSystem = () => {
 
           <footer
             ref={footerRef}
-            className="sticky bottom-0 z-50 border-t bg-opacity-95 backdrop-blur-lg"
+            className={`fixed bottom-0 left-0 right-0 z-50 border-t bg-opacity-95 backdrop-blur-lg ${isKeyboardOpen ? 'transform translate-y-0 transition-transform' : ''
+              }`}
+            style={{
+              bottom: isKeyboardOpen ? 0 : undefined
+            }}
           >
             <AnimatePresence>
               {isPromptsExpanded && (
@@ -1748,6 +1760,26 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
+
+      html {
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  overflow: hidden;
+  height: 100%;
+  position: fixed;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.keyboard-open {
+  position: absolute !important;
+}
     html, body {
       overflow: hidden;
       position: fixed;
