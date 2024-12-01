@@ -125,8 +125,7 @@ const MenuRecommendationSystem = () => {
 
   const [selectedComboItem, setSelectedComboItem] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
 
   // ... (existing code)
 
@@ -1308,74 +1307,27 @@ const MenuRecommendationSystem = () => {
   const footerRef = useRef(null);
 
   useEffect(() => {
-    let originalHeight = window.innerHeight;
-
-    const handleVisualViewportChange = () => {
-      if (!window.visualViewport) return;
-
-      const isKeyboardVisible = originalHeight > window.visualViewport.height + 150; // threshold for keyboard
-      setIsKeyboardOpen(isKeyboardVisible);
-
-      if (isKeyboardVisible) {
-        // When keyboard is open, lock the container height
-        document.body.style.height = `${window.visualViewport.height}px`;
-        document.body.style.overflow = 'hidden';
-
-        // Adjust main content area to prevent scrolling under footer
-        const footerHeight = footerRef.current?.offsetHeight || 0;
-        const mainContent = mainContentRef.current;
-        if (mainContent) {
-          mainContent.style.height = `${window.visualViewport.height - footerHeight}px`;
-          mainContent.style.overflow = 'auto';
-        }
-      } else {
-        // Reset when keyboard is closed
-        document.body.style.height = '100%';
-        document.body.style.overflow = '';
-
-        const mainContent = mainContentRef.current;
-        if (mainContent) {
-          mainContent.style.height = '';
-          mainContent.style.overflow = '';
-        }
-      }
-
-      setViewportHeight(window.visualViewport.height);
+    const handleFocus = () => {
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
     };
 
-    const handleResize = () => {
-      originalHeight = window.innerHeight;
-      handleVisualViewportChange();
+    const handleBlur = () => {
+      document.body.style.position = '';
+      document.body.style.width = '';
     };
 
-    const handleFocus = (e) => {
-      if (e.target.tagName.toLowerCase() === 'input') {
-        // Prevent scroll to input
-        setTimeout(() => {
-          window.scrollTo(0, 0);
-        }, 100);
-      }
-    };
-
-    // Add event listeners
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleVisualViewportChange);
-      window.visualViewport.addEventListener('scroll', handleVisualViewportChange);
+    const input = searchInputRef.current;
+    if (input) {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
     }
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('focus', handleFocus, true);
-
-    // Initial setup
-    handleVisualViewportChange();
-
     return () => {
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', handleVisualViewportChange);
-        window.visualViewport.removeEventListener('scroll', handleVisualViewportChange);
+      if (input) {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
       }
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('focus', handleFocus, true);
     };
   }, []);
 
@@ -1416,14 +1368,10 @@ const MenuRecommendationSystem = () => {
 
 
   return (
-    <div
-      className={`app-container ${isKeyboardOpen ? 'keyboard-open' : ''}`}
-      style={{
-        height: isKeyboardOpen ? `${viewportHeight}px` : '100vh',
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-    >
+    <div className={`app-container h-screen flex flex-col overflow-hidden ${theme === 'light'
+      ? 'bg-gradient-to-br from-gray-100 to-gray-200'
+      : 'bg-gradient-to-br from-gray-900 to-gray-800'
+      }`}>
       <AnimatePresence>
         {showWelcome && (
           <WelcomeScreen onGetStarted={handleGetStarted} theme={theme} />
@@ -1548,14 +1496,13 @@ const MenuRecommendationSystem = () => {
             <div ref={conversationEndRef} />
           </main>
 
-          // Update your footer element's className
+          // Unt's className
           <footer
-            ref={footerRef}
             className={`fixed bottom-0 left-0 right-0 z-50 border-t ${theme === 'light'
                 ? 'bg-white/95 border-gray-200'
                 : 'bg-gray-900/95 border-gray-800'
               } backdrop-blur-lg transition-all duration-300 shadow-lg`}
-            style={{ position: 'sticky' }}
+            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             <AnimatePresence>
               {isPromptsExpanded && (
@@ -1813,13 +1760,11 @@ const MenuRecommendationSystem = () => {
   :root {
     --vh: 1vh;
     --footer-height: 0px;
-  }
-
-  body {
-    overscroll-behavior-y: none;
+    --keyboard-height: 0px;
   }
 
   .app-container {
+    height: calc(var(--vh, 1vh) * 100);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1828,50 +1773,27 @@ const MenuRecommendationSystem = () => {
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100%;
-  }
-
-  .app-container.keyboard-open {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow: hidden;
   }
 
   main {
-    flex: 1;
+    flex-grow: 1;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
+    height: calc(100% - var(--footer-height) - var(--keyboard-height));
   }
 
-  footer {
-    flex-shrink: 0;
-    width: 100%;
-    position: sticky;
+  .footer-container {
+    position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 50;
-  }
-
-  .keyboard-open footer {
-    position: sticky;
-    bottom: 0;
+    background-color: inherit;
   }
 
   @supports (padding: max(0px)) {
-    footer {
+    .footer-container {
       padding-bottom: max(env(safe-area-inset-bottom), 20px);
     }
-  }
-
-  /* Disable pull-to-refresh and bouncing effects */
-  html, body {
-    overscroll-behavior-y: none;
-    position: fixed;
-    width: 100%;
-    height: 100%;
   }
 `}</style>
     </div>
