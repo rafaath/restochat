@@ -1376,9 +1376,7 @@ const MenuRecommendationSystem = () => {
 
       {!showWelcome && (
         <>
-          <header
-            className="sticky top-0 z-50 transition-all duration-300 bg-opacity-90 backdrop-blur-sm"
-          >
+          <header className="sticky top-0 z-50 transition-all duration-300 bg-opacity-90 backdrop-blur-sm">
             <div className="max-w-4xl mx-auto px-4">
               <div className="flex items-center justify-between h-14">
                 <div className="flex items-center space-x-4">
