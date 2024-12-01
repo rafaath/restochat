@@ -1231,6 +1231,24 @@ const MenuRecommendationSystem = () => {
   const appContainerRef = useRef(null);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
 
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // If the height becomes smaller, keyboard is likely open
+      if (window.innerHeight < viewportHeight) {
+        setIsKeyboardOpen(true);
+      } else {
+        setIsKeyboardOpen(false);
+      }
+      setViewportHeight(window.innerHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [viewportHeight]);
+
   useEffect(() => {
     const updateFooterHeight = () => {
       if (footerRef.current) {
@@ -1342,10 +1360,13 @@ const MenuRecommendationSystem = () => {
 
   return (
     <div
-      className={`app-container h-screen flex flex-col ${theme === 'light'
-        ? 'bg-gradient-to-br from-gray-100 to-gray-200'
-        : 'bg-gradient-to-br from-gray-900 to-gray-800'
+      className={`fixed inset-0 flex flex-col ${theme === 'light'
+          ? 'bg-gradient-to-br from-gray-100 to-gray-200'
+          : 'bg-gradient-to-br from-gray-900 to-gray-800'
         }`}
+      style={{
+        height: isKeyboardOpen ? `${viewportHeight}px` : '100%',
+      }}
     >
       <AnimatePresence>
         {showWelcome && (
@@ -1356,10 +1377,7 @@ const MenuRecommendationSystem = () => {
       {!showWelcome && (
         <>
           <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${theme === 'light'
-              ? 'bg-white bg-opacity-90 text-gray-800'
-              : 'bg-gray-900 bg-opacity-90 text-white'
-              } backdrop-blur-sm`}
+            className="sticky top-0 z-50 transition-all duration-300 bg-opacity-90 backdrop-blur-sm"
           >
             <div className="max-w-4xl mx-auto px-4">
               <div className="flex items-center justify-between h-14">
@@ -1416,13 +1434,10 @@ const MenuRecommendationSystem = () => {
 
           <main
             ref={mainContentRef}
-            className={`
-    flex-1 
-    overflow-y-auto 
-    mt-14 
-    pb-[calc(var(--footer-height)+env(safe-area-inset-bottom,0px)+1.5rem)] 
-    ${activeTab === 'chat' && conversations.length === 0 ? 'flex items-center justify-center' : ''}
-  `}
+            className="flex-1 overflow-y-auto relative"
+            style={{
+              height: isKeyboardOpen ? `${viewportHeight - 120}px` : 'auto', // Adjust 120 based on your header+footer height
+            }}
           >
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
@@ -1480,10 +1495,7 @@ const MenuRecommendationSystem = () => {
 
           <footer
             ref={footerRef}
-            className={`fixed bottom-0 left-0 right-0 z-50 border-t ${theme === 'light'
-              ? 'bg-white/95 border-gray-200'
-              : 'bg-gray-900/95 border-gray-800'
-              } backdrop-blur-lg transition-all duration-300 shadow-lg`}
+            className="sticky bottom-0 z-50 border-t bg-opacity-95 backdrop-blur-lg"
           >
             <AnimatePresence>
               {isPromptsExpanded && (
@@ -1738,41 +1750,24 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
-  :root {
-    --vh: 1vh;
-    --footer-height: 0px;
-  }
-
-  .app-container {
-    height: 100vh; /* fallback */
-    height: calc(var(--vh, 1vh) * 100);
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-    top: 0;
-    left: 0;
-  }
-
-  /* Ensure proper iOS behavior */
-  @supports (-webkit-touch-callout: none) {
-    .app-container {
-      height: -webkit-fill-available;
+    html, body {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      height: 100%;
     }
-  }
 
-  main {
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    height: 100%;
-  }
+    .app-container {
+      height: 100%;
+      position: fixed;
+      width: 100%;
+      overflow: hidden;
+    }
 
-  /* Prevent Safari elastic scrolling */
-  body {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-`}</style>
+    main {
+      -webkit-overflow-scrolling: touch;
+    }
+  `}</style>
     </div>
   );
 };
