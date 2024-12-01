@@ -102,6 +102,7 @@ const ClearChatButton = ({ onClearChat, theme, isVisible }) => {
 
 
 const MenuRecommendationSystem = () => {
+  const isMobile = window.innerWidth <= 768;
   const [selectedPrompt, setSelectedPrompt] = useState(null);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -142,12 +143,37 @@ const MenuRecommendationSystem = () => {
   const [searchResults, setSearchResults] = useState([]);
 
   const SEARCH_CONFIG = {
-    hideHeaderDuringSearch: false,  // Controls header visibility
+    hideHeaderDuringSearch: true,  // Controls header visibility
     maxSearchResults: 8,           // Maximum number of search results to show
     searchDebounceMs: 300,        // Debounce time for search in milliseconds
     showCategoriesInSuggestions: true,  // Whether to show category suggestions
     overlayOpacity: 0.6,          // Opacity of the backdrop overlay (0-1)
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      // First we get the viewport height and we multiple it by 1% to get a value for a vh unit
+      const vh = window.innerHeight * 0.01;
+      // Then we set the value in the --vh custom property to the root of the document
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+      // Update footer height
+      if (footerRef.current) {
+        const footerHeight = footerRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--footer-height', `${footerHeight}px`);
+      }
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
+  }, [isSearchFocused]);
 
   // Add this function near your other search-related functions
   const handleSearchFocus = () => {
@@ -1493,10 +1519,16 @@ const MenuRecommendationSystem = () => {
             <div ref={conversationEndRef} />
           </main>
 
-          <footer className={`flex-shrink-0 z-50 border-t ${theme === 'light'
-            ? 'bg-white/95 border-gray-200'
-            : 'bg-gray-900/95 border-gray-800'
-            } backdrop-blur-lg transition-all duration-300 shadow-lg`}>
+          <footer
+            ref={footerRef}
+            className={`flex-shrink-0 z-50 border-t fixed bottom-0 left-0 right-0 ${theme === 'light'
+              ? 'bg-white/95 border-gray-200'
+              : 'bg-gray-900/95 border-gray-800'
+              } backdrop-blur-lg transition-all duration-300 shadow-lg`}
+            style={{
+              position: isSearchFocused && isMobile ? 'fixed' : 'relative'
+            }}
+          >
             <AnimatePresence>
               {isPromptsExpanded && (
                 <motion.div
@@ -1747,151 +1779,212 @@ const MenuRecommendationSystem = () => {
         </motion.div>
       )} */}
       <style jsx global>{`
-        :root {
-          --vh: 1vh;
-          --footer-height: 0px;
-        }
+  :root {
+    --vh: 1vh;
+    --footer-height: 0px;
+  }
 
-        .app-container {
-          height: calc(var(--vh, 1vh) * 100);
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
+  .app-container {
+    height: ${isSearchFocused && isMobile ? '100%' : 'calc(var(--vh, 1vh) * 100)'};
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
 
-        main {
-          flex-grow: 1;
-          overflow-y: auto;
-          height: calc(100% - var(--footer-height));
-        }
+  main {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: ${isSearchFocused && isMobile ?
+          'calc(100vh - var(--footer-height))' :
+          'calc(100% - var(--footer-height))'
+        };
+    padding-bottom: ${isSearchFocused && isMobile ? 'var(--footer-height)' : '0'};
+  }
 
-        .footer-container {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          z-index: 50;
-        }
+  .footer-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background-color: ${theme === 'light' ? 'rgba(255, 255, 255, 0.95)' : 'rgba(17, 24, 39, 0.95)'};
+  }
 
-        @supports (padding: max(0px)) {
-          .footer-container {
-            padding-bottom: max(env(safe-area-inset-bottom), 20px);
-          }
-        }
-      `}</style>
+  @supports (padding: max(0px)) {
+    .footer-container {
+      padding-bottom: max(env(safe-area-inset-bottom), 20px);
+    }
+  }
+
+  /* Prevent scroll on body when search is focused on mobile */
+  ${isSearchFocused && isMobile ? `
+    body {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+  ` : ''}
+
+  /* Add padding for iOS safe area */
+  .search-results-container {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Add these to your existing style jsx global block */
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: var(--footer-height);
+    display: flex;
+    flex-direction: column;
+    background-color: ${theme === 'light' ? '#ffffff' : '#1f2937'};
+  }
+  
+  .search-results-container {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+`}</style>
       <AnimatePresence>
         {isSearchFocused && !isWaitingForResponse && (
           <>
+            {/* Backdrop overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className={`fixed z-40 backdrop-blur-sm`}
+              className={`fixed inset-0 z-40 backdrop-blur-sm ${isMobile ? 'bg-black/60' : `bg-black/${SEARCH_CONFIG.overlayOpacity * 100}`
+                }`}
               style={{
-                // When hideHeaderDuringSearch is true, overlay starts from the very top (0)
-                // When false, overlay starts below the header
-                top: 0,
-                left: 0,
-                right: 0,
+                top: isMobile ? (SEARCH_CONFIG.hideHeaderDuringSearch ? 0 : headerHeight) : (SEARCH_CONFIG.hideHeaderDuringSearch ? 0 : headerHeight),
                 bottom: 'var(--footer-height)',
-                backgroundColor: `rgba(0, 0, 0, ${SEARCH_CONFIG.overlayOpacity})`
               }}
               onClick={() => setIsSearchFocused(false)}
             />
+
+            {/* Search results container */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`fixed left-4 right-4 max-w-4xl mx-auto mt-2 rounded-lg shadow-lg z-50 overflow-hidden ${theme === 'light' ? 'bg-white' : 'bg-gray-800'
-                }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`fixed z-50 ${theme === 'light' ? 'bg-white' : 'bg-gray-800'}`}
               style={{
-                // Position the search results below header in both cases
-                top: `${headerHeight + 20}px`
+                top: isMobile ? (SEARCH_CONFIG.hideHeaderDuringSearch ? 0 : headerHeight) : (SEARCH_CONFIG.hideHeaderDuringSearch ? '20px' : `${headerHeight + 20}px`),
+                bottom: isMobile ? 'var(--footer-height)' : 'auto',
+                left: isMobile ? 0 : '1rem',
+                right: isMobile ? 0 : '1rem',
+                maxHeight: isMobile ? undefined : '80vh',
+                borderRadius: isMobile ? 0 : '0.5rem',
+                overflow: 'auto',
+                WebkitOverflowScrolling: 'touch'
               }}
             >
-              {query.trim() === '' ? (
-                <div className="p-4">
-                  <h3 className={`text-sm font-medium mb-2 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'
-                    }`}>
-                    Suggested searches
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {['Vegetarian', 'Spicy', 'Desserts', 'Healthy', 'Popular', 'Quick Bites'].map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        onClick={() => {
-                          setQuery(suggestion);
-                          searchInputRef.current?.focus();
-                        }}
-                        className={`px-3 py-1.5 rounded-full text-sm ${theme === 'light'
-                          ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                          : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                          } transition-colors duration-150`}
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-4">
+              <div className={`h-full overflow-y-auto ${isMobile ? 'pb-6' : ''}`}>
+                {query.trim() === '' ? (
+
+                  <div className={`p-4 ${SEARCH_CONFIG.hideHeaderDuringSearch && isMobile ? 'pt-6' : ''}`}>
                     <h3 className={`text-sm font-medium mb-2 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'
                       }`}>
-                      Popular categories
+                      Suggested searches
                     </h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {['Breakfast', 'Main Course', 'Snacks', 'Beverages'].map((category) => (
+                    <div className="flex flex-wrap gap-2">
+                      {['Vegetarian', 'Spicy', 'Desserts', 'Healthy', 'Popular', 'Quick Bites'].map((suggestion) => (
                         <button
-                          key={category}
+                          key={suggestion}
                           onClick={() => {
-                            setQuery(category);
+                            setQuery(suggestion);
                             searchInputRef.current?.focus();
                           }}
-                          className={`flex items-center space-x-2 p-2 rounded-lg ${theme === 'light'
-                            ? 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                          className={`px-3 py-1.5 rounded-full text-sm ${theme === 'light'
+                            ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                             : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
-                            }`}
+                            } transition-colors duration-150`}
                         >
-                          <span>{category}</span>
+                          {suggestion}
                         </button>
                       ))}
                     </div>
-                  </div>
-                </div>
-              ) : searchResults.length > 0 ? (
-                renderSearchResults()
-              ) : (
-                <div className={`p-8 text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
-                  <div className="max-w-sm mx-auto">
-                    <div className="mb-4">
-                      <Search size={48} className="mx-auto mb-4 opacity-40" />
-                      <div className="mb-2 text-lg font-semibold">No items found for "{query}"</div>
-                      <p className="text-sm mb-6 opacity-75">
-                        But don't worry! Our AI assistant can help you find exactly what you're looking for.
-                      </p>
-                    </div>
-
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        handleSearch();  // This will trigger the AI chat
-                        setIsSearchFocused(false);  // Close the search overlay
-                      }}
-                      className={`flex items-center justify-center space-x-2 w-full px-6 py-3 rounded-full shadow-md ${theme === 'light'
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
-                        } transition-colors duration-200`}
-                    >
-                      <MessageCircle size={18} />
-                      <span>Ask AI Assistant</span>
-                    </motion.button>
-
-                    <div className={`mt-4 text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'
-                      }`}>
-                      Try asking about ingredients, taste, or dietary preferences!
+                    <div className="mt-4">
+                      <h3 className={`text-sm font-medium mb-2 ${theme === 'light' ? 'text-gray-600' : 'text-gray-300'
+                        }`}>
+                        Popular categories
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['Breakfast', 'Main Course', 'Snacks', 'Beverages'].map((category) => (
+                          <button
+                            key={category}
+                            onClick={() => {
+                              setQuery(category);
+                              searchInputRef.current?.focus();
+                            }}
+                            className={`flex items-center space-x-2 p-2 rounded-lg ${theme === 'light'
+                              ? 'bg-gray-50 hover:bg-gray-100 text-gray-700'
+                              : 'bg-gray-700 hover:bg-gray-600 text-gray-200'
+                              }`}
+                          >
+                            <span>{category}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+
+                ) : searchResults.length > 0 ? (
+                  <div className={`${SEARCH_CONFIG.hideHeaderDuringSearch && isMobile ? 'pt-6' : ''}`}>
+                    {renderSearchResults()}
+                  </div>
+                ) : (
+                  <div className={`p-8 text-center ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'}`}>
+                    <div className={`p-4 ${SEARCH_CONFIG.hideHeaderDuringSearch && isMobile ? 'pt-6' : ''}`}>
+                      <div className="max-w-sm mx-auto">
+                        <div className="mb-4">
+                          <Search size={48} className="mx-auto mb-4 opacity-40" />
+                          <div className="mb-2 text-lg font-semibold">No items found for "{query}"</div>
+                          <p className="text-sm mb-6 opacity-75">
+                            But don't worry! Our AI assistant can help you find exactly what you're looking for.
+                          </p>
+                        </div>
+
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            handleSearch();  // This will trigger the AI chat
+                            setIsSearchFocused(false);  // Close the search overlay
+                          }}
+                          className={`flex items-center justify-center space-x-2 w-full px-6 py-3 rounded-full shadow-md ${theme === 'light'
+                            ? 'bg-blue-500 text-white hover:bg-blue-600'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
+                            } transition-colors duration-200`}
+                        >
+                          <MessageCircle size={18} />
+                          <span>Ask AI Assistant</span>
+                        </motion.button>
+
+                        <div className={`mt-4 text-xs ${theme === 'light' ? 'text-gray-500' : 'text-gray-400'
+                          }`}>
+                          Try asking about ingredients, taste, or dietary preferences!
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </>
         )}

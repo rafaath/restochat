@@ -50,10 +50,9 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
       onClick={onClose}
     >
       <motion.div
-        className={`relative w-full max-w-4xl mx-auto overflow-hidden rounded-3xl shadow-2xl max-h-[85vh] ${theme === 'light'
+        className={`relative w-full max-w-4xl mx-auto overflow-hidden rounded-3xl shadow-2xl max-h-[85vh] min-h-[350px] ${theme === 'light'
           ? 'bg-white/95 backdrop-blur-md'
-          : 'bg-gray-900/95 backdrop-blur-md'
-          }`}
+          : 'bg-gray-900/95 backdrop-blur-md'}`}
         variants={modalVariants}
         initial="hidden"
         animate="visible"
@@ -71,8 +70,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
               transition={{ duration: 0.6 }}
             />
           ) : (
-            <div className={`w-full h-full flex items-center justify-center ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-800'
-              }`}>
+            <div className={`w-full h-full flex items-center justify-center ${theme === 'light' ? 'bg-gray-100' : 'bg-gray-800'}`}>
               <ImageIcon size={64} className={theme === 'light' ? 'text-gray-400' : 'text-gray-500'} />
             </div>
           )}
@@ -124,18 +122,18 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
           </div>
         </div>
 
-        <div className="p-8">
+        <div className="p-6">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className={`text-lg mb-8 leading-relaxed ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'
+            className={`text-md mb-8 leading-relaxed ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'
               }`}
           >
             {item.description || "No description available."}
           </motion.p>
 
-          <div className="grid grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-2 gap-8 mb-2">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -165,17 +163,17 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
               <div className="flex flex-wrap gap-2">
                 <motion.span
                   whileHover={{ scale: 1.05 }}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium shadow-sm ${item.veg_or_non_veg === 'veg'
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium shadow-sm ${item.veg_or_non_veg === 'veg'
                     ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
                     }`}
                 >
-                  {item.veg_or_non_veg === 'veg' ? '🥬 Vegetarian' : '🍖 Non-vegetarian'}
+                  {item.veg_or_non_veg === 'veg' ? '🥬 Veg' : '🍖 Non-veg'}
                 </motion.span>
                 {item.is_vegan === 'yes' && (
                   <motion.span
                     whileHover={{ scale: 1.05 }}
-                    className="px-4 py-1.5 rounded-full text-sm font-medium shadow-sm bg-green-100 text-green-800"
+                    className="px-4 py-1.5 rounded-full text-xs font-medium shadow-sm bg-green-100 text-green-800"
                   >
                     🌱 Vegan
                   </motion.span>
@@ -183,7 +181,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
                 {item.is_gluten_free === 'yes' && (
                   <motion.span
                     whileHover={{ scale: 1.05 }}
-                    className="px-4 py-1.5 rounded-full text-sm font-medium shadow-sm bg-yellow-100 text-yellow-800"
+                    className="px-4 py-1.5 rounded-full text-xs font-medium shadow-sm bg-yellow-100 text-yellow-800"
                   >
                     🌾 Gluten-free
                   </motion.span>
@@ -191,7 +189,7 @@ const ItemModal = ({ item, isOpen, onClose, theme, addToCart, removeFromCart, ca
                 {item.is_dairy_free === 'yes' && (
                   <motion.span
                     whileHover={{ scale: 1.05 }}
-                    className="px-4 py-1.5 rounded-full text-sm font-medium shadow-sm bg-blue-100 text-blue-800"
+                    className="px-4 py-1.5 rounded-full text-xs font-medium shadow-sm bg-blue-100 text-blue-800"
                   >
                     🥛 Dairy-free
                   </motion.span>
