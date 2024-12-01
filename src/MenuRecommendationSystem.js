@@ -336,84 +336,7 @@ const MenuRecommendationSystem = () => {
     }
   }, [activeStoryIndex, isStoryOpen]);
 
-  const StoryContent = ({ conversation }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
-      className="h-full overflow-y-auto px-4 py-8"
-      ref={storyContentRef}
-    >
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-white">{conversation.query}</h2>
-        <ReactMarkdown
-          components={{
-            p: ({ node, ...props }) => <p className="mb-4 text-gray-200" {...props} />,
-            h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mb-4 text-white" {...props} />,
-            h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mb-3 text-white" {...props} />,
-            h3: ({ node, ...props }) => <h3 className="text-xl font-bold mb-2 text-white" {...props} />,
-            ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-4 text-gray-200" {...props} />,
-            ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-4 text-gray-200" {...props} />,
-            li: ({ node, ...props }) => <li className="mb-2 text-gray-200" {...props} />,
-            code: ({ node, inline, className, children, ...props }) => {
-              const match = /language-(\w+)/.exec(className || '');
-              return !inline && match ? (
-                <SyntaxHighlighter
-                  style={tomorrow}
-                  language={match[1]}
-                  PreTag="div"
-                  className="rounded-md overflow-hidden my-4"
-                  {...props}
-                >
-                  {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-              ) : (
-                <code className="bg-gray-800 rounded px-1 py-0.5 text-gray-200" {...props}>
-                  {children}
-                </code>
-              );
-            },
-          }}
-        >
-          {conversation.response}
-        </ReactMarkdown>
-        {conversation.items.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-xl font-bold mb-4 text-white">Recommended Items</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {conversation.items.map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-gray-800 rounded-lg overflow-hidden shadow-lg"
-                >
-                  <img src={item.image_link} alt={item.name_of_item} className="w-full h-48 object-cover" />
-                  <div className="p-4">
-                    <h4 className="text-lg font-semibold mb-2 text-white">{item.name_of_item}</h4>
-                    <p className="text-sm text-gray-300 mb-4">{item.description}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-blue-400">₹{item.cost.toFixed(2)}</span>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => addToCart(item)}
-                        className="bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-600 transition-colors"
-                      >
-                        Add to Cart
-                      </motion.button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
+
 
   const EmptyChatState = React.memo(({ theme, searchInputRef, onStartChatting }) => (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
@@ -1307,6 +1230,19 @@ const MenuRecommendationSystem = () => {
 
   const appContainerRef = useRef(null);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const updateFooterHeight = () => {
+      if (footerRef.current) {
+        const height = footerRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--footer-height', `${height}px`);
+      }
+    };
+
+    updateFooterHeight();
+    window.addEventListener('resize', updateFooterHeight);
+    return () => window.removeEventListener('resize', updateFooterHeight);
+  }, []);
 
   // Add keyboard detection logic
   useEffect(() => {
