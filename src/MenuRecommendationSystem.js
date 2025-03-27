@@ -464,7 +464,7 @@ const MenuRecommendationSystem = () => {
         const token = await getToken();
 
         const response = await axios.get(url, {
-          baseURL: 'https://nomnom.cialabs.org',
+          baseURL: 'https://menubot-backend.onrender.com',
           headers: {
             Authorization: `Bearer ${token}`
           }
